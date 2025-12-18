@@ -126,7 +126,7 @@ describe("Templates Router", () => {
     // Verificar que a paleta padrão existe
     const darkPurple = palettes.find((p: { id: string }) => p.id === 'dark-purple');
     expect(darkPurple).toBeDefined();
-    expect(darkPurple.colors.background).toBe('#0a0a0a');
+    expect(darkPurple.colors.background).toBe('#1e1033'); // Roxo escuro
     expect(darkPurple.colors.text).toBe('#ffffff');
   });
 });

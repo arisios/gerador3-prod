@@ -234,3 +234,7 @@
   - Slide 2: Storytelling + Verde Escuro
   - Slide 3: Declaração Bold + Azul Escuro
   - Cada slide com template E cor diferentes
+
+## Correções Urgentes (18/12/2024)
+- [x] Cores não estão aparecendo visualmente diferentes nos slides - CORRIGIDO: paletas agora têm fundos coloridos distintos
+- [x] Permitir edição de texto no SlideComposer para templates automáticos - IMPLEMENTADO: botão "Editar Visual" abre o SlideComposer

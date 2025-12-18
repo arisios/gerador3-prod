@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, `order`, designTemplateId, colorPaletteId FROM slides WHERE contentId = 150001 ORDER BY `order` LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT id, `order`, designTemplateId, colorPaletteId FROM slides WHERE contentId = 150001 ORDER BY `order` LIMIT 5;",
+  "rows": [
+    {
+      "id": "150001",
+      "order": "1",
+      "designTemplateId": "fullbleed-center",
+      "colorPaletteId": "dark-purple"
+    },
+    {
+      "id": "150002",
+      "order": "2",
+      "designTemplateId": "editorial-story",
+      "colorPaletteId": "dark-green"
+    },
+    {
+      "id": "150003",
+      "order": "3",
+      "designTemplateId": "bold-statement",
+      "colorPaletteId": "dark-blue"
+    },
+    {
+      "id": "150004",
+      "order": "4",
+      "designTemplateId": "split-60-40",
+      "colorPaletteId": "dark-red"
+    },
+    {
+      "id": "150005",
+      "order": "5",
+      "designTemplateId": "split-right-image",
+      "colorPaletteId": "dark-orange"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torder\tdesignTemplateId\tcolorPaletteId\n150001\t1\tfullbleed-center\tdark-purple\n150002\t2\teditorial-story\tdark-green\n150003\t3\tbold-statement\tdark-blue\n150004\t4\tsplit-60-40\tdark-red\n150005\t5\tsplit-right-image\tdark-orange\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

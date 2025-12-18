@@ -769,14 +769,15 @@ export interface ColorPalette {
 }
 
 export const colorPalettes: ColorPalette[] = [
-  { id: 'dark-purple', name: 'Roxo Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#8b5cf6' } },
-  { id: 'dark-green', name: 'Verde Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#10b981' } },
-  { id: 'dark-blue', name: 'Azul Escuro', colors: { background: '#0f172a', text: '#ffffff', accent: '#3b82f6' } },
-  { id: 'dark-red', name: 'Vermelho Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#ef4444' } },
-  { id: 'dark-orange', name: 'Laranja Escuro', colors: { background: '#1a1a1a', text: '#ffffff', accent: '#f97316' } },
-  { id: 'dark-pink', name: 'Rosa Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#ec4899' } },
-  { id: 'dark-cyan', name: 'Ciano Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#06b6d4' } },
-  { id: 'dark-gold', name: 'Dourado Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#fbbf24' } },
+  // Paletas com fundos coloridos distintos para variedade visual
+  { id: 'dark-purple', name: 'Roxo Escuro', colors: { background: '#1e1033', text: '#ffffff', accent: '#a78bfa' } },
+  { id: 'dark-green', name: 'Verde Escuro', colors: { background: '#0d2818', text: '#ffffff', accent: '#34d399' } },
+  { id: 'dark-blue', name: 'Azul Escuro', colors: { background: '#0f172a', text: '#ffffff', accent: '#60a5fa' } },
+  { id: 'dark-red', name: 'Vermelho Escuro', colors: { background: '#2a0f0f', text: '#ffffff', accent: '#f87171' } },
+  { id: 'dark-orange', name: 'Laranja Escuro', colors: { background: '#2a1a0f', text: '#ffffff', accent: '#fb923c' } },
+  { id: 'dark-pink', name: 'Rosa Escuro', colors: { background: '#2a0f1e', text: '#ffffff', accent: '#f472b6' } },
+  { id: 'dark-cyan', name: 'Ciano Escuro', colors: { background: '#0f2a2a', text: '#ffffff', accent: '#22d3ee' } },
+  { id: 'dark-gold', name: 'Dourado Escuro', colors: { background: '#2a2510', text: '#ffffff', accent: '#fcd34d' } },
   { id: 'light-minimal', name: 'Claro Minimalista', colors: { background: '#fafafa', text: '#1a1a1a', accent: '#0a0a0a' } },
   { id: 'light-warm', name: 'Claro Quente', colors: { background: '#fffbeb', text: '#1a1a1a', accent: '#d97706' } },
   { id: 'neon-green', name: 'Neon Verde', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#00ff88' } },

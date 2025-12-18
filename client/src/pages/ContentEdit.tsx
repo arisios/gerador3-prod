@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { trpc } from "@/lib/trpc";
 import { SlideRenderer, SlidePreview, TemplateSelector } from "@/components/SlideRenderer";
+import SlideComposer, { SlideStyle } from "@/components/SlideComposer";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { designTemplates, colorPalettes, type DesignTemplate } from "../../../shared/designTemplates";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Images, Palette, Layout, Wand2, Upload } from "lucide-react";
@@ -26,6 +27,7 @@ export default function ContentEdit() {
   const [selectedTemplateId, setSelectedTemplateId] = useState("split-top-image");
   const [selectedPaletteId, setSelectedPaletteId] = useState("dark-purple");
   const [designSheetOpen, setDesignSheetOpen] = useState(false);
+  const [showComposer, setShowComposer] = useState(false);
 
   const { data: content, isLoading } = trpc.content.get.useQuery({ id: contentId });
   const { data: project } = trpc.projects.get.useQuery(
@@ -183,6 +185,34 @@ export default function ContentEdit() {
         colorPaletteId: paletteId, // salvar direto no campo
         style: { ...((currentSlide as any).style || {}), colorPaletteId: paletteId },
       });
+    }
+  };
+
+  // Funções para o SlideComposer
+  const handleStyleChange = (style: SlideStyle) => {
+    if (!currentSlide) return;
+    updateSlide.mutate({ id: currentSlide.id, style: style as any });
+  };
+
+  const handleComposerTextChange = (text: string) => {
+    if (!currentSlide) return;
+    setSlideText(text);
+    updateSlide.mutate({ id: currentSlide.id, text: text });
+  };
+
+  const handleComposerDownload = async (withText: boolean) => {
+    if (!currentSlide || !currentSlide.imageUrl) return;
+    try {
+      // Download simples da imagem
+      const link = document.createElement('a');
+      link.href = currentSlide.imageUrl;
+      link.download = `slide_${currentSlideIndex + 1}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Download iniciado!");
+    } catch (error) {
+      toast.error("Erro no download");
     }
   };
 
@@ -509,42 +539,76 @@ export default function ContentEdit() {
       </header>
 
       <main className="container px-4 py-6 space-y-6">
-        {/* Preview do Slide com Template */}
-        <Card className="overflow-hidden">
-          <div className="relative">
-            {/* Badge do template */}
-            <div className="absolute top-2 left-2 z-10 flex gap-2">
-              <span className="px-2 py-1 bg-black/70 rounded text-xs text-white">
-                {selectedTemplate.name}
-              </span>
-              <span className="px-2 py-1 bg-black/70 rounded text-xs flex items-center gap-1">
-                <span 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ background: selectedPalette?.colors.accent || selectedTemplate.colors.accent }}
-                />
-                {selectedPalette?.name || 'Padrão'}
-              </span>
-            </div>
-            
-            {/* Botão de expandir */}
-            <button 
-              className="absolute top-2 right-2 z-10 p-2 bg-black/50 rounded-lg hover:bg-black/70 transition-colors"
-              onClick={() => setLightboxOpen(true)}
-            >
-              <Maximize2 className="w-4 h-4 text-white" />
-            </button>
+        {/* SlideComposer ou Preview do Slide com Template */}
+        {showComposer && currentSlide ? (
+          <SlideComposer
+            text={currentSlide.text || ""}
+            imageUrl={currentSlide.imageUrl || undefined}
+            style={(currentSlide as any).style || {
+              showText: true,
+              textAlign: "center",
+              positionY: 80,
+              fontSize: 32,
+              fontFamily: "Inter",
+              textColor: "#FFFFFF",
+              backgroundColor: "#000000",
+              overlayOpacity: 50,
+              shadowEnabled: true,
+              shadowColor: "#000000",
+              shadowBlur: 4,
+              shadowOffsetX: 2,
+              shadowOffsetY: 2,
+              borderEnabled: false,
+              borderColor: "#FFFFFF",
+              borderWidth: 2,
+              glowEnabled: false,
+              glowColor: "#A855F7",
+              glowIntensity: 10,
+              letterSpacing: 0,
+              lineHeight: 1.3,
+              padding: 24,
+            }}
+            onStyleChange={handleStyleChange}
+            onTextChange={handleComposerTextChange}
+            onDownload={handleComposerDownload}
+          />
+        ) : (
+          <Card className="overflow-hidden">
+            <div className="relative">
+              {/* Badge do template */}
+              <div className="absolute top-2 left-2 z-10 flex gap-2">
+                <span className="px-2 py-1 bg-black/70 rounded text-xs text-white">
+                  {selectedTemplate.name}
+                </span>
+                <span className="px-2 py-1 bg-black/70 rounded text-xs flex items-center gap-1">
+                  <span 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ background: selectedPalette?.colors.accent || selectedTemplate.colors.accent }}
+                  />
+                  {selectedPalette?.name || 'Padrão'}
+                </span>
+              </div>
+              
+              {/* Botão de expandir */}
+              <button 
+                className="absolute top-2 right-2 z-10 p-2 bg-black/50 rounded-lg hover:bg-black/70 transition-colors"
+                onClick={() => setLightboxOpen(true)}
+              >
+                <Maximize2 className="w-4 h-4 text-white" />
+              </button>
 
-            {/* Preview do slide */}
-            <SlidePreview
-              text={currentSlide?.text || ""}
-              imageUrl={currentSlide?.imageUrl || undefined}
-              templateId={selectedTemplateId}
-              paletteId={selectedPaletteId}
-              logoUrl={project?.logoUrl || undefined}
-              className="w-full"
-            />
-          </div>
-        </Card>
+              {/* Preview do slide */}
+              <SlidePreview
+                text={currentSlide?.text || ""}
+                imageUrl={currentSlide?.imageUrl || undefined}
+                templateId={selectedTemplateId}
+                paletteId={selectedPaletteId}
+                logoUrl={project?.logoUrl || undefined}
+                className="w-full"
+              />
+            </div>
+          </Card>
+        )}
 
         {/* Navegação de slides */}
         <div className="flex items-center justify-center gap-2">
@@ -591,12 +655,22 @@ export default function ContentEdit() {
                 <Layout className="w-5 h-5" />
                 <h3 className="font-semibold">Design do Slide</h3>
               </div>
-              <Sheet open={designSheetOpen} onOpenChange={setDesignSheetOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    Editar
+              <div className="flex gap-2">
+                  <Button 
+                    variant={showComposer ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => setShowComposer(!showComposer)}
+                  >
+                    <Edit2 className="w-4 h-4 mr-1" />
+                    {showComposer ? "Fechar Editor" : "Editar Visual"}
                   </Button>
-                </SheetTrigger>
+                  <Sheet open={designSheetOpen} onOpenChange={setDesignSheetOpen}>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Layout className="w-4 h-4 mr-1" />
+                        Template
+                      </Button>
+                    </SheetTrigger>
                 <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle>Template Visual</SheetTitle>
@@ -630,7 +704,8 @@ export default function ContentEdit() {
                     </div>
                   </div>
                 </SheetContent>
-              </Sheet>
+                  </Sheet>
+                </div>
             </div>
             
             {/* Preview rápido do template */}

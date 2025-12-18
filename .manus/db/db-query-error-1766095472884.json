@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, slide_order, design_template_id, color_palette_id FROM slides WHERE content_id = 150001 ORDER BY slide_order LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT id, slide_order, design_template_id, color_palette_id FROM slides WHERE content_id = 150001 ORDER BY slide_order LIMIT 5;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'content_id' in 'where clause'"
+  ]
+}
