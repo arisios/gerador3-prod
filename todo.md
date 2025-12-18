@@ -183,3 +183,11 @@
 - [x] Aplicar estilos (overlay, posição do texto, cores neon) automaticamente
 - [x] Preview em tempo real do template selecionado
 - [x] Seletor de cor de destaque (8 cores neon)
+
+## Mais Templates e Template Automático (18/12/2024)
+- [x] Adicionar mais variedades de templates visuais (24 templates)
+- [x] Implementar seleção automática de template com IA
+- [x] IA analisa texto/conteúdo e escolhe template adequado
+- [x] Opção "Automático" no seletor de templates
+- [x] Filtro por categoria de template
+- [x] Botão "Ver mais" para expandir lista de templates

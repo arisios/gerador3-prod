@@ -60,6 +60,58 @@ export const appRouter = router({
     getCopyFormulas: publicProcedure.query(() => copyFormulas),
     getVisualTemplates: publicProcedure.query(() => visualTemplates),
     getAccentColors: publicProcedure.query(() => accentColors),
+    
+    // Seleção automática de template com IA
+    selectAutoTemplate: protectedProcedure
+      .input(z.object({
+        text: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        // Criar lista de templates para o prompt
+        const templatesList = visualTemplates.map(t => 
+          `- ${t.id}: ${t.name} - ${t.description} (tags: ${t.tags.join(', ')})`
+        ).join('\n');
+        
+        const response = await invokeLLM({
+          messages: [
+            { role: "user", content: prompts.selectVisualTemplatePrompt(input.text, templatesList) }
+          ],
+        });
+        
+        const rawContent = response.choices[0]?.message?.content;
+        const content = typeof rawContent === 'string' ? rawContent : '';
+        
+        try {
+          // Extrair JSON da resposta
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (!jsonMatch) {
+            // Fallback para template padrão
+            return {
+              templateId: "lifestyle-editorial",
+              accentColorId: "neon-green",
+              reason: "Template padrão selecionado"
+            };
+          }
+          
+          const result = JSON.parse(jsonMatch[0]);
+          
+          // Validar se o template existe
+          const validTemplate = visualTemplates.find(t => t.id === result.templateId);
+          const validColor = accentColors.find(c => c.id === result.accentColorId);
+          
+          return {
+            templateId: validTemplate ? result.templateId : "lifestyle-editorial",
+            accentColorId: validColor ? result.accentColorId : "neon-green",
+            reason: result.reason || "Selecionado automaticamente"
+          };
+        } catch (e) {
+          return {
+            templateId: "lifestyle-editorial",
+            accentColorId: "neon-green",
+            reason: "Template padrão selecionado"
+          };
+        }
+      }),
     getStylePresets: publicProcedure.query(() => stylePresets),
   }),
 

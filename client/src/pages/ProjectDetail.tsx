@@ -578,6 +578,14 @@ export default function ProjectDetail() {
                     <TemplateSelector
                       selectedId={visualTemplate}
                       onSelect={setVisualTemplate}
+                      text={selectedSourceIds.length > 0 
+                        ? sources.find(s => s.id === selectedSourceIds[0])?.name || ""
+                        : ""
+                      }
+                      onAutoSelect={(templateId, colorId) => {
+                        setVisualTemplate(templateId);
+                        setAccentColor(colorId);
+                      }}
                     />
                     <div className="space-y-2">
                       <Label className="text-xs">Cor de Destaque</Label>

@@ -412,6 +412,11 @@ export default function ContentEdit() {
                   <TemplateSelector
                     selectedId={selectedTemplate}
                     onSelect={setSelectedTemplate}
+                    text={currentSlide?.text || content?.title || ""}
+                    onAutoSelect={(templateId, colorId) => {
+                      setSelectedTemplate(templateId);
+                      setSelectedAccentColor(colorId);
+                    }}
                   />
                 )}
 

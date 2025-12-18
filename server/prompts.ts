@@ -1,5 +1,33 @@
 // Prompts para geração de conteúdo com IA - Gerador 3
 
+// ===== PROMPT DE SELEÇÃO AUTOMÁTICA DE TEMPLATE =====
+export const selectVisualTemplatePrompt = (text: string, templates: string) => `
+Você é um especialista em design de conteúdo para redes sociais, especialmente no estilo @brandsdecoded__.
+
+Analise o texto abaixo e escolha o template visual mais adequado.
+
+TEXTO DO CONTEÚDO:
+"${text}"
+
+TEMPLATES DISPONÍVEIS:
+${templates}
+
+Critérios de escolha:
+- Tom do texto (provocativo, informativo, emocional, humor, urgente)
+- Tipo de conteúdo (dados/números, história, pergunta, lista, citação, comparação)
+- Objetivo implícito (venda, autoridade, engajamento, educação)
+- Presença de elementos específicos (%, números, perguntas, urgência, antes/depois)
+
+Responda APENAS com um JSON:
+{
+  "templateId": "id-do-template-escolhido",
+  "accentColorId": "id-da-cor-de-destaque",
+  "reason": "breve explicação da escolha"
+}
+
+Cores disponíveis: neon-green, neon-yellow, neon-pink, neon-blue, neon-orange, neon-red, white, gold, neon-purple, neon-cyan
+`;
+
 // ===== PROMPT DE ANÁLISE DE PROJETO =====
 export const analyzeProjectPrompt = (source: string, sourceType: string) => `
 Analise a seguinte fonte e extraia informações relevantes para criação de conteúdo para redes sociais.
