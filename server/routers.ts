@@ -489,6 +489,92 @@ A foto deve:
         return { id };
       }),
 
+    // Gerar fotos de perfil automáticas para o influenciador
+    generateProfilePhotos: protectedProcedure
+      .input(z.object({
+        influencerId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const influencer = await db.getInfluencerById(input.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        if (!influencer.referenceImageUrl) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Influenciador precisa ter uma foto de referência" });
+        }
+
+        const profilePhotos: { type: string; url: string; prompt: string }[] = [];
+
+        // Tipos de fotos a gerar
+        const photoTypes = [
+          {
+            type: "profile",
+            prompt: `Foto de perfil profissional para Instagram.
+A MESMA PESSOA da foto de referência, mantendo EXATAMENTE as mesmas características físicas.
+Foto em primeiro plano (close-up), sorriso natural, olhando para a câmera.
+Iluminação suave e favorecedora.
+Fundo neutro ou levemente desfocado.
+REGRA PRIMORDIAL: Imagem REAL, SEM NENHUM TEXTO. Foto tirada pelo próprio influenciador (selfie profissional).`
+          },
+          {
+            type: "lifestyle",
+            prompt: `Foto lifestyle para feed do Instagram.
+A MESMA PESSOA da foto de referência, mantendo EXATAMENTE as mesmas características físicas.
+Foto casual mostrando o dia a dia, ambiente relacionado ao nicho ${influencer.niche || "lifestyle"}.
+Pose natural e descontraída.
+REGRA PRIMORDIAL: Imagem REAL, SEM NENHUM TEXTO. Foto em primeira pessoa, como se fosse tirada por um amigo.`
+          },
+          {
+            type: "action",
+            prompt: `Foto de ação/atividade para Instagram.
+A MESMA PESSOA da foto de referência, mantendo EXATAMENTE as mesmas características físicas.
+Foto realizando atividade relacionada ao nicho ${influencer.niche || "lifestyle"}.
+Expressão engajada e autêntica.
+REGRA PRIMORDIAL: Imagem REAL, SEM NENHUM TEXTO. Foto em primeira pessoa, selfie ou foto tirada por amigo.`
+          },
+        ];
+
+        // Se for tipo transformação, adicionar foto "antes"
+        if (influencer.type === "transformation") {
+          photoTypes.unshift({
+            type: "before",
+            prompt: `Foto "ANTES" para conteúdo de transformação.
+A MESMA PESSOA da foto de referência, mas em uma versão anterior (antes da transformação).
+Mostrar a pessoa de forma natural, sem maquiagem elaborada, iluminação comum.
+Pose simples, expressão neutra ou levemente insatisfeita.
+Nicho: ${influencer.niche || "lifestyle"}
+REGRA PRIMORDIAL: Imagem REAL, SEM NENHUM TEXTO. Selfie casual.`
+          });
+        }
+
+        // Gerar cada foto usando a referência
+        for (const photoType of photoTypes) {
+          try {
+            const result = await generateImage({
+              prompt: photoType.prompt,
+              originalImages: [{
+                url: influencer.referenceImageUrl,
+                mimeType: "image/jpeg"
+              }]
+            });
+            if (result.url) {
+              profilePhotos.push({
+                type: photoType.type,
+                url: result.url,
+                prompt: photoType.prompt
+              });
+            }
+          } catch (e) {
+            console.error("Erro ao gerar foto de perfil", photoType.type, e);
+          }
+        }
+
+        // Salvar fotos no banco (criar tabela ou usar campo JSON)
+        // Por enquanto, retornar as fotos geradas
+        return { photos: profilePhotos };
+      }),
+
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {

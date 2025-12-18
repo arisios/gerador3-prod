@@ -124,3 +124,23 @@
 - [x] Interface não otimizada para mobile - CORRIGIDO: CSS mobile-first
 - [x] Bug: Imagem fica esticada no download - corrigido com cover ratio
 - [x] Bug: Prompt de influenciador deve gerar fotos em primeira pessoa (selfies reais) - CORRIGIDO
+
+## Novo Fluxo - Implementação (18/12/2024)
+
+### Regras Gerais
+- [ ] Todo conteúdo pode ser editado
+- [ ] Toda imagem tem prompt editável como referência + botão salvar
+
+### Fluxo A - Projeto
+- [x] Escolher fonte: Dores OU Viral OU Trends
+- [x] Seleção múltipla de dores/trends/virais
+- [x] Escolher tipo de conteúdo + quantidade para cada seleção
+- [x] Exemplo: Dor 1 → Carrossel Antes/Depois → 5 conteúdos
+
+### Fluxo B - Influenciador
+- [x] Após criar influenciador, gerar automaticamente fotos de perfil
+- [x] Foto de perfil para rede social
+- [x] Foto "antes" e "atual" (transformação)
+- [x] Outras fotos para montar o perfil
+- [x] Conteúdos: templates padrão + dores + trends + virais
+- [x] Edição de conteúdo igual aos projetos

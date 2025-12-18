@@ -1,17 +1,33 @@
 import { useState } from "react";
 import { useLocation, useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
 import { 
   ArrowLeft, Plus, Image, Video, Layers, Loader2, 
-  ChevronRight, Trash2, Users, Zap, Target, AlertCircle
+  ChevronRight, Trash2, Users, Zap, Target, AlertCircle,
+  TrendingUp, Flame, X, Check
 } from "lucide-react";
 import { toast } from "sonner";
+
+type ContentSource = "pains" | "trends" | "virals";
+
+interface ContentSelection {
+  id: string;
+  sourceType: ContentSource;
+  sourceId: number;
+  sourceName: string;
+  contentType: "carousel" | "image" | "video";
+  template: string;
+  templateName: string;
+  quantity: number;
+}
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -19,16 +35,22 @@ export default function ProjectDetail() {
   const projectId = parseInt(id || "0");
 
   const [showGenerator, setShowGenerator] = useState(false);
-  const [contentType, setContentType] = useState<"carousel" | "image" | "video">("carousel");
-  const [template, setTemplate] = useState("");
-  const [quantity, setQuantity] = useState(1);
-  const [selectedPain, setSelectedPain] = useState<number | null>(null);
+  const [contentSource, setContentSource] = useState<ContentSource>("pains");
+  const [selections, setSelections] = useState<ContentSelection[]>([]);
   const [objective, setObjective] = useState<"sale" | "authority" | "growth">("authority");
   const [person, setPerson] = useState<"first" | "second" | "third">("second");
   const [clickbait, setClickbait] = useState(false);
 
+  // Seleção atual
+  const [selectedSourceIds, setSelectedSourceIds] = useState<number[]>([]);
+  const [currentContentType, setCurrentContentType] = useState<"carousel" | "image" | "video">("carousel");
+  const [currentTemplate, setCurrentTemplate] = useState("");
+  const [currentQuantity, setCurrentQuantity] = useState(1);
+
   const { data: project, isLoading } = trpc.projects.get.useQuery({ id: projectId });
   const { data: contents } = trpc.content.list.useQuery({ projectId }, { enabled: !!projectId });
+  const { data: trends } = trpc.trends.list.useQuery({ source: "google" });
+  const { data: virals } = trpc.virals.list.useQuery({});
   const { data: carouselTemplates } = trpc.templates.getCarouselTemplates.useQuery();
   const { data: imageTemplates } = trpc.templates.getImageTemplates.useQuery();
   const { data: videoTemplates } = trpc.templates.getVideoTemplates.useQuery();
@@ -40,6 +62,7 @@ export default function ProjectDetail() {
       toast.success(`${data.contentIds.length} conteúdo(s) gerado(s)!`);
       utils.content.list.invalidate({ projectId });
       setShowGenerator(false);
+      setSelections([]);
       if (data.contentIds[0]) {
         setLocation(`/content/${data.contentIds[0]}`);
       }
@@ -56,23 +79,103 @@ export default function ProjectDetail() {
     },
   });
 
-  const handleGenerate = () => {
-    if (!template) {
+  const templates = currentContentType === "carousel" ? carouselTemplates :
+                    currentContentType === "image" ? imageTemplates : videoTemplates;
+
+  // Obter lista de fontes baseado no tipo selecionado
+  const getSources = () => {
+    if (contentSource === "pains") {
+      return project?.pains?.map(p => ({ id: p.id, name: p.pain, level: p.level })) || [];
+    } else if (contentSource === "trends") {
+      return trends?.map(t => ({ id: t.id, name: t.name, level: t.classification })) || [];
+    } else {
+      return virals?.map(v => ({ id: v.id, name: v.title, level: v.category })) || [];
+    }
+  };
+
+  const sources = getSources();
+
+  // Adicionar seleção
+  const handleAddSelection = () => {
+    if (selectedSourceIds.length === 0) {
+      toast.error("Selecione pelo menos uma opção");
+      return;
+    }
+    if (!currentTemplate) {
       toast.error("Selecione um template");
       return;
     }
-    const pain = project?.pains?.find(p => p.id === selectedPain);
-    generateContent.mutate({
-      projectId,
-      type: contentType,
-      template,
-      quantity,
-      painId: selectedPain || undefined,
-      pain: pain?.pain,
-      objective,
-      person,
-      clickbait,
+
+    const templateObj = templates?.find(t => t.id === currentTemplate);
+    const newSelections: ContentSelection[] = selectedSourceIds.map(sourceId => {
+      const source = sources.find(s => s.id === sourceId);
+      return {
+        id: `${contentSource}-${sourceId}-${currentContentType}-${currentTemplate}-${Date.now()}`,
+        sourceType: contentSource,
+        sourceId,
+        sourceName: source?.name || "",
+        contentType: currentContentType,
+        template: currentTemplate,
+        templateName: templateObj?.name || "",
+        quantity: currentQuantity,
+      };
     });
+
+    setSelections([...selections, ...newSelections]);
+    setSelectedSourceIds([]);
+    setCurrentTemplate("");
+    setCurrentQuantity(1);
+    toast.success(`${newSelections.length} item(s) adicionado(s)`);
+  };
+
+  // Remover seleção
+  const handleRemoveSelection = (selectionId: string) => {
+    setSelections(selections.filter(s => s.id !== selectionId));
+  };
+
+  // Gerar todos os conteúdos
+  const handleGenerateAll = async () => {
+    if (selections.length === 0) {
+      toast.error("Adicione pelo menos uma seleção");
+      return;
+    }
+
+    // Gerar cada seleção
+    for (const selection of selections) {
+      let painText: string | undefined;
+      
+      if (selection.sourceType === "pains") {
+        const pain = project?.pains?.find(p => p.id === selection.sourceId);
+        painText = pain?.pain;
+      } else if (selection.sourceType === "trends") {
+        const trend = trends?.find(t => t.id === selection.sourceId);
+        painText = `Trend: ${trend?.name}`;
+      } else {
+        const viral = virals?.find(v => v.id === selection.sourceId);
+        painText = `Viral: ${viral?.title}`;
+      }
+
+      await generateContent.mutateAsync({
+        projectId,
+        type: selection.contentType,
+        template: selection.template,
+        quantity: selection.quantity,
+        painId: selection.sourceType === "pains" ? selection.sourceId : undefined,
+        pain: painText,
+        objective,
+        person,
+        clickbait,
+      });
+    }
+  };
+
+  // Toggle seleção de fonte
+  const toggleSourceSelection = (sourceId: number) => {
+    if (selectedSourceIds.includes(sourceId)) {
+      setSelectedSourceIds(selectedSourceIds.filter(id => id !== sourceId));
+    } else {
+      setSelectedSourceIds([...selectedSourceIds, sourceId]);
+    }
   };
 
   if (isLoading) {
@@ -97,8 +200,7 @@ export default function ProjectDetail() {
     );
   }
 
-  const templates = contentType === "carousel" ? carouselTemplates :
-                    contentType === "image" ? imageTemplates : videoTemplates;
+  const totalContents = selections.reduce((acc, s) => acc + s.quantity, 0);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -238,7 +340,6 @@ export default function ProjectDetail() {
                         {client.description}
                       </div>
                     )}
-                    
                   </CardContent>
                 </Card>
               ))
@@ -256,7 +357,7 @@ export default function ProjectDetail() {
       {showGenerator && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
           <div className="fixed inset-x-0 bottom-0 bg-background border-t border-border rounded-t-xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-background border-b border-border p-4 flex items-center justify-between">
+            <div className="sticky top-0 bg-background border-b border-border p-4 flex items-center justify-between z-10">
               <h2 className="font-bold text-lg">Gerar Conteúdo</h2>
               <Button variant="ghost" size="sm" onClick={() => setShowGenerator(false)}>
                 Fechar
@@ -264,29 +365,104 @@ export default function ProjectDetail() {
             </div>
 
             <div className="p-4 space-y-6">
-              {/* Content Type */}
+              {/* Fonte do Conteúdo */}
+              <div className="space-y-2">
+                <Label>Fonte do Conteúdo</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button
+                    variant={contentSource === "pains" ? "default" : "outline"}
+                    onClick={() => { setContentSource("pains"); setSelectedSourceIds([]); }}
+                    className="flex-col h-auto py-3"
+                  >
+                    <Target className="w-5 h-5 mb-1" />
+                    <span className="text-xs">Dores</span>
+                  </Button>
+                  <Button
+                    variant={contentSource === "trends" ? "default" : "outline"}
+                    onClick={() => { setContentSource("trends"); setSelectedSourceIds([]); }}
+                    className="flex-col h-auto py-3"
+                  >
+                    <TrendingUp className="w-5 h-5 mb-1" />
+                    <span className="text-xs">Trends</span>
+                  </Button>
+                  <Button
+                    variant={contentSource === "virals" ? "default" : "outline"}
+                    onClick={() => { setContentSource("virals"); setSelectedSourceIds([]); }}
+                    className="flex-col h-auto py-3"
+                  >
+                    <Flame className="w-5 h-5 mb-1" />
+                    <span className="text-xs">Virais</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Lista de Fontes com Checkbox */}
+              <div className="space-y-2">
+                <Label>
+                  Selecione {contentSource === "pains" ? "as Dores" : contentSource === "trends" ? "as Trends" : "os Virais"}
+                </Label>
+                <div className="max-h-40 overflow-y-auto space-y-2 border rounded-lg p-2">
+                  {sources.length > 0 ? (
+                    sources.map((source) => (
+                      <div
+                        key={source.id}
+                        className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                          selectedSourceIds.includes(source.id) ? "bg-primary/10" : "hover:bg-muted"
+                        }`}
+                        onClick={() => toggleSourceSelection(source.id)}
+                      >
+                        <Checkbox 
+                          checked={selectedSourceIds.includes(source.id)}
+                          onCheckedChange={() => toggleSourceSelection(source.id)}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">{source.name}</div>
+                          {source.level && (
+                            <Badge variant="outline" className="text-xs mt-1">
+                              {source.level}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-muted-foreground text-sm">
+                      {contentSource === "pains" && "Nenhuma dor mapeada"}
+                      {contentSource === "trends" && "Nenhuma trend coletada. Vá em Trends para coletar."}
+                      {contentSource === "virals" && "Nenhum viral coletado. Vá em Virais para coletar."}
+                    </div>
+                  )}
+                </div>
+                {selectedSourceIds.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {selectedSourceIds.length} selecionado(s)
+                  </p>
+                )}
+              </div>
+
+              {/* Tipo de Conteúdo */}
               <div className="space-y-2">
                 <Label>Tipo de Conteúdo</Label>
                 <div className="grid grid-cols-3 gap-2">
                   <Button
-                    variant={contentType === "carousel" ? "default" : "outline"}
-                    onClick={() => { setContentType("carousel"); setTemplate(""); }}
+                    variant={currentContentType === "carousel" ? "default" : "outline"}
+                    onClick={() => { setCurrentContentType("carousel"); setCurrentTemplate(""); }}
                     className="flex-col h-auto py-3"
                   >
                     <Layers className="w-5 h-5 mb-1" />
                     <span className="text-xs">Carrossel</span>
                   </Button>
                   <Button
-                    variant={contentType === "image" ? "default" : "outline"}
-                    onClick={() => { setContentType("image"); setTemplate(""); }}
+                    variant={currentContentType === "image" ? "default" : "outline"}
+                    onClick={() => { setCurrentContentType("image"); setCurrentTemplate(""); }}
                     className="flex-col h-auto py-3"
                   >
                     <Image className="w-5 h-5 mb-1" />
                     <span className="text-xs">Imagem</span>
                   </Button>
                   <Button
-                    variant={contentType === "video" ? "default" : "outline"}
-                    onClick={() => { setContentType("video"); setTemplate(""); }}
+                    variant={currentContentType === "video" ? "default" : "outline"}
+                    onClick={() => { setCurrentContentType("video"); setCurrentTemplate(""); }}
                     className="flex-col h-auto py-3"
                   >
                     <Video className="w-5 h-5 mb-1" />
@@ -298,7 +474,7 @@ export default function ProjectDetail() {
               {/* Template */}
               <div className="space-y-2">
                 <Label>Template</Label>
-                <Select value={template} onValueChange={setTemplate}>
+                <Select value={currentTemplate} onValueChange={setCurrentTemplate}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um template" />
                   </SelectTrigger>
@@ -312,37 +488,15 @@ export default function ProjectDetail() {
                 </Select>
               </div>
 
-              {/* Pain */}
-              {project.pains && project.pains.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Dor (opcional)</Label>
-                  <Select 
-                    value={selectedPain?.toString() || ""} 
-                    onValueChange={(v) => setSelectedPain(v ? parseInt(v) : null)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma dor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {project.pains.map((p) => (
-                        <SelectItem key={p.id} value={p.id.toString()}>
-                          {p.pain}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Quantity */}
+              {/* Quantidade */}
               <div className="space-y-2">
-                <Label>Quantidade</Label>
+                <Label>Quantidade por seleção</Label>
                 <div className="flex gap-2">
                   {[1, 3, 5, 10].map((q) => (
                     <Button
                       key={q}
-                      variant={quantity === q ? "default" : "outline"}
-                      onClick={() => setQuantity(q)}
+                      variant={currentQuantity === q ? "default" : "outline"}
+                      onClick={() => setCurrentQuantity(q)}
                       className="flex-1"
                     >
                       {q}
@@ -351,58 +505,104 @@ export default function ProjectDetail() {
                 </div>
               </div>
 
-              {/* Objective */}
-              <div className="space-y-2">
-                <Label>Objetivo</Label>
-                <Select value={objective} onValueChange={(v) => setObjective(v as typeof objective)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sale">Venda</SelectItem>
-                    <SelectItem value="authority">Autoridade</SelectItem>
-                    <SelectItem value="growth">Crescimento</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Botão Adicionar */}
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={handleAddSelection}
+                disabled={selectedSourceIds.length === 0 || !currentTemplate}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar à Lista
+              </Button>
 
-              {/* Person */}
-              <div className="space-y-2">
-                <Label>Pessoa Gramatical</Label>
-                <Select value={person} onValueChange={(v) => setPerson(v as typeof person)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="first">1ª Pessoa (Eu)</SelectItem>
-                    <SelectItem value="second">2ª Pessoa (Você)</SelectItem>
-                    <SelectItem value="third">3ª Pessoa (Ele/Ela)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Clickbait */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Clickbait</Label>
-                  <p className="text-xs text-muted-foreground">Títulos mais chamativos</p>
+              {/* Lista de Seleções */}
+              {selections.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Lista de Conteúdos ({totalContents} total)</Label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {selections.map((selection) => (
+                      <div 
+                        key={selection.id}
+                        className="flex items-center justify-between p-2 bg-muted rounded-lg"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">{selection.sourceName}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {selection.templateName} × {selection.quantity}
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleRemoveSelection(selection.id)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <Switch checked={clickbait} onCheckedChange={setClickbait} />
+              )}
+
+              {/* Configurações Globais */}
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="font-medium">Configurações Globais</h3>
+                
+                {/* Objetivo */}
+                <div className="space-y-2">
+                  <Label>Objetivo</Label>
+                  <Select value={objective} onValueChange={(v) => setObjective(v as typeof objective)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sale">Venda</SelectItem>
+                      <SelectItem value="authority">Autoridade</SelectItem>
+                      <SelectItem value="growth">Crescimento</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Pessoa */}
+                <div className="space-y-2">
+                  <Label>Pessoa Gramatical</Label>
+                  <Select value={person} onValueChange={(v) => setPerson(v as typeof person)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="first">1ª Pessoa (Eu)</SelectItem>
+                      <SelectItem value="second">2ª Pessoa (Você)</SelectItem>
+                      <SelectItem value="third">3ª Pessoa (Ele/Ela)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Clickbait */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Clickbait</Label>
+                    <p className="text-xs text-muted-foreground">Títulos mais chamativos</p>
+                  </div>
+                  <Switch checked={clickbait} onCheckedChange={setClickbait} />
+                </div>
               </div>
 
               {/* Generate Button */}
               <Button 
                 className="w-full" 
                 size="lg"
-                onClick={handleGenerate}
-                disabled={generateContent.isPending}
+                onClick={handleGenerateAll}
+                disabled={generateContent.isPending || selections.length === 0}
               >
                 {generateContent.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : (
                   <Zap className="w-4 h-4 mr-2" />
                 )}
-                Gerar {quantity} Conteúdo{quantity > 1 ? "s" : ""}
+                Gerar {totalContents} Conteúdo{totalContents > 1 ? "s" : ""}
               </Button>
             </div>
           </div>

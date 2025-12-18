@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Loader2, Zap } from "lucide-react";
+import { ArrowLeft, Loader2, Zap, TrendingUp, Flame, Target, Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
 
 const SOFT_SELL_TEMPLATES = [
@@ -19,15 +22,36 @@ const SOFT_SELL_TEMPLATES = [
   { id: "historia", name: "História Pessoal" },
 ];
 
+const CAROUSEL_TEMPLATES = [
+  { id: "antes-depois", name: "Antes e Depois" },
+  { id: "storytelling", name: "Storytelling" },
+  { id: "lista", name: "Lista/Dicas" },
+  { id: "passo-a-passo", name: "Passo a Passo" },
+  { id: "mitos-verdades", name: "Mitos e Verdades" },
+  { id: "problema-solucao", name: "Problema e Solução" },
+];
+
+interface SelectedItem {
+  id: number;
+  name: string;
+  template: string;
+  quantity: number;
+}
+
 export default function InfluencerContentCreate() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const influencerId = parseInt(id || "0");
 
+  const [mode, setMode] = useState<"soft-sell" | "dores" | "trends" | "virals">("soft-sell");
   const [template, setTemplate] = useState("");
   const [product, setProduct] = useState("");
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const { data: influencer } = trpc.influencers.get.useQuery({ id: influencerId });
+  const { data: trends } = trpc.trends.list.useQuery();
+  const { data: virals } = trpc.virals.list.useQuery();
 
   const generateContent = trpc.influencers.generateContent.useMutation({
     onSuccess: (data) => {
@@ -38,16 +62,68 @@ export default function InfluencerContentCreate() {
   });
 
   const handleGenerate = () => {
-    if (!template) {
-      toast.error("Selecione um template");
-      return;
+    if (mode === "soft-sell") {
+      if (!template) {
+        toast.error("Selecione um template");
+        return;
+      }
+      generateContent.mutate({
+        influencerId,
+        template,
+        product: product || undefined,
+      });
+    } else {
+      if (selectedItems.length === 0) {
+        toast.error("Selecione pelo menos um item");
+        return;
+      }
+      // Gerar conteúdos em sequência
+      setIsGenerating(true);
+      generateMultipleContents();
     }
-    generateContent.mutate({
-      influencerId,
-      template,
-      product: product || undefined,
-    });
   };
+
+  const generateMultipleContents = async () => {
+    for (const item of selectedItems) {
+      for (let i = 0; i < item.quantity; i++) {
+        try {
+          await generateContent.mutateAsync({
+            influencerId,
+            template: item.template,
+            product: item.name,
+          });
+        } catch (e) {
+          console.error("Erro ao gerar conteúdo", e);
+        }
+      }
+    }
+    setIsGenerating(false);
+    toast.success(`${selectedItems.reduce((acc, item) => acc + item.quantity, 0)} conteúdos gerados!`);
+    setLocation(`/influencer/${influencerId}`);
+  };
+
+  const toggleItem = (id: number, name: string) => {
+    const exists = selectedItems.find(item => item.id === id);
+    if (exists) {
+      setSelectedItems(selectedItems.filter(item => item.id !== id));
+    } else {
+      setSelectedItems([...selectedItems, { id, name, template: "storytelling", quantity: 1 }]);
+    }
+  };
+
+  const updateItemTemplate = (id: number, template: string) => {
+    setSelectedItems(selectedItems.map(item => 
+      item.id === id ? { ...item, template } : item
+    ));
+  };
+
+  const updateItemQuantity = (id: number, delta: number) => {
+    setSelectedItems(selectedItems.map(item => 
+      item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
+    ));
+  };
+
+  const isItemSelected = (id: number) => selectedItems.some(item => item.id === id);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -61,35 +137,250 @@ export default function InfluencerContentCreate() {
       </header>
 
       <main className="container px-4 py-6 space-y-6">
-        <div className="space-y-2">
-          <Label>Template</Label>
-          <Select value={template} onValueChange={setTemplate}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione um template" />
-            </SelectTrigger>
-            <SelectContent>
-              {SOFT_SELL_TEMPLATES.map((t) => (
-                <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Mode Selection */}
+        <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
+          <TabsList className="w-full grid grid-cols-4">
+            <TabsTrigger value="soft-sell" className="text-xs">Soft Sell</TabsTrigger>
+            <TabsTrigger value="dores" className="text-xs">Dores</TabsTrigger>
+            <TabsTrigger value="trends" className="text-xs">Trends</TabsTrigger>
+            <TabsTrigger value="virals" className="text-xs">Virais</TabsTrigger>
+          </TabsList>
 
-        <div className="space-y-2">
-          <Label>Produto/Serviço (opcional)</Label>
-          <Input 
-            placeholder="Ex: Curso de Marketing, Suplemento XYZ..." 
-            value={product} 
-            onChange={(e) => setProduct(e.target.value)} 
-          />
-          <p className="text-xs text-muted-foreground">Se vazio, será um conteúdo de autoridade sem venda direta</p>
-        </div>
+          {/* Soft Sell Tab */}
+          <TabsContent value="soft-sell" className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label>Template</Label>
+              <Select value={template} onValueChange={setTemplate}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um template" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SOFT_SELL_TEMPLATES.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Produto/Serviço (opcional)</Label>
+              <Input 
+                placeholder="Ex: Curso de Marketing, Suplemento XYZ..." 
+                value={product} 
+                onChange={(e) => setProduct(e.target.value)} 
+              />
+              <p className="text-xs text-muted-foreground">Se vazio, será um conteúdo de autoridade sem venda direta</p>
+            </div>
+          </TabsContent>
+
+          {/* Dores Tab */}
+          <TabsContent value="dores" className="space-y-4 mt-4">
+            <p className="text-sm text-muted-foreground">
+              <Target className="w-4 h-4 inline mr-1" />
+              Selecione dores do seu projeto para criar conteúdo personalizado
+            </p>
+            <div className="text-center py-8 text-muted-foreground">
+              <p>Para usar dores, vincule este influenciador a um projeto</p>
+              <p className="text-sm">Ou crie conteúdo usando Trends ou Virais</p>
+            </div>
+          </TabsContent>
+
+          {/* Trends Tab */}
+          <TabsContent value="trends" className="space-y-4 mt-4">
+            <p className="text-sm text-muted-foreground">
+              <TrendingUp className="w-4 h-4 inline mr-1" />
+              Selecione tendências para criar conteúdo baseado em trends
+            </p>
+            
+            {trends && trends.length > 0 ? (
+              <div className="space-y-3">
+                {trends.slice(0, 10).map((trend: any) => (
+                  <Card 
+                    key={trend.id} 
+                    className={`cursor-pointer transition-all ${isItemSelected(trend.id) ? 'border-primary bg-primary/5' : ''}`}
+                    onClick={() => toggleItem(trend.id, trend.name)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-start gap-3">
+                        <Checkbox checked={isItemSelected(trend.id)} />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm">{trend.name}</div>
+                          <div className="text-xs text-muted-foreground">{trend.source} • {trend.category}</div>
+                        </div>
+                      </div>
+                      
+                      {isItemSelected(trend.id) && (
+                        <div className="mt-3 pt-3 border-t border-border space-y-2" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center gap-2">
+                            <Label className="text-xs">Template:</Label>
+                            <Select 
+                              value={selectedItems.find(i => i.id === trend.id)?.template || "storytelling"} 
+                              onValueChange={(v) => updateItemTemplate(trend.id, v)}
+                            >
+                              <SelectTrigger className="h-8 text-xs flex-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CAROUSEL_TEMPLATES.map((t) => (
+                                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label className="text-xs">Quantidade:</Label>
+                            <div className="flex items-center gap-1">
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-7 w-7"
+                                onClick={() => updateItemQuantity(trend.id, -1)}
+                              >
+                                <Minus className="w-3 h-3" />
+                              </Button>
+                              <span className="w-8 text-center text-sm">
+                                {selectedItems.find(i => i.id === trend.id)?.quantity || 1}
+                              </span>
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-7 w-7"
+                                onClick={() => updateItemQuantity(trend.id, 1)}
+                              >
+                                <Plus className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Nenhuma trend coletada</p>
+                <Button variant="link" onClick={() => setLocation("/trends")}>
+                  Ir para Trends
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Virals Tab */}
+          <TabsContent value="virals" className="space-y-4 mt-4">
+            <p className="text-sm text-muted-foreground">
+              <Flame className="w-4 h-4 inline mr-1" />
+              Selecione conteúdos virais para criar adaptações
+            </p>
+            
+            {virals && virals.length > 0 ? (
+              <div className="space-y-3">
+                {virals.slice(0, 10).map((viral: any) => (
+                  <Card 
+                    key={viral.id} 
+                    className={`cursor-pointer transition-all ${isItemSelected(viral.id) ? 'border-primary bg-primary/5' : ''}`}
+                    onClick={() => toggleItem(viral.id, viral.title)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-start gap-3">
+                        <Checkbox checked={isItemSelected(viral.id)} />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm">{viral.title}</div>
+                          <div className="text-xs text-muted-foreground">{viral.source} • {viral.category}</div>
+                        </div>
+                      </div>
+                      
+                      {isItemSelected(viral.id) && (
+                        <div className="mt-3 pt-3 border-t border-border space-y-2" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center gap-2">
+                            <Label className="text-xs">Template:</Label>
+                            <Select 
+                              value={selectedItems.find(i => i.id === viral.id)?.template || "storytelling"} 
+                              onValueChange={(v) => updateItemTemplate(viral.id, v)}
+                            >
+                              <SelectTrigger className="h-8 text-xs flex-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CAROUSEL_TEMPLATES.map((t) => (
+                                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label className="text-xs">Quantidade:</Label>
+                            <div className="flex items-center gap-1">
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-7 w-7"
+                                onClick={() => updateItemQuantity(viral.id, -1)}
+                              >
+                                <Minus className="w-3 h-3" />
+                              </Button>
+                              <span className="w-8 text-center text-sm">
+                                {selectedItems.find(i => i.id === viral.id)?.quantity || 1}
+                              </span>
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-7 w-7"
+                                onClick={() => updateItemQuantity(viral.id, 1)}
+                              >
+                                <Plus className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Nenhum viral coletado</p>
+                <Button variant="link" onClick={() => setLocation("/virals")}>
+                  Ir para Virais
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Selected Items Summary */}
+        {selectedItems.length > 0 && mode !== "soft-sell" && (
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="p-4">
+              <div className="font-medium mb-2">
+                {selectedItems.length} item(s) selecionado(s)
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Total: {selectedItems.reduce((acc, item) => acc + item.quantity, 0)} conteúdo(s) a gerar
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
-        <Button className="w-full" size="lg" onClick={handleGenerate} disabled={generateContent.isPending}>
-          {generateContent.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
-          Gerar Conteúdo
+        <Button 
+          className="w-full" 
+          size="lg" 
+          onClick={handleGenerate} 
+          disabled={generateContent.isPending || isGenerating}
+        >
+          {(generateContent.isPending || isGenerating) ? (
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          ) : (
+            <Zap className="w-4 h-4 mr-2" />
+          )}
+          {mode === "soft-sell" 
+            ? "Gerar Conteúdo" 
+            : `Gerar ${selectedItems.reduce((acc, item) => acc + item.quantity, 0)} Conteúdo(s)`
+          }
         </Button>
       </div>
     </div>
