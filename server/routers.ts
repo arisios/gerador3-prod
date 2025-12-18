@@ -176,6 +176,9 @@ export const appRouter = router({
         const rawContent = response.choices[0]?.message?.content;
         const contentStr = typeof rawContent === 'string' ? rawContent : '';
 
+        // Lista de paletas para variar entre slides (cores escuras para melhor contraste)
+        const darkPalettes = colorPalettes.filter(p => p.id.startsWith('dark-') || p.id.startsWith('neon-'));
+        
         try {
           const jsonMatch = contentStr.match(/\{[\s\S]*\}/);
           if (!jsonMatch) {
@@ -183,50 +186,58 @@ export const appRouter = router({
           }
 
           const result = JSON.parse(jsonMatch[0]);
-          const paletteId = colorPalettes.find(p => p.id === result.paletteId)?.id || 'dark-neon';
+          const basePaletteId = colorPalettes.find(p => p.id === result.paletteId)?.id || 'dark-purple';
 
-          // Atualizar cada slide com seu template
-          const updates: { slideId: number; templateId: string; reason: string }[] = [];
+          // Atualizar cada slide com seu template E cor variada
+          const updates: { slideId: number; templateId: string; paletteId: string; reason: string }[] = [];
           
-          for (const slideResult of result.slides || []) {
+          for (let i = 0; i < (result.slides || []).length; i++) {
+            const slideResult = result.slides[i];
             const slide = slides.find(s => s.order === slideResult.order);
             if (slide) {
               const validTemplate = designTemplates.find(t => t.id === slideResult.templateId);
               const templateId = validTemplate ? slideResult.templateId : 'split-top';
               
+              // Variar a cor entre slides usando paletas escuras
+              const slideColorPaletteId = darkPalettes[i % darkPalettes.length].id;
+              
               await db.updateSlide(slide.id, {
                 designTemplateId: templateId,
-                colorPaletteId: paletteId,
+                colorPaletteId: slideColorPaletteId,
               });
               
               updates.push({
                 slideId: slide.id,
                 templateId,
+                paletteId: slideColorPaletteId,
                 reason: slideResult.reason || 'Selecionado automaticamente'
               });
             }
           }
 
-          return { paletteId, updates };
+          return { basePaletteId, updates };
         } catch (e) {
-          // Fallback: distribuir templates variados manualmente
+          // Fallback: distribuir templates variados manualmente COM cores variadas
           const fallbackTemplates = ['split-top-image', 'fullbleed-bottom', 'card-centered', 'minimal-text-only', 'bold-statement', 'split-left-image', 'card-rounded', 'editorial-magazine', 'split-60-40', 'fullbleed-center'];
-          const updates: { slideId: number; templateId: string; reason: string }[] = [];
+          const updates: { slideId: number; templateId: string; paletteId: string; reason: string }[] = [];
           
           for (let i = 0; i < slides.length; i++) {
             const templateId = fallbackTemplates[i % fallbackTemplates.length];
+            const slideColorPaletteId = darkPalettes[i % darkPalettes.length].id;
+            
             await db.updateSlide(slides[i].id, {
               designTemplateId: templateId,
-              colorPaletteId: 'dark-purple',
+              colorPaletteId: slideColorPaletteId,
             });
             updates.push({
               slideId: slides[i].id,
               templateId,
-              reason: 'Template distribuído automaticamente'
+              paletteId: slideColorPaletteId,
+              reason: 'Template e cor distribuídos automaticamente'
             });
           }
 
-          return { paletteId: 'dark-purple', updates };
+          return { basePaletteId: 'dark-purple', updates };
         }
       }),
   }),

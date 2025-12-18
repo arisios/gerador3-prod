@@ -73,8 +73,8 @@ export function SlideRenderer({
       drawOverlay(ctx, template.overlay, width, height);
     }
 
-    // 4. Desenhar texto com estilo do template
-    drawText(ctx, text, template.textStyle, colors, width, height);
+    // 4. Desenhar texto com estilo do template (respeitando área da imagem)
+    drawText(ctx, text, template.textStyle, colors, width, height, template.imageFrame);
 
     // 5. Desenhar logo se houver
     if (logoUrl && template.logoPosition !== 'none') {
@@ -243,7 +243,8 @@ function drawText(
   textStyle: DesignTemplate['textStyle'],
   colors: { text: string; accent: string },
   width: number,
-  height: number
+  height: number,
+  imageFrame?: DesignTemplate['imageFrame']
 ) {
   // Tamanhos de fonte baseados no canvas
   const fontSizes: Record<string, number> = {
@@ -280,8 +281,8 @@ function drawText(
   ctx.textAlign = textStyle.alignment as CanvasTextAlign;
   ctx.textBaseline = 'top';
   
-  // Calcular posição baseada no textStyle.position
-  const { x, y } = getTextPosition(textStyle.position, width, height, padding);
+  // Calcular posição baseada no textStyle.position E área da imagem
+  const { x, y, availableHeight } = getTextPositionWithImageBounds(textStyle.position, width, height, padding, imageFrame);
   
   // Aplicar sombra se necessário
   if (textStyle.textShadow) {
@@ -450,6 +451,91 @@ function roundedRect(
   ctx.lineTo(x, y + r);
   ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
+}
+
+// Calcula a posição do texto respeitando a área da imagem
+function getTextPositionWithImageBounds(
+  position: string,
+  width: number,
+  height: number,
+  padding: number,
+  imageFrame?: DesignTemplate['imageFrame']
+): { x: number; y: number; availableHeight: number } {
+  // Calcular área ocupada pela imagem
+  let imageTop = 0;
+  let imageBottom = 0;
+  let imageLeft = 0;
+  let imageRight = 0;
+  
+  if (imageFrame && imageFrame.position !== 'none') {
+    const imgY = parseValue(imageFrame.y, height);
+    const imgH = parseValue(imageFrame.height, height);
+    const imgX = parseValue(imageFrame.x, width);
+    const imgW = parseValue(imageFrame.width, width);
+    
+    imageTop = imgY;
+    imageBottom = imgY + imgH;
+    imageLeft = imgX;
+    imageRight = imgX + imgW;
+  }
+  
+  // Calcular área disponível para texto baseado na posição da imagem
+  let availableHeight = height;
+  let textY = padding;
+  
+  if (position.includes('top')) {
+    // Texto no topo: verificar se imagem está no topo
+    if (imageFrame?.position === 'top' || imageTop < height * 0.3) {
+      // Imagem no topo, texto não pode ficar lá - mover para baixo da imagem
+      textY = imageBottom + padding;
+      availableHeight = height - imageBottom - padding * 2;
+    } else {
+      availableHeight = imageTop > 0 ? imageTop - padding * 2 : height * 0.5;
+    }
+  } else if (position.includes('bottom')) {
+    // Texto na base: verificar se imagem está na base
+    if (imageFrame?.position === 'bottom' || imageBottom > height * 0.7) {
+      // Imagem na base, texto deve ficar acima
+      availableHeight = imageTop - padding * 2;
+      textY = height - padding; // Será ajustado depois
+    } else {
+      availableHeight = height - imageBottom - padding * 2;
+      textY = height - padding;
+    }
+  } else if (position.includes('center')) {
+    // Texto no centro: calcular área livre
+    if (imageFrame?.position === 'top') {
+      availableHeight = height - imageBottom - padding * 2;
+      textY = imageBottom + (height - imageBottom) / 2;
+    } else if (imageFrame?.position === 'bottom') {
+      availableHeight = imageTop - padding * 2;
+      textY = imageTop / 2;
+    } else {
+      textY = height / 2;
+    }
+  }
+  
+  // Calcular X baseado no alinhamento horizontal
+  let textX = padding;
+  if (position.includes('center') && !position.includes('left') && !position.includes('right')) {
+    textX = width / 2;
+  } else if (position.includes('right')) {
+    textX = width - padding;
+  } else if (position.includes('left')) {
+    // Se imagem está à esquerda, mover texto para direita
+    if (imageFrame?.position === 'left' || (imageLeft < width * 0.3 && imageRight < width * 0.6)) {
+      textX = imageRight + padding;
+    }
+  }
+  
+  // Se imagem está à direita, ajustar texto para esquerda
+  if (imageFrame?.position === 'right' || (imageLeft > width * 0.4 && imageRight > width * 0.7)) {
+    if (position.includes('right')) {
+      textX = imageLeft - padding;
+    }
+  }
+  
+  return { x: textX, y: textY, availableHeight: Math.max(availableHeight, height * 0.2) };
 }
 
 function getTextPosition(

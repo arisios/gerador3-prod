@@ -233,3 +233,13 @@
   - Slide 1: Declaração Bold (texto topo, imagem base)
   - Slide 2: Storytelling (imagem topo, texto base)
   - Slide 3: Imagem Direita (imagem à direita, texto à esquerda)
+
+## Melhorias de Variedade Visual (18/12/2024)
+- [x] Variar cores entre slides automaticamente (cada slide usa cor diferente da paleta)
+- [x] Adicionar preview de todos os slides (galeria de miniaturas)
+- [x] Ajustar área de texto para não invadir área da imagem
+- [x] Testar variedade visual completa - CONFIRMADO:
+  - Slide 1: Declaração Bold + Roxo Escuro
+  - Slide 2: Storytelling + Verde Escuro
+  - Slide 3: Imagem Esquerda + Azul Escuro
+  - Cada slide com template E cor diferentes
