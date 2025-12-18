@@ -224,3 +224,13 @@
 - [x] Garantir carregamento de designTemplateId e colorPaletteId por slide
 - [x] Aplicar cores da paleta selecionada no SlideRenderer
 - [x] Testar variedade de templates no carrossel
+
+## Refazer Variedade de Templates - SIMPLES (18/12/2024)
+- [x] Verificar estado atual do botão "Automático para Todo Carrossel"
+- [x] Garantir que cada slide recebe um template DIFERENTE
+- [x] Garantir que cada slide recebe uma COR DIFERENTE da paleta
+- [x] Testar e validar variedade visual - CONFIRMADO:
+  - Slide 1: Full + Texto Central + Roxo Escuro
+  - Slide 2: Storytelling + Verde Escuro
+  - Slide 3: Declaração Bold + Azul Escuro
+  - Cada slide com template E cor diferentes
