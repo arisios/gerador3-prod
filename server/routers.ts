@@ -26,6 +26,24 @@ export const appRouter = router({
     }),
   }),
 
+  // ===== PROXY DE IMAGEM (para evitar CORS) =====
+  imageProxy: router({
+    get: publicProcedure
+      .input(z.object({ url: z.string() }))
+      .query(async ({ input }) => {
+        try {
+          const response = await fetch(input.url);
+          if (!response.ok) throw new Error('Failed to fetch image');
+          const buffer = await response.arrayBuffer();
+          const base64 = Buffer.from(buffer).toString('base64');
+          const contentType = response.headers.get('content-type') || 'image/png';
+          return { base64, contentType };
+        } catch (error) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to proxy image' });
+        }
+      }),
+  }),
+
   // ===== UPLOAD =====
   upload: router({
     image: protectedProcedure

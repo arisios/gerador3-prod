@@ -224,3 +224,12 @@
 - [x] Garantir carregamento de designTemplateId e colorPaletteId por slide
 - [x] Aplicar cores da paleta selecionada no SlideRenderer
 - [x] Testar variedade de templates no carrossel
+
+## Correção Visual de Templates (18/12/2024 - Parte 2)
+- [x] Diagnosticar por que SlidePreview não muda visualmente - RESOLVIDO: estava funcionando, problema era CORS no download
+- [x] Corrigir SlidePreview para aplicar cada template corretamente - FUNCIONANDO
+- [x] Adicionar proxy de imagem para evitar CORS no download
+- [x] Testar variedade visual nos slides - CONFIRMADO:
+  - Slide 1: Declaração Bold (texto topo, imagem base)
+  - Slide 2: Storytelling (imagem topo, texto base)
+  - Slide 3: Imagem Direita (imagem à direita, texto à esquerda)

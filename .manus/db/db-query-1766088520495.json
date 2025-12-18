@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, text, designTemplateId, colorPaletteId, visualTemplate FROM slides WHERE contentId = 150001 LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT id, text, designTemplateId, colorPaletteId, visualTemplate FROM slides WHERE contentId = 150001 LIMIT 5;",
+  "rows": [
+    {
+      "id": "150001",
+      "text": "Seu grupo de cuidadores do pet está em CAOS?",
+      "designTemplateId": "bold-statement",
+      "colorPaletteId": "dark-blue",
+      "visualTemplate": "lifestyle-editorial"
+    },
+    {
+      "id": "150002",
+      "text": "CONTEXTO: Família de 4 pessoas compartilhava os cuidados da gata Luna (diabética).",
+      "designTemplateId": "editorial-story",
+      "colorPaletteId": "dark-blue",
+      "visualTemplate": "lifestyle-editorial"
+    },
+    {
+      "id": "150003",
+      "text": "DESAFIO: Esquecimentos de doses de insulina e conflitos de agendamento de veterinário.",
+      "designTemplateId": "split-right-image",
+      "colorPaletteId": "dark-blue",
+      "visualTemplate": "lifestyle-editorial"
+    },
+    {
+      "id": "150004",
+      "text": "O risco era real: a saúde de Luna estava em perigo devido à falta de coordenação.",
+      "designTemplateId": "fullbleed-bottom",
+      "colorPaletteId": "dark-blue",
+      "visualTemplate": "lifestyle-editorial"
+    },
+    {
+      "id": "150005",
+      "text": "ESTRATÉGIA 1: Centralizar informações de saúde (doses, dieta) em um app compartilhado.",
+      "designTemplateId": "split-60-40",
+      "colorPaletteId": "dark-blue",
+      "visualTemplate": "lifestyle-editorial"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttext\tdesignTemplateId\tcolorPaletteId\tvisualTemplate\n150001\tSeu grupo de cuidadores do pet está em CAOS?\tbold-statement\tdark-blue\tlifestyle-editorial\n150002\tCONTEXTO: Família de 4 pessoas compartilhava os cuidados da gata Luna (diabética).\teditorial-story\tdark-blue\tlifestyle-editorial\n150003\tDESAFIO: Esquecimentos de doses de insulina e conflitos de agendamento de veterinário.\tsplit-right-image\tdark-blue\tlifestyle-editorial\n150004\tO risco era real: a saúde de Luna estava em perigo devido à falta de coordenação.\tfullbleed-bottom\tdark-blue\tlifestyle-editorial\n150005\tESTRATÉGIA 1: Centralizar informações de saúde (doses, dieta) em um app compartilhado.\tsplit-60-40\tdark-blue\tlifestyle-editorial\n",
+  "stderr": "",
+  "execution_time_ms": 98
+}

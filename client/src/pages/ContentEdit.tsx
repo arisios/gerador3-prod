@@ -213,12 +213,19 @@ export default function ContentEdit() {
     }
     ctx.fillRect(0, 0, 1080, 1080);
 
-    // Desenhar imagem na moldura
+    // Desenhar imagem na moldura (usando proxy para evitar CORS)
+    console.log('Download - imageUrl:', currentSlide.imageUrl);
+    console.log('Download - template:', template.id, 'imageFrame:', template.imageFrame.position);
     if (currentSlide.imageUrl && template.imageFrame.position !== 'none') {
-      await new Promise<void>((resolve) => {
-        const img = new window.Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
+      try {
+        // Buscar imagem via proxy do servidor para evitar CORS
+        const proxyResult = await utils.client.imageProxy.get.query({ url: currentSlide.imageUrl });
+        const dataUrl = `data:${proxyResult.contentType};base64,${proxyResult.base64}`;
+        
+        await new Promise<void>((resolve) => {
+          const img = new window.Image();
+          img.onload = () => {
+            console.log('Imagem carregada via proxy:', img.width, 'x', img.height);
           const frame = template.imageFrame;
           const frameX = parsePercent(frame.x, 1080);
           const frameY = parsePercent(frame.y, 1080);
@@ -251,9 +258,17 @@ export default function ContentEdit() {
           ctx.restore();
           resolve();
         };
-        img.onerror = () => resolve();
-        img.src = currentSlide.imageUrl!;
-      });
+          img.onerror = (e) => {
+            console.error('Erro ao carregar imagem:', e);
+            toast.error('Erro ao carregar imagem para o download');
+            resolve();
+          };
+          img.src = dataUrl;
+        });
+      } catch (error) {
+        console.error('Erro ao buscar imagem via proxy:', error);
+        toast.error('Erro ao carregar imagem');
+      }
     }
 
     // Desenhar overlay se existir
