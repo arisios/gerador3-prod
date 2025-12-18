@@ -45,8 +45,6 @@ export interface DesignTemplate {
     type: 'gradient-bottom' | 'gradient-top' | 'gradient-left' | 'gradient-right' | 'solid' | 'none';
     opacity: number; // 0-1
   };
-  // Flag para indicar que o template pode ter sobreposição de texto/imagem
-  requiresManualTextEdit?: boolean;
 }
 
 export const designTemplates: DesignTemplate[] = [
@@ -400,8 +398,7 @@ export const designTemplates: DesignTemplate[] = [
     overlay: {
       type: 'gradient-bottom',
       opacity: 0.7
-    },
-    requiresManualTextEdit: true
+    }
   },
   {
     id: 'fullbleed-center',
@@ -436,8 +433,7 @@ export const designTemplates: DesignTemplate[] = [
     overlay: {
       type: 'solid',
       opacity: 0.5
-    },
-    requiresManualTextEdit: true
+    }
   },
   {
     id: 'fullbleed-top',
@@ -472,8 +468,7 @@ export const designTemplates: DesignTemplate[] = [
     overlay: {
       type: 'gradient-top',
       opacity: 0.6
-    },
-    requiresManualTextEdit: true
+    }
   },
 
   // === MINIMAL ===

@@ -26,24 +26,6 @@ export const appRouter = router({
     }),
   }),
 
-  // ===== PROXY DE IMAGEM (para evitar CORS) =====
-  imageProxy: router({
-    get: publicProcedure
-      .input(z.object({ url: z.string() }))
-      .query(async ({ input }) => {
-        try {
-          const response = await fetch(input.url);
-          if (!response.ok) throw new Error('Failed to fetch image');
-          const buffer = await response.arrayBuffer();
-          const base64 = Buffer.from(buffer).toString('base64');
-          const contentType = response.headers.get('content-type') || 'image/png';
-          return { base64, contentType };
-        } catch (error) {
-          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to proxy image' });
-        }
-      }),
-  }),
-
   // ===== UPLOAD =====
   upload: router({
     image: protectedProcedure
@@ -176,9 +158,6 @@ export const appRouter = router({
         const rawContent = response.choices[0]?.message?.content;
         const contentStr = typeof rawContent === 'string' ? rawContent : '';
 
-        // Lista de paletas para variar entre slides (cores escuras para melhor contraste)
-        const darkPalettes = colorPalettes.filter(p => p.id.startsWith('dark-') || p.id.startsWith('neon-'));
-        
         try {
           const jsonMatch = contentStr.match(/\{[\s\S]*\}/);
           if (!jsonMatch) {
@@ -186,58 +165,50 @@ export const appRouter = router({
           }
 
           const result = JSON.parse(jsonMatch[0]);
-          const basePaletteId = colorPalettes.find(p => p.id === result.paletteId)?.id || 'dark-purple';
+          const paletteId = colorPalettes.find(p => p.id === result.paletteId)?.id || 'dark-neon';
 
-          // Atualizar cada slide com seu template E cor variada
-          const updates: { slideId: number; templateId: string; paletteId: string; reason: string }[] = [];
+          // Atualizar cada slide com seu template
+          const updates: { slideId: number; templateId: string; reason: string }[] = [];
           
-          for (let i = 0; i < (result.slides || []).length; i++) {
-            const slideResult = result.slides[i];
+          for (const slideResult of result.slides || []) {
             const slide = slides.find(s => s.order === slideResult.order);
             if (slide) {
               const validTemplate = designTemplates.find(t => t.id === slideResult.templateId);
               const templateId = validTemplate ? slideResult.templateId : 'split-top';
               
-              // Variar a cor entre slides usando paletas escuras
-              const slideColorPaletteId = darkPalettes[i % darkPalettes.length].id;
-              
               await db.updateSlide(slide.id, {
                 designTemplateId: templateId,
-                colorPaletteId: slideColorPaletteId,
+                colorPaletteId: paletteId,
               });
               
               updates.push({
                 slideId: slide.id,
                 templateId,
-                paletteId: slideColorPaletteId,
                 reason: slideResult.reason || 'Selecionado automaticamente'
               });
             }
           }
 
-          return { basePaletteId, updates };
+          return { paletteId, updates };
         } catch (e) {
-          // Fallback: distribuir templates variados manualmente COM cores variadas
+          // Fallback: distribuir templates variados manualmente
           const fallbackTemplates = ['split-top-image', 'fullbleed-bottom', 'card-centered', 'minimal-text-only', 'bold-statement', 'split-left-image', 'card-rounded', 'editorial-magazine', 'split-60-40', 'fullbleed-center'];
-          const updates: { slideId: number; templateId: string; paletteId: string; reason: string }[] = [];
+          const updates: { slideId: number; templateId: string; reason: string }[] = [];
           
           for (let i = 0; i < slides.length; i++) {
             const templateId = fallbackTemplates[i % fallbackTemplates.length];
-            const slideColorPaletteId = darkPalettes[i % darkPalettes.length].id;
-            
             await db.updateSlide(slides[i].id, {
               designTemplateId: templateId,
-              colorPaletteId: slideColorPaletteId,
+              colorPaletteId: 'dark-purple',
             });
             updates.push({
               slideId: slides[i].id,
               templateId,
-              paletteId: slideColorPaletteId,
-              reason: 'Template e cor distribuídos automaticamente'
+              reason: 'Template distribuído automaticamente'
             });
           }
 
-          return { basePaletteId: 'dark-purple', updates };
+          return { paletteId: 'dark-purple', updates };
         }
       }),
   }),

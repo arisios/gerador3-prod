@@ -74,9 +74,8 @@ export default function ContentEdit() {
       const currentUpdate = data.updates.find(u => u.slideId === currentSlide?.id);
       if (currentUpdate) {
         setSelectedTemplateId(currentUpdate.templateId);
-        // Usar a paleta específica do slide atual
-        setSelectedPaletteId(currentUpdate.paletteId);
       }
+      setSelectedPaletteId(data.paletteId);
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao aplicar templates");
@@ -214,19 +213,12 @@ export default function ContentEdit() {
     }
     ctx.fillRect(0, 0, 1080, 1080);
 
-    // Desenhar imagem na moldura (usando proxy para evitar CORS)
-    console.log('Download - imageUrl:', currentSlide.imageUrl);
-    console.log('Download - template:', template.id, 'imageFrame:', template.imageFrame.position);
+    // Desenhar imagem na moldura
     if (currentSlide.imageUrl && template.imageFrame.position !== 'none') {
-      try {
-        // Buscar imagem via proxy do servidor para evitar CORS
-        const proxyResult = await utils.client.imageProxy.get.query({ url: currentSlide.imageUrl });
-        const dataUrl = `data:${proxyResult.contentType};base64,${proxyResult.base64}`;
-        
-        await new Promise<void>((resolve) => {
-          const img = new window.Image();
-          img.onload = () => {
-            console.log('Imagem carregada via proxy:', img.width, 'x', img.height);
+      await new Promise<void>((resolve) => {
+        const img = new window.Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
           const frame = template.imageFrame;
           const frameX = parsePercent(frame.x, 1080);
           const frameY = parsePercent(frame.y, 1080);
@@ -259,17 +251,9 @@ export default function ContentEdit() {
           ctx.restore();
           resolve();
         };
-          img.onerror = (e) => {
-            console.error('Erro ao carregar imagem:', e);
-            toast.error('Erro ao carregar imagem para o download');
-            resolve();
-          };
-          img.src = dataUrl;
-        });
-      } catch (error) {
-        console.error('Erro ao buscar imagem via proxy:', error);
-        toast.error('Erro ao carregar imagem');
-      }
+        img.onerror = () => resolve();
+        img.src = currentSlide.imageUrl!;
+      });
     }
 
     // Desenhar overlay se existir
@@ -540,14 +524,6 @@ export default function ContentEdit() {
                 />
                 {selectedPalette?.name || 'Padrão'}
               </span>
-              {selectedTemplate.requiresManualTextEdit && (
-                <span className="px-2 py-1 bg-amber-500/90 rounded text-xs text-white flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  Requer edição manual
-                </span>
-              )}
             </div>
             
             {/* Botão de expandir */}
@@ -570,60 +546,42 @@ export default function ContentEdit() {
           </div>
         </Card>
 
-        {/* Galeria de Miniaturas de Todos os Slides */}
-        <Card className="overflow-hidden">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Todos os Slides ({slides.length})</h3>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => setCurrentSlideIndex(Math.max(0, currentSlideIndex - 1))}
-                  disabled={currentSlideIndex === 0}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => setCurrentSlideIndex(Math.min(slides.length - 1, currentSlideIndex + 1))}
-                  disabled={currentSlideIndex === slides.length - 1}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-11 gap-2">
-              {slides.map((slide: any, i: number) => (
-                <button
-                  key={slide.id}
-                  onClick={() => setCurrentSlideIndex(i)}
-                  className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                    i === currentSlideIndex 
-                      ? 'border-primary ring-2 ring-primary/30 scale-105' 
-                      : 'border-transparent hover:border-muted-foreground/30'
-                  }`}
-                >
-                  <SlidePreview
-                    text={slide.text || ""}
-                    imageUrl={slide.imageUrl || undefined}
-                    templateId={slide.designTemplateId || 'split-top-image'}
-                    paletteId={slide.colorPaletteId || 'dark-purple'}
-                    className="w-full h-full"
-                  />
-                  <div className={`absolute bottom-0 left-0 right-0 text-center text-xs py-0.5 ${
-                    i === currentSlideIndex ? 'bg-primary text-primary-foreground' : 'bg-black/60 text-white'
-                  }`}>
-                    {i + 1}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Navegação de slides */}
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentSlideIndex(Math.max(0, currentSlideIndex - 1))}
+            disabled={currentSlideIndex === 0}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          
+          <div className="flex gap-1">
+            {slides.map((_slide: unknown, i: number) => (
+              <button
+                key={i}
+                onClick={() => setCurrentSlideIndex(i)}
+                className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
+                  i === currentSlideIndex 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted hover:bg-muted/80'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+          
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentSlideIndex(Math.min(slides.length - 1, currentSlideIndex + 1))}
+            disabled={currentSlideIndex === slides.length - 1}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
 
         {/* Painel de Design */}
         <Card>
