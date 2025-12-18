@@ -1,276 +1,211 @@
-import type { SlideStyle } from "@/components/SlideComposer";
-
-const CANVAS_WIDTH = 1080;
-const CANVAS_HEIGHT = 1350;
+/**
+ * Sistema de Downloads - PNG sequencial (sem ZIP)
+ * Seguindo especificação do PDF Sistema-Downloads-Completo
+ */
 
 /**
- * Carrega uma imagem via proxy para evitar CORS
+ * Baixar slide individual de carrossel (com texto renderizado)
  */
-async function loadImageWithProxy(imageUrl: string): Promise<HTMLImageElement> {
-  // Primeiro, buscar a imagem via proxy e converter para data URL
-  const proxyUrl = `/api/trpc/proxy.getImage?input=${encodeURIComponent(JSON.stringify({ json: { url: imageUrl } }))}`;
-  
-  try {
-    const response = await fetch(proxyUrl);
-    const data = await response.json();
-    
-    if (data.result?.data?.json?.data) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error("Falha ao carregar imagem do proxy"));
-        img.src = data.result.data.json.data;
-      });
-    }
-  } catch (error) {
-    console.warn("Proxy falhou, tentando diretamente:", error);
-  }
-  
-  // Fallback: tentar carregar diretamente
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Falha ao carregar imagem"));
-    img.src = imageUrl;
-  });
-}
-
-/**
- * Quebra texto em múltiplas linhas para caber no canvas
- */
-function wrapText(
-  ctx: CanvasRenderingContext2D,
+export async function downloadCarouselSlide(
+  imageUrl: string,
   text: string,
-  maxWidth: number
-): string[] {
-  const words = text.split(" ");
+  filename: string,
+  isFirst: boolean
+): Promise<void> {
+  // Criar canvas para este slide
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080;
+  canvas.height = 1350;
+  const ctx = canvas.getContext('2d')!;
+
+  // Carregar imagem via proxy para evitar CORS
+  const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error('Falha ao carregar imagem'));
+    img.src = proxyUrl;
+  });
+
+  // Desenhar imagem
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  // Adicionar gradiente
+  const gradientStart = isFirst ? 0 : canvas.height * 0.5;
+  const gradient = ctx.createLinearGradient(0, gradientStart, 0, canvas.height);
+  gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Configurar e desenhar texto
+  const fontSize = isFirst ? 60 : 48;
+  const textPosition = isFirst ? 0.15 : 0.67;
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `bold ${fontSize}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Quebrar texto em linhas
+  const maxWidth = canvas.width * 0.85;
+  const words = text.split(' ');
   const lines: string[] = [];
-  let currentLine = "";
+  let currentLine = words[0];
 
-  for (const word of words) {
-    const testLine = currentLine ? `${currentLine} ${word}` : word;
+  for (let j = 1; j < words.length; j++) {
+    const testLine = currentLine + ' ' + words[j];
     const metrics = ctx.measureText(testLine);
-
-    if (metrics.width > maxWidth && currentLine) {
+    if (metrics.width > maxWidth) {
       lines.push(currentLine);
-      currentLine = word;
+      currentLine = words[j];
     } else {
       currentLine = testLine;
     }
   }
+  lines.push(currentLine);
 
-  if (currentLine) {
-    lines.push(currentLine);
-  }
+  // Desenhar linhas
+  const lineHeight = fontSize * 1.3;
+  const startY = canvas.height * textPosition;
 
-  return lines;
-}
-
-/**
- * Desenha o texto no canvas com todos os estilos aplicados
- */
-function drawStyledText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  style: SlideStyle
-) {
-  const maxWidth = CANVAS_WIDTH - style.padding * 2;
-  const fontSize = style.fontSize * (CANVAS_WIDTH / 400); // Escalar para canvas maior
-  
-  ctx.font = `bold ${fontSize}px ${style.fontFamily}, sans-serif`;
-  ctx.textAlign = style.textAlign;
-  ctx.fillStyle = style.textColor;
-
-  // Configurar sombra
-  if (style.shadowEnabled) {
-    ctx.shadowColor = style.shadowColor;
-    ctx.shadowBlur = style.shadowBlur * 2;
-    ctx.shadowOffsetX = style.shadowOffsetX * 2;
-    ctx.shadowOffsetY = style.shadowOffsetY * 2;
-  }
-
-  // Quebrar texto em linhas
-  const lines = wrapText(ctx, text, maxWidth);
-  const lineHeight = fontSize * style.lineHeight;
-  const totalHeight = lines.length * lineHeight;
-
-  // Calcular posição Y
-  const startY = (CANVAS_HEIGHT * style.positionY) / 100 - totalHeight / 2;
-
-  // Calcular posição X baseado no alinhamento
-  let x: number;
-  switch (style.textAlign) {
-    case "left":
-      x = style.padding;
-      break;
-    case "right":
-      x = CANVAS_WIDTH - style.padding;
-      break;
-    default:
-      x = CANVAS_WIDTH / 2;
-  }
-
-  // Desenhar borda do texto primeiro (se habilitada)
-  if (style.borderEnabled) {
-    ctx.strokeStyle = style.borderColor;
-    ctx.lineWidth = style.borderWidth * 2;
-    ctx.lineJoin = "round";
-    
-    lines.forEach((line, index) => {
-      const y = startY + index * lineHeight + fontSize;
-      ctx.strokeText(line, x, y);
-    });
-  }
-
-  // Desenhar glow (se habilitado)
-  if (style.glowEnabled) {
-    ctx.shadowColor = style.glowColor;
-    ctx.shadowBlur = style.glowIntensity * 3;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    
-    // Desenhar múltiplas vezes para intensificar o glow
-    for (let i = 0; i < 3; i++) {
-      lines.forEach((line, index) => {
-        const y = startY + index * lineHeight + fontSize;
-        ctx.fillText(line, x, y);
-      });
-    }
-  }
-
-  // Resetar sombra para o texto principal
-  if (style.shadowEnabled) {
-    ctx.shadowColor = style.shadowColor;
-    ctx.shadowBlur = style.shadowBlur * 2;
-    ctx.shadowOffsetX = style.shadowOffsetX * 2;
-    ctx.shadowOffsetY = style.shadowOffsetY * 2;
-  } else {
-    ctx.shadowColor = "transparent";
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-  }
-
-  // Desenhar texto principal
   lines.forEach((line, index) => {
-    const y = startY + index * lineHeight + fontSize;
-    ctx.fillText(line, x, y);
+    const y = startY + (index - lines.length / 2) * lineHeight;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.fillText(line, canvas.width / 2, y);
   });
-}
-
-/**
- * Desenha overlay gradiente
- */
-function drawOverlay(
-  ctx: CanvasRenderingContext2D,
-  style: SlideStyle
-) {
-  const gradient = ctx.createLinearGradient(0, CANVAS_HEIGHT, 0, CANVAS_HEIGHT * 0.3);
-  const alpha = style.overlayOpacity / 100;
-  
-  gradient.addColorStop(0, `${style.backgroundColor}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`);
-  gradient.addColorStop(0.5, `${style.backgroundColor}${Math.round(alpha * 0.5 * 255).toString(16).padStart(2, '0')}`);
-  gradient.addColorStop(1, "transparent");
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-}
-
-/**
- * Baixa um slide como PNG
- */
-export async function downloadSlide(
-  imageUrl: string | undefined,
-  text: string,
-  style: SlideStyle,
-  withText: boolean,
-  filename: string = "slide"
-): Promise<void> {
-  const canvas = document.createElement("canvas");
-  canvas.width = CANVAS_WIDTH;
-  canvas.height = CANVAS_HEIGHT;
-  
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Não foi possível criar contexto do canvas");
-
-  // Fundo preto padrão
-  ctx.fillStyle = "#000000";
-  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-  // Carregar e desenhar imagem de fundo
-  if (imageUrl) {
-    try {
-      const img = await loadImageWithProxy(imageUrl);
-      
-      // Calcular dimensões para cover
-      const imgRatio = img.width / img.height;
-      const canvasRatio = CANVAS_WIDTH / CANVAS_HEIGHT;
-      
-      let drawWidth, drawHeight, drawX, drawY;
-      
-      if (imgRatio > canvasRatio) {
-        drawHeight = CANVAS_HEIGHT;
-        drawWidth = img.width * (CANVAS_HEIGHT / img.height);
-        drawX = (CANVAS_WIDTH - drawWidth) / 2;
-        drawY = 0;
-      } else {
-        drawWidth = CANVAS_WIDTH;
-        drawHeight = img.height * (CANVAS_WIDTH / img.width);
-        drawX = 0;
-        drawY = (CANVAS_HEIGHT - drawHeight) / 2;
-      }
-      
-      ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-    } catch (error) {
-      console.error("Erro ao carregar imagem:", error);
-    }
-  }
-
-  // Desenhar overlay e texto se solicitado
-  if (withText && style.showText) {
-    drawOverlay(ctx, style);
-    drawStyledText(ctx, text, style);
-  }
 
   // Converter para blob e baixar
-  canvas.toBlob((blob) => {
-    if (!blob) return;
-    
+  const blob = await new Promise<Blob>((resolve) => {
+    canvas.toBlob((b) => resolve(b!), 'image/png');
+  });
+
+  // Criar URL temporária e baixar
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Baixar imagem única selecionada (sem renderização de texto)
+ */
+export async function downloadSingleImage(
+  imageUrl: string,
+  filename: string
+): Promise<void> {
+  try {
+    // Usar proxy para evitar CORS
+    const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
+
+    // Buscar imagem
+    const response = await fetch(proxyUrl);
+
+    if (!response.ok) {
+      throw new Error('Erro ao baixar imagem');
+    }
+
+    // Converter para blob
+    const blob = await response.blob();
+
+    // Criar URL temporária
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+
+    // Criar link de download
+    const a = document.createElement('a');
     a.href = url;
-    a.download = `${filename}.png`;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+
+    // Limpar
     URL.revokeObjectURL(url);
-  }, "image/png", 1.0);
+
+  } catch (error) {
+    console.error('Erro ao baixar imagem:', error);
+    alert('❌ Erro ao baixar imagem');
+  }
 }
 
 /**
- * Baixa múltiplos slides em sequência
+ * Baixar todos os slides de um carrossel como PNGs individuais (com texto)
+ * Downloads sequenciais com intervalo para não sobrecarregar
  */
-export async function downloadAllSlides(
+export async function downloadAllSlidesWithText(
   slides: Array<{
-    imageUrl?: string;
+    url: string;
     text: string;
-    style: SlideStyle;
+    isFirst: boolean;
   }>,
-  withText: boolean,
-  baseFilename: string = "slide"
+  carouselTitle: string,
+  onProgress?: (current: number, total: number) => void
 ): Promise<void> {
   for (let i = 0; i < slides.length; i++) {
-    const slide = slides[i];
-    await downloadSlide(
-      slide.imageUrl,
-      slide.text,
-      slide.style,
-      withText,
-      `${baseFilename}_${i + 1}`
+    onProgress?.(i + 1, slides.length);
+    
+    const filename = `${carouselTitle}_${i + 1}.png`;
+    await downloadCarouselSlide(
+      slides[i].url,
+      slides[i].text,
+      filename,
+      slides[i].isFirst
     );
-    // Pequeno delay entre downloads
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    
+    // Pequeno intervalo entre downloads para não sobrecarregar
+    if (i < slides.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+}
+
+/**
+ * Baixar todos os slides de um carrossel como PNGs individuais (sem texto)
+ * Downloads sequenciais com intervalo para não sobrecarregar
+ */
+export async function downloadAllSlidesWithoutText(
+  slides: Array<{ url: string }>,
+  carouselTitle: string,
+  onProgress?: (current: number, total: number) => void
+): Promise<void> {
+  for (let i = 0; i < slides.length; i++) {
+    onProgress?.(i + 1, slides.length);
+    
+    const filename = `${carouselTitle}_${i + 1}_sem_texto.png`;
+    await downloadSingleImage(slides[i].url, filename);
+    
+    // Pequeno intervalo entre downloads para não sobrecarregar
+    if (i < slides.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+}
+
+/**
+ * Baixar vídeo gerado
+ */
+export function downloadVideo(videoUrl: string, filename: string): void {
+  try {
+    // Criar link de download
+    const a = document.createElement('a');
+    a.href = videoUrl; // URL já é pública do S3
+    a.download = filename;
+    a.target = '_blank'; // Abrir em nova aba se download falhar
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+  } catch (error) {
+    console.error('Erro ao baixar vídeo:', error);
+    alert('❌ Erro ao baixar vídeo');
   }
 }

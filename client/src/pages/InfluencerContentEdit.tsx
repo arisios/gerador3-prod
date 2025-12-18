@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Sparkles, ImagePlus, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
-import { downloadSlide } from "@/lib/downloadSlide";
+import { downloadCarouselSlide, downloadSingleImage } from "@/lib/downloadSlide";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import type { SlideStyle } from "@/components/SlideComposer";
 
@@ -146,16 +146,22 @@ export default function InfluencerContentEdit() {
 
   const handleDownload = async (withText: boolean) => {
     const slide = slides[currentSlide];
-    if (!slide) return;
+    if (!slide || !slide.imageUrl) return;
     
     try {
-      await downloadSlide(
-        slide.imageUrl || "",
-        slide.text || "",
-        defaultStyle,
-        withText,
-        `${content?.title || "slide"}_${currentSlide + 1}`
-      );
+      if (withText) {
+        await downloadCarouselSlide(
+          slide.imageUrl,
+          slide.text || "",
+          `${content?.title || "slide"}_${currentSlide + 1}.png`,
+          currentSlide === 0
+        );
+      } else {
+        await downloadSingleImage(
+          slide.imageUrl,
+          `${content?.title || "slide"}_${currentSlide + 1}.png`
+        );
+      }
       toast.success("Download iniciado!");
     } catch (e) {
       toast.error("Erro no download");

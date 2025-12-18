@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { trpc } from "@/lib/trpc";
 import SlideComposer, { SlideStyle } from "@/components/SlideComposer";
 import { ImageLightbox } from "@/components/ImageLightbox";
-import { downloadSlide, downloadAllSlides } from "@/lib/downloadSlide";
+import { downloadCarouselSlide, downloadSingleImage, downloadAllSlidesWithText, downloadAllSlidesWithoutText } from "@/lib/downloadSlide";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -139,15 +139,21 @@ export default function ContentEdit() {
   };
 
   const handleDownload = async (withText: boolean) => {
-    if (!currentSlide) return;
+    if (!currentSlide || !currentSlide.imageUrl) return;
     try {
-      await downloadSlide(
-        currentSlide.imageUrl || undefined,
-        currentSlide.text || "",
-        (currentSlide.style as SlideStyle) || DEFAULT_STYLE,
-        withText,
-        `slide_${currentSlideIndex + 1}`
-      );
+      if (withText) {
+        await downloadCarouselSlide(
+          currentSlide.imageUrl,
+          currentSlide.text || "",
+          `slide_${currentSlideIndex + 1}.png`,
+          currentSlideIndex === 0
+        );
+      } else {
+        await downloadSingleImage(
+          currentSlide.imageUrl,
+          `slide_${currentSlideIndex + 1}.png`
+        );
+      }
       toast.success("Download iniciado!");
     } catch (error) {
       toast.error("Erro no download");
@@ -156,13 +162,30 @@ export default function ContentEdit() {
 
   const handleDownloadAll = async (withText: boolean) => {
     try {
-      const slidesData = slides.map((s: any) => ({
-        imageUrl: s.imageUrl || undefined,
-        text: s.text || "",
-        style: (s.style as SlideStyle) || DEFAULT_STYLE,
-      }));
-      await downloadAllSlides(slidesData, withText, content?.title || "carrossel");
-      toast.success("Downloads iniciados!");
+      const slidesWithImages = slides.filter((s: any) => s.imageUrl);
+      if (slidesWithImages.length === 0) {
+        toast.error("Nenhum slide com imagem para baixar");
+        return;
+      }
+      
+      if (withText) {
+        const slidesData = slidesWithImages.map((s: any, index: number) => ({
+          url: s.imageUrl,
+          text: s.text || "",
+          isFirst: index === 0,
+        }));
+        toast.info(`Baixando ${slidesData.length} slides...`);
+        await downloadAllSlidesWithText(slidesData, content?.title || "carrossel", (current, total) => {
+          toast.info(`Baixando slide ${current} de ${total}...`);
+        });
+      } else {
+        const slidesData = slidesWithImages.map((s: any) => ({ url: s.imageUrl }));
+        toast.info(`Baixando ${slidesData.length} imagens...`);
+        await downloadAllSlidesWithoutText(slidesData, content?.title || "carrossel", (current, total) => {
+          toast.info(`Baixando imagem ${current} de ${total}...`);
+        });
+      }
+      toast.success("Downloads concluídos!");
     } catch (error) {
       toast.error("Erro nos downloads");
     }
