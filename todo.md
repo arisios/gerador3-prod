@@ -243,3 +243,8 @@
   - Slide 2: Storytelling + Verde Escuro
   - Slide 3: Imagem Esquerda + Azul Escuro
   - Cada slide com template E cor diferentes
+
+## Aviso de Edição Manual de Texto (18/12/2024)
+- [x] Adicionar flag "requiresManualTextEdit" nos templates com sobreposição (fullbleed-bottom, fullbleed-center, fullbleed-top)
+- [x] Exibir aviso "Requer edição manual de texto" no seletor de templates (ícone amarelo)
+- [x] Exibir aviso no preview do slide quando template requer edição (badge amarelo)
