@@ -1,60 +1,78 @@
-import { useState } from "react";
-import { useLocation, Link } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Plus, User, ChevronRight, Loader2, Camera, FileText } from "lucide-react";
+import { useLocation, Link } from "wouter";
+import { 
+  ArrowLeft, Plus, FolderOpen, Link2, FileText, 
+  ChevronRight, Loader2 
+} from "lucide-react";
+import { getLoginUrl } from "@/const";
+import { useState } from "react";
 
-export default function Influencers() {
+export default function Projects() {
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const [showCreateOptions, setShowCreateOptions] = useState(false);
-  const { data: influencers, isLoading } = trpc.influencers.list.useQuery();
+
+  const { data: projects, isLoading: projectsLoading } = trpc.projects.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    window.location.href = getLoginUrl();
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container flex items-center h-14 px-4">
           <Button variant="ghost" size="icon" onClick={() => setLocation("/dashboard")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <span className="ml-2 font-medium">Influenciadores</span>
+          <span className="ml-2 font-medium">Meus Projetos</span>
         </div>
       </header>
 
       <main className="container px-4 py-6 space-y-4">
-        {isLoading ? (
+        {projectsLoading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-        ) : influencers && influencers.length > 0 ? (
-          influencers.map((inf) => (
-            <Link key={inf.id} href={`/influencer/${inf.id}`}>
+        ) : projects && projects.length > 0 ? (
+          projects.map((project) => (
+            <Link key={project.id} href={`/project/${project.id}`}>
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-muted overflow-hidden">
-                    {inf.photoUrl ? (
-                      <img src={inf.photoUrl} alt={inf.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <User className="w-6 h-6 text-muted-foreground" />
-                      </div>
-                    )}
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">{project.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {project.sourceType === "site" && "Site"}
+                      {project.sourceType === "instagram" && "Instagram"}
+                      {project.sourceType === "tiktok" && "TikTok"}
+                      {project.sourceType === "description" && "Descrição"}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="font-medium">{inf.name}</div>
-                    <div className="text-sm text-muted-foreground">{inf.niche}</div>
-                    <div className="text-xs text-muted-foreground capitalize">{inf.type}</div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </CardContent>
               </Card>
             </Link>
           ))
         ) : (
           <div className="text-center py-16 text-muted-foreground">
-            <User className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p className="text-lg">Nenhum influenciador ainda</p>
-            <p className="text-sm mt-1">Crie seu primeiro influenciador virtual</p>
+            <FolderOpen className="w-16 h-16 mx-auto mb-4 opacity-50" />
+            <p className="text-lg">Nenhum projeto ainda</p>
+            <p className="text-sm mt-1">Crie seu primeiro projeto para começar</p>
           </div>
         )}
       </main>
@@ -82,7 +100,7 @@ export default function Influencers() {
           >
             <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
             
-            <h2 className="text-lg font-bold text-center">Criar Influenciador</h2>
+            <h2 className="text-lg font-bold text-center">Criar Novo Projeto</h2>
             <p className="text-sm text-muted-foreground text-center">
               Como você quer começar?
             </p>
@@ -93,16 +111,16 @@ export default function Influencers() {
                 className="h-auto py-4 justify-start gap-4"
                 onClick={() => {
                   setShowCreateOptions(false);
-                  setLocation("/influencer/new/photo");
+                  setLocation("/project/new/link");
                 }}
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Camera className="w-5 h-5 text-primary" />
+                  <Link2 className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-left">
-                  <div className="font-medium">Por Foto</div>
+                  <div className="font-medium">Por Link</div>
                   <div className="text-xs text-muted-foreground">
-                    Envie uma foto como referência visual
+                    Cole o link do seu Instagram, TikTok, YouTube ou site
                   </div>
                 </div>
               </Button>
@@ -112,16 +130,16 @@ export default function Influencers() {
                 className="h-auto py-4 justify-start gap-4"
                 onClick={() => {
                   setShowCreateOptions(false);
-                  setLocation("/influencer/new");
+                  setLocation("/project/new");
                 }}
               >
-                <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-purple-500" />
+                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-blue-500" />
                 </div>
                 <div className="text-left">
                   <div className="font-medium">Por Descrição</div>
                   <div className="text-xs text-muted-foreground">
-                    Descreva as características do influenciador
+                    Descreva seu negócio manualmente
                   </div>
                 </div>
               </Button>

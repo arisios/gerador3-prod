@@ -9,6 +9,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import ProjectCreate from "./pages/ProjectCreate";
+import Projects from "./pages/Projects";
 import ProjectCreateByLink from "./pages/ProjectCreateByLink";
 import ProjectDetail from "./pages/ProjectDetail";
 import ContentEdit from "./pages/ContentEdit";
@@ -29,6 +30,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/projects" component={Projects} />
       <Route path="/project/new" component={ProjectCreate} />
       <Route path="/project/new/link" component={ProjectCreateByLink} />
       <Route path="/project/:id" component={ProjectDetail} />

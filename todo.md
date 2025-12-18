@@ -155,3 +155,9 @@
   - [x] Dores Principais (mais evidentes)
   - [x] Dores Secundárias (importantes mas menos óbvias)
   - [x] Dores Inexploradas (pouco conteúdo, oportunidade)
+
+## Simplificação do Dashboard (18/12/2024)
+- [x] Remover stats, trends, virais, histórico do Dashboard
+- [x] Manter apenas 2 opções: Projetos e Influenciadores
+- [x] Projetos → Link ou Descrição
+- [x] Influenciadores → Foto ou Descrição
