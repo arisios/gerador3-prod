@@ -193,6 +193,247 @@ export const appRouter = router({
         await db.deleteProject(input.id);
         return { success: true };
       }),
+
+    // Análise profunda de link - retorna lista de clientes potenciais
+    analyzeLink: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        sourceType: z.enum(["site", "instagram", "tiktok", "youtube"]),
+        sourceUrl: z.string().min(1),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const projectId = await db.createProject({
+          userId: ctx.user.id,
+          name: input.name,
+          sourceType: input.sourceType as "site" | "instagram" | "tiktok" | "description",
+          sourceUrl: input.sourceUrl,
+        });
+
+        const analysisPrompt = prompts.analyzeLinkDeepPrompt(input.sourceUrl, input.sourceType);
+        
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: "Você é um especialista em análise de negócios e marketing digital. Analise profundamente e retorne apenas JSON válido." },
+            { role: "user", content: analysisPrompt }
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "link_analysis",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  businessAnalysis: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      niche: { type: "string" },
+                      mainOffer: { type: "string" },
+                      uniqueValue: { type: "string" },
+                      tone: { type: "string" },
+                      keywords: { type: "array", items: { type: "string" } }
+                    },
+                    required: ["name", "niche", "mainOffer", "uniqueValue", "tone", "keywords"],
+                    additionalProperties: false
+                  },
+                  potentialClients: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        description: { type: "string" },
+                        demographics: {
+                          type: "object",
+                          properties: {
+                            age: { type: "string" },
+                            gender: { type: "string" },
+                            location: { type: "string" },
+                            income: { type: "string" },
+                            occupation: { type: "string" }
+                          },
+                          required: ["age", "gender", "location", "income", "occupation"],
+                          additionalProperties: false
+                        },
+                        psychographics: {
+                          type: "object",
+                          properties: {
+                            values: { type: "array", items: { type: "string" } },
+                            interests: { type: "array", items: { type: "string" } },
+                            lifestyle: { type: "string" },
+                            goals: { type: "array", items: { type: "string" } },
+                            frustrations: { type: "array", items: { type: "string" } }
+                          },
+                          required: ["values", "interests", "lifestyle", "goals", "frustrations"],
+                          additionalProperties: false
+                        },
+                        buyingMotivation: { type: "string" },
+                        mainPain: { type: "string" }
+                      },
+                      required: ["name", "description", "demographics", "psychographics", "buyingMotivation", "mainPain"],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ["businessAnalysis", "potentialClients"],
+                additionalProperties: false
+              }
+            }
+          }
+        });
+
+        const analysisText = response.choices[0]?.message?.content || "{}";
+        let analysisData;
+        try {
+          analysisData = JSON.parse(typeof analysisText === 'string' ? analysisText : JSON.stringify(analysisText));
+        } catch {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Falha ao analisar link" });
+        }
+
+        await db.updateProject(projectId, { analysis: analysisData.businessAnalysis });
+
+        if (analysisData.potentialClients && analysisData.potentialClients.length > 0) {
+          await db.createIdealClients(projectId, analysisData.potentialClients.map((c: { name: string; description: string; demographics: unknown; psychographics: unknown }) => ({
+            name: c.name,
+            description: c.description,
+            demographics: c.demographics,
+            psychographics: c.psychographics,
+          })));
+        }
+
+        return { projectId, businessAnalysis: analysisData.businessAnalysis, potentialClients: analysisData.potentialClients };
+      }),
+
+    selectClientsAndGeneratePains: protectedProcedure
+      .input(z.object({
+        projectId: z.number(),
+        selectedClientIds: z.array(z.number()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await db.getProjectById(input.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        const allClients = await db.getIdealClientsByProject(input.projectId);
+        for (const client of allClients) {
+          await db.updateIdealClient(client.id, { isSelected: input.selectedClientIds.includes(client.id) });
+        }
+
+        const selectedClients = await db.getSelectedIdealClientsByProject(input.projectId);
+        if (selectedClients.length === 0) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Selecione pelo menos um cliente ideal" });
+        }
+
+        await db.deletePainsByProject(input.projectId);
+
+        const painsPrompt = prompts.generatePainsBySelectedClientsPrompt(
+          JSON.stringify(project.analysis),
+          JSON.stringify(selectedClients)
+        );
+
+        const painsResponse = await invokeLLM({
+          messages: [
+            { role: "system", content: "Você é um especialista em copywriting e psicologia do consumidor. Retorne apenas JSON válido." },
+            { role: "user", content: painsPrompt }
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "pains_analysis",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  primary: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        pain: { type: "string" },
+                        description: { type: "string" },
+                        contentOpportunity: { type: "string" }
+                      },
+                      required: ["pain", "description", "contentOpportunity"],
+                      additionalProperties: false
+                    }
+                  },
+                  secondary: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        pain: { type: "string" },
+                        description: { type: "string" },
+                        contentOpportunity: { type: "string" }
+                      },
+                      required: ["pain", "description", "contentOpportunity"],
+                      additionalProperties: false
+                    }
+                  },
+                  unexplored: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        pain: { type: "string" },
+                        description: { type: "string" },
+                        contentOpportunity: { type: "string" }
+                      },
+                      required: ["pain", "description", "contentOpportunity"],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ["primary", "secondary", "unexplored"],
+                additionalProperties: false
+              }
+            }
+          }
+        });
+
+        const painsText = painsResponse.choices[0]?.message?.content || "{}";
+        let painsData;
+        try {
+          painsData = JSON.parse(typeof painsText === 'string' ? painsText : JSON.stringify(painsText));
+        } catch {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Falha ao gerar dores" });
+        }
+
+        const allPains: { level: "primary" | "secondary" | "unexplored"; pain: string; description: string }[] = [];
+        if (painsData.primary) {
+          painsData.primary.forEach((p: { pain: string; description: string }) => {
+            allPains.push({ level: "primary", pain: p.pain, description: p.description });
+          });
+        }
+        if (painsData.secondary) {
+          painsData.secondary.forEach((p: { pain: string; description: string }) => {
+            allPains.push({ level: "secondary", pain: p.pain, description: p.description });
+          });
+        }
+        if (painsData.unexplored) {
+          painsData.unexplored.forEach((p: { pain: string; description: string }) => {
+            allPains.push({ level: "unexplored", pain: p.pain, description: p.description });
+          });
+        }
+
+        if (allPains.length > 0) {
+          await db.createPains(input.projectId, allPains);
+        }
+
+        return { success: true, painsCount: allPains.length, pains: painsData };
+      }),
+
+    updateIdealClientSelection: protectedProcedure
+      .input(z.object({
+        clientId: z.number(),
+        isSelected: z.boolean(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateIdealClient(input.clientId, { isSelected: input.isSelected });
+        return { success: true };
+      }),
   }),
 
   // ===== CONTENT =====

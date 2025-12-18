@@ -18,6 +18,109 @@ Retorne um JSON com:
 }
 `;
 
+// ===== PROMPT DE ANÁLISE PROFUNDA DE LINK =====
+export const analyzeLinkDeepPrompt = (url: string, sourceType: string) => `
+Você é um especialista em análise de negócios e marketing digital.
+
+Analise PROFUNDAMENTE o seguinte link e identifique TODOS os possíveis clientes ideais que esse negócio poderia atender.
+
+Link: ${url}
+Tipo: ${sourceType}
+
+Sua análise deve considerar:
+1. O produto/serviço oferecido
+2. A linguagem e tom de comunicação
+3. Os problemas que o negócio resolve
+4. O posicionamento de mercado
+5. Os benefícios destacados
+6. O público-alvo implícito e explícito
+
+Retorne um JSON com:
+{
+  "businessAnalysis": {
+    "name": "nome do negócio",
+    "niche": "nicho principal",
+    "mainOffer": "oferta principal",
+    "uniqueValue": "proposta de valor única",
+    "tone": "tom de comunicação",
+    "keywords": ["palavras-chave identificadas"]
+  },
+  "potentialClients": [
+    {
+      "name": "Nome descritivo do perfil (ex: 'Maria Empreendedora', 'João Executivo')",
+      "description": "Descrição breve de quem é essa pessoa",
+      "demographics": {
+        "age": "faixa etária",
+        "gender": "gênero predominante",
+        "location": "localização típica",
+        "income": "faixa de renda",
+        "occupation": "ocupação/profissão"
+      },
+      "psychographics": {
+        "values": ["valores importantes"],
+        "interests": ["interesses"],
+        "lifestyle": "estilo de vida",
+        "goals": ["objetivos principais"],
+        "frustrations": ["frustrações atuais"]
+      },
+      "buyingMotivation": "Por que essa pessoa compraria?",
+      "mainPain": "Dor principal que esse cliente tem"
+    }
+  ]
+}
+
+Gere entre 8 a 12 perfis de clientes potenciais, variando desde os mais óbvios até os menos explorados.
+Seja criativo e pense em nichos adjacentes que também poderiam se beneficiar.
+`;
+
+// ===== PROMPT DE GERAÇÃO DE DORES POR CLIENTES SELECIONADOS =====
+export const generatePainsBySelectedClientsPrompt = (businessAnalysis: string, selectedClients: string) => `
+Você é um especialista em copywriting e psicologia do consumidor.
+
+Com base na análise do negócio e nos clientes ideais SELECIONADOS pelo usuário, gere dores em 3 categorias:
+
+Análise do Negócio: ${businessAnalysis}
+
+Clientes Ideais Selecionados: ${selectedClients}
+
+Gere dores específicas para ESSES clientes selecionados:
+
+1. **DORES PRINCIPAIS** (5-7 dores)
+   - São as dores mais evidentes e urgentes
+   - Problemas que o cliente já sabe que tem
+   - Dores que ele busca ativamente resolver
+   - Muito conteúdo já existe sobre isso
+
+2. **DORES SECUNDÁRIAS** (5-7 dores)
+   - Dores relacionadas mas menos óbvias
+   - Problemas que o cliente reconhece quando apontados
+   - Consequências das dores principais
+   - Algum conteúdo existe, mas não é saturado
+
+3. **DORES INEXPLORADAS** (5-7 dores)
+   - Dores que o cliente nem sabe que tem
+   - Problemas que poucos criadores abordam
+   - Oportunidades de conteúdo diferenciado
+   - Pouco ou nenhum conteúdo sobre isso nas redes
+   - GRANDE OPORTUNIDADE para se destacar
+
+Retorne um JSON com:
+{
+  "primary": [
+    {"pain": "dor principal", "description": "explicação detalhada de por que isso dói", "contentOpportunity": "como usar em conteúdo"}
+  ],
+  "secondary": [
+    {"pain": "dor secundária", "description": "explicação detalhada", "contentOpportunity": "como usar em conteúdo"}
+  ],
+  "unexplored": [
+    {"pain": "dor inexplorada", "description": "explicação detalhada", "contentOpportunity": "por que é uma oportunidade"}
+  ]
+}
+
+IMPORTANTE: As dores devem ser ESPECÍFICAS para os clientes selecionados, não genéricas.
+Use a linguagem que esses clientes usariam para descrever seus problemas.
+`;
+
 // ===== PROMPT DE CLIENTES IDEAIS =====
 export const generateIdealClientsPrompt = (analysis: string) => `
 Com base na análise do negócio abaixo, gere 10 perfis de clientes ideais detalhados.

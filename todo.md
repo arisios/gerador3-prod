@@ -144,3 +144,14 @@
 - [x] Outras fotos para montar o perfil
 - [x] Conteúdos: templates padrão + dores + trends + virais
 - [x] Edição de conteúdo igual aos projetos
+
+## Fluxo de Criação por Link
+- [x] Opção de entrada por link (Instagram, TikTok, YouTube, site)
+- [x] IA analisa o link profundamente
+- [x] IA retorna lista de possíveis clientes ideais
+- [x] Usuário seleciona quais clientes são ideais
+- [x] IA analisa novamente com base nos clientes selecionados
+- [x] IA gera 3 categorias de dores:
+  - [x] Dores Principais (mais evidentes)
+  - [x] Dores Secundárias (importantes mas menos óbvias)
+  - [x] Dores Inexploradas (pouco conteúdo, oportunidade)

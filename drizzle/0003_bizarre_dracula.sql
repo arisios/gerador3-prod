@@ -1,0 +1,1 @@
+ALTER TABLE `idealClients` ADD `isSelected` boolean DEFAULT false;

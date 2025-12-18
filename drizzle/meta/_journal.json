@@ -22,6 +22,13 @@
       "when": 1766056598006,
       "tag": "0002_small_killmonger",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1766071613894,
+      "tag": "0003_bizarre_dracula",
+      "breakpoints": true
     }
   ]
 }

@@ -9,6 +9,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import ProjectCreate from "./pages/ProjectCreate";
+import ProjectCreateByLink from "./pages/ProjectCreateByLink";
 import ProjectDetail from "./pages/ProjectDetail";
 import ContentEdit from "./pages/ContentEdit";
 import ImageEdit from "./pages/ImageEdit";
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/project/new" component={ProjectCreate} />
+      <Route path="/project/new/link" component={ProjectCreateByLink} />
       <Route path="/project/:id" component={ProjectDetail} />
       <Route path="/content/:id" component={ContentEdit} />
       <Route path="/content/:id/image" component={ImageEdit} />

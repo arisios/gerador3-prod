@@ -120,6 +120,24 @@ export async function getIdealClientsByProject(projectId: number): Promise<Ideal
   return db.select().from(idealClients).where(eq(idealClients.projectId, projectId));
 }
 
+export async function updateIdealClient(id: number, data: Partial<IdealClient>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(idealClients).set(data).where(eq(idealClients.id, id));
+}
+
+export async function deleteIdealClientsByProject(projectId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(idealClients).where(eq(idealClients.projectId, projectId));
+}
+
+export async function getSelectedIdealClientsByProject(projectId: number): Promise<IdealClient[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(idealClients).where(and(eq(idealClients.projectId, projectId), eq(idealClients.isSelected, true)));
+}
+
 // ===== PAINS FUNCTIONS =====
 export async function createPains(projectId: number, painsList: Omit<Pain, "id" | "projectId" | "createdAt">[]): Promise<void> {
   const db = await getDb();

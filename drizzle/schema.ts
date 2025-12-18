@@ -35,6 +35,7 @@ export const idealClients = mysqlTable("idealClients", {
   description: text("description"),
   demographics: json("demographics"),
   psychographics: json("psychographics"),
+  isSelected: boolean("isSelected").default(false),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

@@ -5,7 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { useLocation, Link } from "wouter";
 import { 
   Plus, FolderOpen, Image, Video, Users, TrendingUp, 
-  Flame, Clock, ChevronRight, Loader2, LogOut 
+  Flame, Clock, ChevronRight, Loader2, LogOut, Link2, FileText 
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
@@ -74,18 +74,38 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           <Button 
             className="h-auto py-4 flex-col gap-2" 
-            onClick={() => setLocation("/project/new")}
+            onClick={() => setLocation("/project/new/link")}
           >
-            <Plus className="w-6 h-6" />
-            <span>Novo Projeto</span>
+            <Link2 className="w-6 h-6" />
+            <span>Criar por Link</span>
           </Button>
           <Button 
             variant="outline" 
             className="h-auto py-4 flex-col gap-2"
+            onClick={() => setLocation("/project/new")}
+          >
+            <FileText className="w-6 h-6" />
+            <span>Criar por Descrição</span>
+          </Button>
+        </div>
+
+        {/* Secondary Actions */}
+        <div className="grid grid-cols-2 gap-3">
+          <Button 
+            variant="outline" 
+            className="h-auto py-3 flex-col gap-1"
             onClick={() => setLocation("/influencers")}
           >
-            <Users className="w-6 h-6" />
-            <span>Influenciadores</span>
+            <Users className="w-5 h-5" />
+            <span className="text-sm">Influenciadores</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="h-auto py-3 flex-col gap-1"
+            onClick={() => setLocation("/trends")}
+          >
+            <TrendingUp className="w-5 h-5" />
+            <span className="text-sm">Trends</span>
           </Button>
         </div>
 

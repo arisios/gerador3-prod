@@ -295,16 +295,42 @@ export default function ProjectDetail() {
                 {["primary", "secondary", "unexplored"].map((level) => {
                   const levelPains = project.pains?.filter(p => p.level === level) || [];
                   if (levelPains.length === 0) return null;
+                  
+                  const levelConfig = {
+                    primary: { 
+                      title: "Dores Principais", 
+                      description: "Problemas óbvios e urgentes que o cliente já sabe que tem",
+                      color: "bg-red-500/10 border-red-500/30 text-red-500",
+                      icon: "\uD83D\uDD25"
+                    },
+                    secondary: { 
+                      title: "Dores Secundárias", 
+                      description: "Problemas relacionados mas menos urgentes",
+                      color: "bg-orange-500/10 border-orange-500/30 text-orange-500",
+                      icon: "\u26A0\uFE0F"
+                    },
+                    unexplored: { 
+                      title: "Dores Inexploradas", 
+                      description: "Oportunidades! Pouco conteúdo sobre isso nas redes",
+                      color: "bg-green-500/10 border-green-500/30 text-green-500",
+                      icon: "\uD83D\uDCA1"
+                    }
+                  }[level];
+                  
                   return (
-                    <div key={level}>
-                      <h3 className="text-sm font-medium mb-2 capitalize">
-                        {level === "primary" && "Dores Principais"}
-                        {level === "secondary" && "Dores Secundárias"}
-                        {level === "unexplored" && "Dores Inexploradas"}
-                      </h3>
-                      <div className="space-y-2">
+                    <div key={level} className="space-y-3">
+                      <div className={`p-3 rounded-lg border ${levelConfig?.color}`}>
+                        <div className="flex items-center gap-2">
+                          <span>{levelConfig?.icon}</span>
+                          <div>
+                            <h3 className="font-medium">{levelConfig?.title}</h3>
+                            <p className="text-xs opacity-80">{levelConfig?.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-2 pl-2">
                         {levelPains.map((pain) => (
-                          <Card key={pain.id} className="bg-card/50">
+                          <Card key={pain.id} className="bg-card/50 hover:bg-card transition-colors">
                             <CardContent className="p-3">
                               <div className="font-medium text-sm">{pain.pain}</div>
                               {pain.description && (
@@ -331,18 +357,43 @@ export default function ProjectDetail() {
           {/* Clients Tab */}
           <TabsContent value="clients" className="space-y-4 mt-4">
             {project.idealClients && project.idealClients.length > 0 ? (
-              project.idealClients.map((client) => (
-                <Card key={client.id} className="bg-card/50">
-                  <CardContent className="p-4">
-                    <div className="font-medium">{client.name}</div>
-                    {client.description && (
-                      <div className="text-sm text-muted-foreground mt-1">
-                        {client.description}
+              <>
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{project.idealClients.filter(c => c.isSelected).length} selecionado(s)</span>
+                  <span>{project.idealClients.length} total</span>
+                </div>
+                {project.idealClients.map((client) => (
+                  <Card 
+                    key={client.id} 
+                    className={`transition-all ${
+                      client.isSelected 
+                        ? "bg-primary/5 border-primary/30" 
+                        : "bg-card/50 opacity-60"
+                    }`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{client.name}</span>
+                            {client.isSelected && (
+                              <Badge variant="secondary" className="text-xs">
+                                <Check className="w-3 h-3 mr-1" />
+                                Selecionado
+                              </Badge>
+                            )}
+                          </div>
+                          {client.description && (
+                            <div className="text-sm text-muted-foreground mt-1">
+                              {client.description}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                ))}
+              </>
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
