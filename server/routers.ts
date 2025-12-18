@@ -648,6 +648,67 @@ export const appRouter = router({
 
         return { imageUrls };
       }),
+
+    generateAllImages: protectedProcedure
+      .input(z.object({
+        contentId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const content = await db.getContentById(input.contentId);
+        if (!content || content.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        const slides = await db.getSlidesByContent(input.contentId);
+        const results: { slideId: number; imageUrl: string | null; error?: string }[] = [];
+
+        for (const slide of slides) {
+          try {
+            const basePrompt = slide.imagePrompt || `Professional Instagram image for: ${slide.text || "lifestyle content"}`;
+            const fullPrompt = `${basePrompt}\n\nREGRA PRIMORDIAL: A imagem deve ser REAL e SEM NENHUM TEXTO. Não inclua letras, palavras, números ou qualquer elemento textual na imagem. Deve ser uma FOTOGRAFIA REAL, não ilustração.`;
+            
+            const result = await generateImage({
+              prompt: fullPrompt,
+            });
+
+            if (result.url) {
+              const currentBank = (slide.imageBank as string[]) || [];
+              const newBank = [...currentBank, result.url];
+              
+              await db.updateSlide(slide.id, {
+                imageBank: newBank,
+                imageUrl: result.url,
+              });
+
+              results.push({ slideId: slide.id, imageUrl: result.url });
+            } else {
+              results.push({ slideId: slide.id, imageUrl: null, error: "Falha ao gerar" });
+            }
+          } catch (error) {
+            results.push({ slideId: slide.id, imageUrl: null, error: String(error) });
+          }
+        }
+
+        return { results, totalGenerated: results.filter(r => r.imageUrl).length };
+      }),
+
+    uploadImage: protectedProcedure
+      .input(z.object({
+        slideId: z.number(),
+        imageUrl: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const currentSlide = await db.getSlideById(input.slideId);
+        const currentBank = (currentSlide?.imageBank as string[]) || [];
+        const newBank = [...currentBank, input.imageUrl];
+        
+        await db.updateSlide(input.slideId, {
+          imageBank: newBank,
+          imageUrl: input.imageUrl,
+        });
+
+        return { success: true };
+      }),
   }),
 
   // ===== INFLUENCERS =====

@@ -10,7 +10,8 @@ import { trpc } from "@/lib/trpc";
 import SlideComposer, { SlideStyle } from "@/components/SlideComposer";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { downloadCarouselSlide, downloadSingleImage, downloadAllSlidesWithText, downloadAllSlidesWithoutText } from "@/lib/downloadSlide";
-import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2 } from "lucide-react";
+import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Images } from "lucide-react";
+
 import { toast } from "sonner";
 
 const DEFAULT_STYLE: SlideStyle = {
@@ -70,6 +71,23 @@ export default function ContentEdit() {
     onError: (e) => toast.error("Erro: " + e.message),
   });
 
+  const generateAllImages = trpc.slides.generateAllImages.useMutation({
+    onSuccess: (data) => {
+      refetch();
+      toast.success(`${data.totalGenerated} imagens geradas!`);
+    },
+    onError: (e) => toast.error("Erro: " + e.message),
+  });
+
+  const uploadSlideImage = trpc.slides.uploadImage.useMutation({
+    onSuccess: () => {
+      refetch();
+      setLightboxOpen(false);
+      toast.success("Imagem enviada!");
+    },
+    onError: (e) => toast.error("Erro: " + e.message),
+  });
+
   const slides = content?.slides || [];
   const currentSlide = slides[currentSlideIndex];
 
@@ -105,6 +123,49 @@ export default function ContentEdit() {
       prompt: newPrompt,
       quantity: 1,
     });
+  };
+
+  const handleGenerateAllImages = () => {
+    if (!content) return;
+    toast.info(`Gerando imagens para ${slides.length} slides...`);
+    generateAllImages.mutate({ contentId: content.id });
+  };
+
+  const handleUploadImage = async (file: File) => {
+    if (!currentSlide) return;
+    
+    // Convert file to base64 and upload via API
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      // For now, we'll use the base64 directly as the image URL
+      // In production, this should upload to S3 first
+      try {
+        // Create a blob URL for immediate display
+        const blob = new Blob([file], { type: file.type });
+        const blobUrl = URL.createObjectURL(blob);
+        
+        // Upload to server (which will handle S3)
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (response.ok) {
+          const { url } = await response.json();
+          uploadSlideImage.mutate({ slideId: currentSlide.id, imageUrl: url });
+        } else {
+          // Fallback: use base64 (not ideal for production)
+          uploadSlideImage.mutate({ slideId: currentSlide.id, imageUrl: base64 });
+        }
+      } catch (error) {
+        toast.error("Erro ao fazer upload");
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleDeleteImage = async () => {
@@ -346,14 +407,32 @@ export default function ContentEdit() {
         </div>
 
         {/* Actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Gerar Imagem
-              </Button>
-            </SheetTrigger>
+        <div className="space-y-3">
+          {/* Botão Gerar Todas as Imagens */}
+          <Button 
+            className="w-full" 
+            onClick={handleGenerateAllImages}
+            disabled={generateAllImages.isPending || slides.length === 0}
+          >
+            {generateAllImages.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <Images className="w-4 h-4 mr-2" />
+            )}
+            {generateAllImages.isPending 
+              ? "Gerando..." 
+              : `Gerar Todas as Imagens (${slides.length} slides)`
+            }
+          </Button>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Gerar Imagem
+                </Button>
+              </SheetTrigger>
             <SheetContent>
               <SheetHeader>
                 <SheetTitle>Gerar Imagens</SheetTitle>
@@ -401,6 +480,7 @@ export default function ContentEdit() {
             <Edit2 className="w-4 h-4 mr-2" />
             {showComposer ? "Fechar Editor" : "Editar Visual"}
           </Button>
+          </div>
         </div>
 
         {/* Banco de Imagens */}
@@ -466,6 +546,7 @@ export default function ContentEdit() {
         prompt={currentSlide?.imagePrompt || ""}
         title={`Slide ${currentSlideIndex + 1}`}
         onRegenerate={handleRegenerateImage}
+        onUpload={handleUploadImage}
         onDelete={lightboxImageIndex !== null ? handleDeleteImage : undefined}
       />
     </div>

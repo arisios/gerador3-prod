@@ -165,3 +165,9 @@
 ## Simplificação do Fluxo por Link (18/12/2024)
 - [x] Remover campo de nome do projeto no fluxo por link
 - [x] Usar o link como nome do projeto automaticamente (extrai domínio ou @username)
+
+## Melhorias de Imagem (18/12/2024)
+- [x] Botão "Gerar Todas as Imagens" no conteúdo (carrossel)
+- [x] Prompt visível e editável ao clicar na imagem
+- [x] Prompt serve como referência para upload ou edição
+- [x] Opção de upload de imagem própria

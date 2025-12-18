@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Download, Trash2, RefreshCw, Edit2, Check, Loader2, Copy } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { X, Download, Trash2, RefreshCw, Loader2, Copy, Upload, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 interface ImageLightboxProps {
@@ -12,6 +13,7 @@ interface ImageLightboxProps {
   prompt?: string;
   onRegenerate?: (newPrompt: string) => Promise<void>;
   onDelete?: () => Promise<void>;
+  onUpload?: (file: File) => Promise<void>;
   title?: string;
   showPrompt?: boolean;
 }
@@ -23,13 +25,15 @@ export function ImageLightbox({
   prompt = "",
   onRegenerate,
   onDelete,
+  onUpload,
   title = "Imagem",
   showPrompt = true,
 }: ImageLightboxProps) {
-  const [editingPrompt, setEditingPrompt] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState(prompt);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setCurrentPrompt(prompt);
@@ -55,10 +59,13 @@ export function ImageLightbox({
 
   const handleRegenerate = async () => {
     if (!onRegenerate) return;
+    if (!currentPrompt.trim()) {
+      toast.error("Digite um prompt para gerar a imagem");
+      return;
+    }
     setIsRegenerating(true);
     try {
       await onRegenerate(currentPrompt);
-      setEditingPrompt(false);
       toast.success("Imagem regenerada!");
     } catch (error) {
       toast.error("Erro ao regenerar imagem");
@@ -88,6 +95,29 @@ export function ImageLightbox({
     toast.success("Prompt copiado!");
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onUpload) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione uma imagem válida");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      await onUpload(file);
+      toast.success("Imagem enviada!");
+    } catch (error) {
+      toast.error("Erro ao enviar imagem");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -103,99 +133,119 @@ export function ImageLightbox({
         <div className="space-y-4">
           {/* Imagem em tela cheia */}
           <div className="relative bg-black/50 rounded-lg overflow-hidden">
-            <img
-              src={imageUrl}
-              alt={title}
-              className="w-full h-auto max-h-[60vh] object-contain mx-auto"
-            />
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={title}
+                className="w-full h-auto max-h-[50vh] object-contain mx-auto"
+              />
+            ) : (
+              <div className="w-full h-48 flex items-center justify-center text-muted-foreground">
+                <span>Nenhuma imagem gerada</span>
+              </div>
+            )}
           </div>
 
-          {/* Ações */}
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={handleDownload}>
-              <Download className="w-4 h-4 mr-2" />
-              Baixar
-            </Button>
+          {/* Prompt - SEMPRE VISÍVEL E EDITÁVEL */}
+          {showPrompt && (
+            <div className="space-y-2 p-4 bg-muted/30 rounded-lg border border-border">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">
+                  Prompt (orientação para a imagem)
+                </Label>
+                {currentPrompt && (
+                  <Button variant="ghost" size="sm" onClick={handleCopyPrompt}>
+                    <Copy className="w-3 h-3 mr-1" />
+                    Copiar
+                  </Button>
+                )}
+              </div>
+              
+              <Textarea
+                value={currentPrompt}
+                onChange={(e) => setCurrentPrompt(e.target.value)}
+                rows={3}
+                placeholder="Descreva a imagem que deseja gerar..."
+                className="resize-none"
+              />
+              
+              <p className="text-xs text-muted-foreground">
+                💡 Use este prompt como referência para upload de imagem própria ou edite para regenerar
+              </p>
+            </div>
+          )}
 
+          {/* Ações Principais */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Gerar com IA */}
             {onRegenerate && (
               <Button
-                variant="outline"
-                onClick={() => setEditingPrompt(!editingPrompt)}
-                disabled={isRegenerating}
-              >
-                <Edit2 className="w-4 h-4 mr-2" />
-                {editingPrompt ? "Cancelar Edição" : "Editar Prompt"}
-              </Button>
-            )}
-
-            {onRegenerate && (
-              <Button
-                variant="default"
                 onClick={handleRegenerate}
-                disabled={isRegenerating}
+                disabled={isRegenerating || !currentPrompt.trim()}
+                className="w-full"
               >
                 {isRegenerating ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <Sparkles className="w-4 h-4 mr-2" />
                 )}
-                Regenerar
+                {imageUrl ? "Regenerar" : "Gerar"} com IA
               </Button>
             )}
 
-            {onDelete && (
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Trash2 className="w-4 h-4 mr-2" />
-                )}
-                Excluir
-              </Button>
+            {/* Upload */}
+            {onUpload && (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="w-full"
+                >
+                  {isUploading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4 mr-2" />
+                  )}
+                  Fazer Upload
+                </Button>
+              </>
             )}
           </div>
 
-          {/* Prompt */}
-          {showPrompt && currentPrompt && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Prompt usado (orientação para upload)
-                </label>
-                <Button variant="ghost" size="sm" onClick={handleCopyPrompt}>
-                  <Copy className="w-3 h-3 mr-1" />
-                  Copiar
-                </Button>
-              </div>
+          {/* Ações Secundárias */}
+          {imageUrl && (
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
+              <Button variant="outline" size="sm" onClick={handleDownload}>
+                <Download className="w-4 h-4 mr-2" />
+                Baixar
+              </Button>
 
-              {editingPrompt ? (
-                <div className="space-y-2">
-                  <Textarea
-                    value={currentPrompt}
-                    onChange={(e) => setCurrentPrompt(e.target.value)}
-                    rows={4}
-                    placeholder="Descreva a imagem que deseja gerar..."
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Edite o prompt e clique em "Regenerar" para criar uma nova imagem
-                  </p>
-                </div>
-              ) : (
-                <div className="p-3 bg-muted/50 rounded-lg text-sm">
-                  {currentPrompt}
-                </div>
+              {onDelete && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="text-destructive hover:text-destructive"
+                >
+                  {isDeleting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4 mr-2" />
+                  )}
+                  Excluir
+                </Button>
               )}
             </div>
           )}
-
-          {/* Dica */}
-          <p className="text-xs text-muted-foreground text-center">
-            💡 Use o prompt como orientação para fazer upload de uma imagem similar
-          </p>
         </div>
       </DialogContent>
     </Dialog>
