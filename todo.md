@@ -123,3 +123,4 @@
 - [x] App não é PWA - configurar manifest, service worker, icons - CORRIGIDO
 - [x] Interface não otimizada para mobile - CORRIGIDO: CSS mobile-first
 - [x] Bug: Imagem fica esticada no download - corrigido com cover ratio
+- [x] Bug: Prompt de influenciador deve gerar fotos em primeira pessoa (selfies reais) - CORRIGIDO

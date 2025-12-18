@@ -617,21 +617,29 @@ O conteúdo deve parecer natural e autêntico, não vendedor demais.`
           throw new TRPCError({ code: "BAD_REQUEST", message: "Influenciador não tem imagem de referência" });
         }
 
-        const prompt = `Foto profissional para Instagram de um influenciador digital.
+        const prompt = `Gere uma foto em PRIMEIRA PESSOA como se fosse tirada pelo próprio influenciador.
+
+A IMAGEM DE REFERÊNCIA ANEXADA é a pessoa que deve aparecer na foto. Use-a como base para manter consistência física absoluta.
+
 Nicho: ${influencer.niche || "lifestyle"}
-Contexto do slide: ${input.slideText}
+Contexto da foto: ${input.slideText}
 ${input.context ? `Contexto adicional: ${input.context}` : ""}
 
-REGRA PRIMORDIAL: A imagem deve ser REAL e SEM NENHUM TEXTO. Não inclua letras, palavras, números ou qualquer elemento textual na imagem.
+REGRAS PRIMORDIAIS (NÃO ALTERAR):
+1. IMAGEM REAL SEM NENHUM TEXTO - Não inclua letras, palavras, números ou qualquer elemento textual
+2. FOTO EM PRIMEIRA PESSOA - Como se o influenciador estivesse tirando a própria foto (selfie, foto no espelho, foto com braço estendido, ou foto tirada por amigo próximo)
+3. CONSISTÊNCIA FÍSICA - A pessoa na foto DEVE ser idêntica à imagem de referência (mesmas características físicas, rosto, corpo, cabelo)
+4. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores
+5. QUALIDADE - Foto de alta qualidade mas natural, não muito produzida
 
-A foto deve:
-- Ser uma FOTOGRAFIA REAL, não ilustração ou arte digital
-- Manter a MESMA pessoa da imagem de referência (mesmas características físicas)
-- Parecer natural e autêntica
-- Ter qualidade profissional
-- Ser adequada para Instagram (4:5)
-- Combinar com o contexto do conteúdo
-- NÃO CONTER ABSOLUTAMENTE NENHUM TEXTO, LETRA, PALAVRA OU NÚMERO`;
+Estilo da foto:
+- Selfie casual ou foto tirada por amigo
+- Iluminação natural ou de ambiente
+- Enquadramento típico de Instagram (4:5)
+- Cenário condizente com o contexto
+- Expressão facial natural e autêntica
+
+Lembre-se: Esta foto será postada como se fosse do próprio influenciador, então deve parecer 100% autêntica e em primeira pessoa.`;
 
         const result = await generateImage({
           prompt,
@@ -667,19 +675,28 @@ A foto deve:
         const results: { slideId: number; imageUrl?: string }[] = [];
 
         for (const slide of slides) {
-          const prompt = `Foto profissional para Instagram de um influenciador digital.
+          const prompt = `Gere uma foto em PRIMEIRA PESSOA como se fosse tirada pelo próprio influenciador.
+
+A IMAGEM DE REFERÊNCIA ANEXADA é a pessoa que deve aparecer na foto. Use-a como base para manter consistência física absoluta.
+
 Nicho: ${influencer.niche || "lifestyle"}
-Contexto do slide: ${slide.text}
+Contexto da foto: ${slide.text}
 
-REGRA PRIMORDIAL: A imagem deve ser REAL e SEM NENHUM TEXTO. Não inclua letras, palavras, números ou qualquer elemento textual na imagem.
+REGRAS PRIMORDIAIS (NÃO ALTERAR):
+1. IMAGEM REAL SEM NENHUM TEXTO - Não inclua letras, palavras, números ou qualquer elemento textual
+2. FOTO EM PRIMEIRA PESSOA - Como se o influenciador estivesse tirando a própria foto (selfie, foto no espelho, foto com braço estendido, ou foto tirada por amigo próximo)
+3. CONSISTÊNCIA FÍSICA - A pessoa na foto DEVE ser idêntica à imagem de referência (mesmas características físicas, rosto, corpo, cabelo)
+4. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores
+5. QUALIDADE - Foto de alta qualidade mas natural, não muito produzida
 
-A foto deve:
-- Ser uma FOTOGRAFIA REAL, não ilustração ou arte digital
-- Manter a MESMA pessoa da imagem de referência (mesmas características físicas)
-- Parecer natural e autêntica
-- Ter qualidade profissional
-- Ser adequada para Instagram (4:5)
-- NÃO CONTER ABSOLUTAMENTE NENHUM TEXTO, LETRA, PALAVRA OU NÚMERO`;
+Estilo da foto:
+- Selfie casual ou foto tirada por amigo
+- Iluminação natural ou de ambiente
+- Enquadramento típico de Instagram (4:5)
+- Cenário condizente com o contexto
+- Expressão facial natural e autêntica
+
+Lembre-se: Esta foto será postada como se fosse do próprio influenciador, então deve parecer 100% autêntica e em primeira pessoa.`;
 
           try {
             const result = await generateImage({

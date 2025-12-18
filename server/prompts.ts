@@ -231,6 +231,8 @@ Retorne um JSON com:
 `;
 
 // ===== PROMPT DE IMAGEM DE INFLUENCIADOR =====
+// REGRA FIXA: A foto de referência é usada como originalImages para manter consistência física
+// As fotos devem parecer selfies/fotos reais tiradas pelo próprio influenciador (primeira pessoa)
 export const generateInfluencerImagePrompt = (params: {
   referenceDescription: string;
   slideText: string;
@@ -238,22 +240,29 @@ export const generateInfluencerImagePrompt = (params: {
   type: "normal" | "transformation";
   isBeforeImage?: boolean;
 }) => `
-Gere uma imagem de um influenciador virtual para Instagram.
+Gere uma foto em PRIMEIRA PESSOA como se fosse tirada pelo próprio influenciador.
 
-Descrição de referência: ${params.referenceDescription}
-Contexto: ${params.context}
-Texto do slide: "${params.slideText}"
+A IMAGEM DE REFERÊNCIA ANEXADA é a pessoa que deve aparecer na foto. Use-a como base para manter consistência física absoluta.
+
+Contexto da foto: ${params.context}
+Texto que será sobreposto: "${params.slideText}"
 ${params.type === "transformation" ? `Tipo: ${params.isBeforeImage ? "ANTES da transformação" : "DEPOIS da transformação"}` : ""}
 
-REGRA PRIMORDIAL: A imagem deve ser REAL e SEM NENHUM TEXTO. Não inclua letras, palavras, números ou qualquer elemento textual na imagem.
+REGRAS PRIMORDIAIS (NÃO ALTERAR):
+1. IMAGEM REAL SEM NENHUM TEXTO - Não inclua letras, palavras, números ou qualquer elemento textual
+2. FOTO EM PRIMEIRA PESSOA - Como se o influenciador estivesse tirando a própria foto (selfie, foto no espelho, foto com braço estendido, ou foto tirada por amigo próximo)
+3. CONSISTÊNCIA FÍSICA - A pessoa na foto DEVE ser idêntica à imagem de referência (mesmas características físicas, rosto, corpo, cabelo)
+4. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores
+5. QUALIDADE - Foto de alta qualidade mas natural, não muito produzida
 
-A imagem deve:
-- Ser uma FOTOGRAFIA REAL, não ilustração ou arte digital
-- Manter consistência com a descrição de referência (mesma pessoa, mesmas características físicas)
-- Parecer natural e autêntica
-- Ter qualidade profissional
-- Ser adequada para Instagram (4:5)
-- NÃO CONTER ABSOLUTAMENTE NENHUM TEXTO, LETRA, PALAVRA OU NÚMERO
-- ${params.type === "transformation" && params.isBeforeImage ? "Mostrar a pessoa ANTES da transformação" : ""}
-- ${params.type === "transformation" && !params.isBeforeImage ? "Mostrar a pessoa DEPOIS da transformação, com aparência melhorada" : ""}
+Estilo da foto:
+- Selfie casual ou foto tirada por amigo
+- Iluminação natural ou de ambiente
+- Enquadramento típico de Instagram (4:5)
+- Cenário condizente com o contexto
+- Expressão facial natural e autêntica
+${params.type === "transformation" && params.isBeforeImage ? "- Mostrar a pessoa ANTES da transformação (expressão mais neutra ou preocupada)" : ""}
+${params.type === "transformation" && !params.isBeforeImage ? "- Mostrar a pessoa DEPOIS da transformação (expressão confiante e feliz)" : ""}
+
+Lembre-se: Esta foto será postada como se fosse do próprio influenciador, então deve parecer 100% autêntica e em primeira pessoa.
 `;
