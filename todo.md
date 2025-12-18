@@ -171,3 +171,8 @@
 - [x] Prompt visível e editável ao clicar na imagem
 - [x] Prompt serve como referência para upload ou edição
 - [x] Opção de upload de imagem própria
+
+## Upload de Foto no Influenciador (18/12/2024)
+- [x] Permitir upload de foto própria na criação de influenciador por foto
+- [x] Usar a foto como referência visual para a IA
+- [x] Rota genérica de upload de imagem para S3

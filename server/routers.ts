@@ -11,6 +11,7 @@ import * as prompts from "./prompts";
 import { carouselTemplates, imageTemplates, videoTemplates, softSellTemplates, hookTypes, copyFormulas } from "@shared/templates";
 import { visualTemplates, accentColors, stylePresets } from "@shared/visualTemplates";
 import { nanoid } from "nanoid";
+import { storagePut } from "./storage";
 
 export const appRouter = router({
   system: systemRouter,
@@ -22,6 +23,31 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+  }),
+
+  // ===== UPLOAD =====
+  upload: router({
+    image: protectedProcedure
+      .input(z.object({
+        base64: z.string(),
+        filename: z.string().optional(),
+        contentType: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Decode base64
+        const base64Data = input.base64.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        
+        // Generate unique filename
+        const ext = input.contentType?.split('/')[1] || 'png';
+        const filename = input.filename || `${nanoid()}.${ext}`;
+        const key = `uploads/${ctx.user.id}/${Date.now()}-${filename}`;
+        
+        // Upload to S3
+        const { url } = await storagePut(key, buffer, input.contentType || 'image/png');
+        
+        return { url, key };
+      }),
   }),
 
   // ===== TEMPLATES =====
