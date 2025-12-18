@@ -217,3 +217,10 @@
 - [x] Reforçar prompt: imagens SEM TEXTO, apenas visual (6 regras obrigatórias)
 - [x] Corrigir bug do texto duplicado - verificado e não há duplicação no código
 - [x] Formatação de texto automática baseada no template selecionado
+
+## Correção de Variedade de Templates (18/12/2024)
+- [x] Verificar IDs de templates no fallback da rota selectVariedTemplates
+- [x] Adicionar botão "Automático para Todo Carrossel" no ContentEdit
+- [x] Garantir carregamento de designTemplateId e colorPaletteId por slide
+- [x] Aplicar cores da paleta selecionada no SlideRenderer
+- [x] Testar variedade de templates no carrossel

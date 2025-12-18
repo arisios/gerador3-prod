@@ -192,14 +192,14 @@ export const appRouter = router({
           return { paletteId, updates };
         } catch (e) {
           // Fallback: distribuir templates variados manualmente
-          const fallbackTemplates = ['split-top', 'fullbleed-dark', 'card-border', 'minimal-left', 'bold-center', 'split-left'];
+          const fallbackTemplates = ['split-top-image', 'fullbleed-bottom', 'card-centered', 'minimal-text-only', 'bold-statement', 'split-left-image', 'card-rounded', 'editorial-magazine', 'split-60-40', 'fullbleed-center'];
           const updates: { slideId: number; templateId: string; reason: string }[] = [];
           
           for (let i = 0; i < slides.length; i++) {
             const templateId = fallbackTemplates[i % fallbackTemplates.length];
             await db.updateSlide(slides[i].id, {
               designTemplateId: templateId,
-              colorPaletteId: 'dark-neon',
+              colorPaletteId: 'dark-purple',
             });
             updates.push({
               slideId: slides[i].id,
@@ -208,7 +208,7 @@ export const appRouter = router({
             });
           }
 
-          return { paletteId: 'dark-neon', updates };
+          return { paletteId: 'dark-purple', updates };
         }
       }),
   }),
@@ -840,6 +840,8 @@ export const appRouter = router({
         imagePrompt: z.string().optional(),
         selectedImageIndex: z.number().optional(),
         visualTemplate: z.string().optional(),
+        designTemplateId: z.string().optional(),
+        colorPaletteId: z.string().optional(),
         style: z.any().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -849,6 +851,8 @@ export const appRouter = router({
           imagePrompt: input.imagePrompt,
           selectedImageIndex: input.selectedImageIndex,
           visualTemplate: input.visualTemplate,
+          designTemplateId: input.designTemplateId,
+          colorPaletteId: input.colorPaletteId,
           style: input.style,
         });
         return { success: true };

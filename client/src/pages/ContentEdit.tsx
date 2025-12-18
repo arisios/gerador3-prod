@@ -65,6 +65,23 @@ export default function ContentEdit() {
 
   const uploadImage = trpc.upload.image.useMutation();
 
+  // Mutation para aplicar templates variados automaticamente a todos os slides
+  const selectVariedTemplates = trpc.templates.selectVariedTemplates.useMutation({
+    onSuccess: (data) => {
+      utils.content.get.invalidate({ id: contentId });
+      toast.success(`Templates variados aplicados! ${data.updates.length} slides atualizados.`);
+      // Atualizar o template do slide atual
+      const currentUpdate = data.updates.find(u => u.slideId === currentSlide?.id);
+      if (currentUpdate) {
+        setSelectedTemplateId(currentUpdate.templateId);
+      }
+      setSelectedPaletteId(data.paletteId);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao aplicar templates");
+    },
+  });
+
   const currentSlide = slides[currentSlideIndex];
 
   useEffect(() => {
@@ -74,13 +91,18 @@ export default function ContentEdit() {
     if (currentSlide?.imagePrompt) {
       setTempPrompt(currentSlide.imagePrompt);
     }
-    // Carregar template salvo do slide se existir
-    if (currentSlide?.visualTemplate) {
+    // Carregar template salvo do slide - priorizar designTemplateId, depois visualTemplate
+    const slideAny = currentSlide as any;
+    if (slideAny?.designTemplateId) {
+      setSelectedTemplateId(slideAny.designTemplateId);
+    } else if (currentSlide?.visualTemplate) {
       setSelectedTemplateId(currentSlide.visualTemplate);
     }
-    const slideStyle = (currentSlide as any)?.style;
-    if (slideStyle?.colorPaletteId) {
-      setSelectedPaletteId(slideStyle.colorPaletteId);
+    // Carregar paleta de cores - priorizar colorPaletteId direto, depois style.colorPaletteId
+    if (slideAny?.colorPaletteId) {
+      setSelectedPaletteId(slideAny.colorPaletteId);
+    } else if (slideAny?.style?.colorPaletteId) {
+      setSelectedPaletteId(slideAny.style.colorPaletteId);
     }
   }, [currentSlide]);
 
@@ -141,13 +163,14 @@ export default function ContentEdit() {
     setLightboxOpen(true);
   };
 
-  // Salvar template no slide
+  // Salvar template no slide - usar designTemplateId para consistência
   const handleTemplateChange = async (templateId: string) => {
     setSelectedTemplateId(templateId);
     if (currentSlide) {
       await updateSlide.mutateAsync({
         id: currentSlide.id,
-        visualTemplate: templateId,
+        designTemplateId: templateId,
+        visualTemplate: templateId, // manter compatibilidade
       });
     }
   };
@@ -157,7 +180,7 @@ export default function ContentEdit() {
     if (currentSlide) {
       await updateSlide.mutateAsync({
         id: currentSlide.id,
-        // Salvar palette no style ou visualTemplate
+        colorPaletteId: paletteId, // salvar direto no campo
         style: { ...((currentSlide as any).style || {}), colorPaletteId: paletteId },
       });
     }
@@ -578,13 +601,33 @@ export default function ContentEdit() {
                   <SheetHeader>
                     <SheetTitle>Template Visual</SheetTitle>
                   </SheetHeader>
-                  <div className="py-4">
-                    <TemplateSelector
-                      selectedId={selectedTemplateId}
-                      onSelect={handleTemplateChange}
-                      paletteId={selectedPaletteId}
-                      onPaletteSelect={handlePaletteChange}
-                    />
+                  <div className="py-4 space-y-4">
+                    {/* Botão para aplicar templates variados a todo o carrossel */}
+                    <Button
+                      variant="outline"
+                      className="w-full justify-center gap-2 border-primary/50 hover:bg-primary/10"
+                      onClick={() => content && selectVariedTemplates.mutate({ contentId: content.id })}
+                      disabled={selectVariedTemplates.isPending || !content}
+                    >
+                      {selectVariedTemplates.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Wand2 className="w-4 h-4" />
+                      )}
+                      <span>Automático para Todo Carrossel</span>
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center">
+                      A IA vai escolher templates diferentes para cada slide
+                    </p>
+                    <div className="border-t pt-4">
+                      <p className="text-sm font-medium mb-2">Ou escolha manualmente para este slide:</p>
+                      <TemplateSelector
+                        selectedId={selectedTemplateId}
+                        onSelect={handleTemplateChange}
+                        paletteId={selectedPaletteId}
+                        onPaletteSelect={handlePaletteChange}
+                      />
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>

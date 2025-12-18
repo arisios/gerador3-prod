@@ -81,4 +81,52 @@ describe("Templates Router", () => {
     expect(result.accentColorId).toBeDefined();
     expect(result.reason).toBeDefined();
   });
+
+  it("should have selectVariedTemplates route defined", async () => {
+    // Este teste verifica apenas que a rota existe e aceita o input correto
+    // O teste real precisa de um contentId válido no banco
+    const caller = appRouter.createCaller({
+      user: { id: 1, name: "Test", openId: "test", role: "user" },
+      req: {} as any,
+      res: {} as any,
+    });
+
+    // Testar que a rota existe verificando o tipo
+    expect(caller.templates.selectVariedTemplates).toBeDefined();
+    expect(typeof caller.templates.selectVariedTemplates).toBe("function");
+  });
+
+  it("should have design templates with correct IDs", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as any,
+      res: {} as any,
+    });
+
+    const templates = await caller.templates.getDesignTemplates();
+    
+    // Verificar que os IDs de fallback existem nos templates
+    const fallbackIds = ['split-top-image', 'fullbleed-bottom', 'card-centered', 'minimal-text-only', 'bold-statement', 'split-left-image'];
+    
+    for (const id of fallbackIds) {
+      const found = templates.find((t: { id: string }) => t.id === id);
+      expect(found).toBeDefined();
+    }
+  });
+
+  it("should have color palettes with correct IDs", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as any,
+      res: {} as any,
+    });
+
+    const palettes = await caller.templates.getColorPalettes();
+    
+    // Verificar que a paleta padrão existe
+    const darkPurple = palettes.find((p: { id: string }) => p.id === 'dark-purple');
+    expect(darkPurple).toBeDefined();
+    expect(darkPurple.colors.background).toBe('#0a0a0a');
+    expect(darkPurple.colors.text).toBe('#ffffff');
+  });
 });
