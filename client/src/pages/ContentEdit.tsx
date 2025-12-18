@@ -544,6 +544,8 @@ export default function ContentEdit() {
           <SlideComposer
             text={currentSlide.text || ""}
             imageUrl={currentSlide.imageUrl || undefined}
+            templateId={selectedTemplateId}
+            paletteId={selectedPaletteId}
             style={(currentSlide as any).style || {
               showText: true,
               textAlign: "center",

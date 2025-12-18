@@ -238,3 +238,6 @@
 ## Correções Urgentes (18/12/2024)
 - [x] Cores não estão aparecendo visualmente diferentes nos slides - CORRIGIDO: paletas agora têm fundos coloridos distintos
 - [x] Permitir edição de texto no SlideComposer para templates automáticos - IMPLEMENTADO: botão "Editar Visual" abre o SlideComposer
+
+## Bug SlideComposer (18/12/2024)
+- [x] SlideComposer não respeita o layout do template selecionado - CORRIGIDO: agora usa imageFrame do template

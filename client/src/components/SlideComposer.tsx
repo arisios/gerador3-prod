@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { designTemplates, colorPalettes } from "../../../shared/designTemplates";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -95,6 +96,8 @@ interface SlideComposerProps {
   text: string;
   imageUrl?: string;
   style: SlideStyle;
+  templateId?: string;
+  paletteId?: string;
   onStyleChange: (style: SlideStyle) => void;
   onTextChange: (text: string) => void;
   onDownload: (withText: boolean) => void;
@@ -104,11 +107,44 @@ export default function SlideComposer({
   text,
   imageUrl,
   style,
+  templateId,
+  paletteId,
   onStyleChange,
   onTextChange,
   onDownload,
 }: SlideComposerProps) {
+  // Obter template e paleta
+  const template = templateId ? designTemplates.find(t => t.id === templateId) : null;
+  const palette = paletteId ? colorPalettes.find(p => p.id === paletteId) : null;
+  
+  // Calcular posição da imagem baseado no template
+  const getImageStyle = (): React.CSSProperties => {
+    if (!template || template.imageFrame.position === 'none') {
+      return {
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover' as const,
+      };
+    }
+    
+    const frame = template.imageFrame;
+    return {
+      position: 'absolute',
+      left: frame.x,
+      top: frame.y,
+      width: frame.width,
+      height: frame.height,
+      objectFit: 'cover' as const,
+      borderRadius: frame.borderRadius || '0',
+    };
+  };
+  
   const [localStyle, setLocalStyle] = useState<SlideStyle>(style);
+  
+  // Cor de fundo do template/paleta
+  const backgroundColor = palette?.colors.background || template?.colors.background || localStyle.backgroundColor;
   const [activeTab, setActiveTab] = useState("basico");
 
   useEffect(() => {
@@ -169,20 +205,20 @@ export default function SlideComposer({
     <div className="space-y-4">
       {/* Preview */}
       <div 
-        className="relative aspect-[4/5] rounded-lg overflow-hidden bg-black"
-        style={{ maxHeight: "400px" }}
+        className="relative aspect-[4/5] rounded-lg overflow-hidden"
+        style={{ maxHeight: "400px", backgroundColor }}
       >
         {imageUrl && (
           <img 
             src={imageUrl} 
             alt="" 
-            className="absolute inset-0 w-full h-full object-cover"
+            style={getImageStyle()}
           />
         )}
         <div 
           className="absolute inset-0"
           style={{ 
-            background: `linear-gradient(to top, ${localStyle.backgroundColor}${Math.round(localStyle.overlayOpacity * 2.55).toString(16).padStart(2, '0')} 0%, transparent 50%)` 
+            background: `linear-gradient(to top, ${backgroundColor}${Math.round(localStyle.overlayOpacity * 2.55).toString(16).padStart(2, '0')} 0%, transparent 50%)` 
           }}
         />
         {localStyle.showText && (
