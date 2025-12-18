@@ -122,3 +122,4 @@
 - [x] Download de todos não funciona no mobile - mudar de ZIP para PNG sequencial - CORRIGIDO
 - [x] App não é PWA - configurar manifest, service worker, icons - CORRIGIDO
 - [x] Interface não otimizada para mobile - CORRIGIDO: CSS mobile-first
+- [x] Bug: Imagem fica esticada no download - corrigido com cover ratio

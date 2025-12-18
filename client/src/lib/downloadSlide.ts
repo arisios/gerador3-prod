@@ -29,8 +29,27 @@ export async function downloadCarouselSlide(
     img.src = proxyUrl;
   });
 
-  // Desenhar imagem
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  // Desenhar imagem mantendo proporção (cover - preenche sem esticar)
+  const imgRatio = img.width / img.height;
+  const canvasRatio = canvas.width / canvas.height;
+  
+  let drawWidth, drawHeight, drawX, drawY;
+  
+  if (imgRatio > canvasRatio) {
+    // Imagem mais larga - ajustar pela altura
+    drawHeight = canvas.height;
+    drawWidth = img.width * (canvas.height / img.height);
+    drawX = (canvas.width - drawWidth) / 2;
+    drawY = 0;
+  } else {
+    // Imagem mais alta - ajustar pela largura
+    drawWidth = canvas.width;
+    drawHeight = img.height * (canvas.width / img.width);
+    drawX = 0;
+    drawY = (canvas.height - drawHeight) / 2;
+  }
+  
+  ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
   // Adicionar gradiente
   const gradientStart = isFirst ? 0 : canvas.height * 0.5;
