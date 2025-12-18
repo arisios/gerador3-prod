@@ -863,7 +863,15 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const imageUrls: string[] = [];
         const basePrompt = input.prompt || "Professional Instagram image, high quality, editorial style";
-        const fullPrompt = `${basePrompt}\n\nREGRA PRIMORDIAL: A imagem deve ser REAL e SEM NENHUM TEXTO. Não inclua letras, palavras, números ou qualquer elemento textual na imagem. Deve ser uma FOTOGRAFIA REAL, não ilustração.`;
+        const fullPrompt = `${basePrompt}
+
+=== REGRAS OBRIGATÓRIAS ===
+1. A imagem DEVE ser uma FOTOGRAFIA REAL, não ilustração, arte digital ou desenho
+2. NÃO INCLUA ABSOLUTAMENTE NENHUM TEXTO na imagem - zero letras, zero palavras, zero números, zero símbolos escritos
+3. NÃO inclua placas, letreiros, logos, marcas d'água, legendas ou qualquer elemento com texto
+4. A imagem será usada como FUNDO em um template que já tem texto sobreposto
+5. Foque apenas em elementos visuais: pessoas, objetos, cenários, texturas
+6. Qualidade profissional de fotografia, iluminação natural`;
         
         for (let i = 0; i < input.quantity; i++) {
           const result = await generateImage({
@@ -904,7 +912,15 @@ export const appRouter = router({
         for (const slide of slides) {
           try {
             const basePrompt = slide.imagePrompt || `Professional Instagram image for: ${slide.text || "lifestyle content"}`;
-            const fullPrompt = `${basePrompt}\n\nREGRA PRIMORDIAL: A imagem deve ser REAL e SEM NENHUM TEXTO. Não inclua letras, palavras, números ou qualquer elemento textual na imagem. Deve ser uma FOTOGRAFIA REAL, não ilustração.`;
+            const fullPrompt = `${basePrompt}
+
+=== REGRAS OBRIGATÓRIAS ===
+1. A imagem DEVE ser uma FOTOGRAFIA REAL, não ilustração, arte digital ou desenho
+2. NÃO INCLUA ABSOLUTAMENTE NENHUM TEXTO na imagem - zero letras, zero palavras, zero números, zero símbolos escritos
+3. NÃO inclua placas, letreiros, logos, marcas d'água, legendas ou qualquer elemento com texto
+4. A imagem será usada como FUNDO em um template que já tem texto sobreposto
+5. Foque apenas em elementos visuais: pessoas, objetos, cenários, texturas
+6. Qualidade profissional de fotografia, iluminação natural`;
             
             const result = await generateImage({
               prompt: fullPrompt,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,38 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { trpc } from "@/lib/trpc";
-import SlideComposer, { SlideStyle } from "@/components/SlideComposer";
-import { SlideRenderer, DesignTemplateSelector, ColorPaletteSelector, designTemplates, colorPalettes } from "@/components/SlideRenderer";
+import { SlideRenderer, SlidePreview, TemplateSelector } from "@/components/SlideRenderer";
 import { ImageLightbox } from "@/components/ImageLightbox";
-import { downloadCarouselSlide, downloadSingleImage, downloadAllSlidesWithText, downloadAllSlidesWithoutText } from "@/lib/downloadSlide";
+import { designTemplates, colorPalettes, type DesignTemplate } from "../../../shared/designTemplates";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Images, Palette, Layout, Wand2, Upload } from "lucide-react";
-
 import { toast } from "sonner";
-
-const DEFAULT_STYLE: SlideStyle = {
-  showText: true,
-  textAlign: "center",
-  positionY: 80,
-  fontSize: 32,
-  fontFamily: "Inter",
-  textColor: "#FFFFFF",
-  backgroundColor: "#000000",
-  overlayOpacity: 50,
-  shadowEnabled: true,
-  shadowColor: "#000000",
-  shadowBlur: 4,
-  shadowOffsetX: 2,
-  shadowOffsetY: 2,
-  borderEnabled: false,
-  borderColor: "#FFFFFF",
-  borderWidth: 2,
-  glowEnabled: false,
-  glowColor: "#A855F7",
-  glowIntensity: 10,
-  letterSpacing: 0,
-  lineHeight: 1.3,
-  padding: 24,
-};
 
 export default function ContentEdit() {
   const { id } = useParams<{ id: string }>();
@@ -48,216 +21,106 @@ export default function ContentEdit() {
   const [editingText, setEditingText] = useState(false);
   const [slideText, setSlideText] = useState("");
   const [tempPrompt, setTempPrompt] = useState("");
-  const [imageQuantity, setImageQuantity] = useState(1);
-  const [showComposer, setShowComposer] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState<number | null>(null);
-  
-  // Design Template states
-  const [selectedTemplateId, setSelectedTemplateId] = useState("split-top");
-  const [selectedPaletteId, setSelectedPaletteId] = useState("dark-neon");
-  const [showDesignPanel, setShowDesignPanel] = useState(false);
-  const [isAutoSelecting, setIsAutoSelecting] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("split-top-image");
+  const [selectedPaletteId, setSelectedPaletteId] = useState("dark-purple");
+  const [designSheetOpen, setDesignSheetOpen] = useState(false);
 
-  const { data: content, isLoading, refetch } = trpc.content.get.useQuery({ id: contentId });
+  const { data: content, isLoading } = trpc.content.get.useQuery({ id: contentId });
   const { data: project } = trpc.projects.get.useQuery(
     { id: content?.projectId || 0 },
     { enabled: !!content?.projectId }
   );
+  // Slides vem junto com o content
+  const slides = content?.slides || [];
   const utils = trpc.useUtils();
 
   const updateSlide = trpc.slides.update.useMutation({
     onSuccess: () => {
-      refetch();
+      utils.content.get.invalidate({ id: contentId });
       setEditingText(false);
-      toast.success("Slide atualizado");
-    },
-  });
-
-  const updateDesignTemplate = trpc.slides.updateDesignTemplate.useMutation({
-    onSuccess: () => {
-      refetch();
-      toast.success("Template atualizado");
-    },
-  });
-
-  const saveRenderedImage = trpc.slides.saveRenderedImage.useMutation({
-    onSuccess: () => {
-      refetch();
-      toast.success("Imagem renderizada salva!");
-    },
-  });
-
-  const selectVariedTemplates = trpc.templates.selectVariedTemplates.useMutation({
-    onSuccess: (data) => {
-      refetch();
-      setSelectedPaletteId(data.paletteId);
-      toast.success(`Templates variados aplicados! (${data.updates.length} slides)`);
-      setIsAutoSelecting(false);
-    },
-    onError: (e) => {
-      toast.error("Erro: " + e.message);
-      setIsAutoSelecting(false);
     },
   });
 
   const generateImage = trpc.slides.generateImage.useMutation({
     onSuccess: () => {
-      refetch();
-      toast.success("Imagem gerada!");
+      utils.content.get.invalidate({ id: contentId });
+      toast.success("Imagem gerada com sucesso!");
     },
-    onError: (e) => toast.error("Erro: " + e.message),
+    onError: (error) => {
+      toast.error(error.message || "Erro ao gerar imagem");
+    },
   });
 
   const generateAllImages = trpc.slides.generateAllImages.useMutation({
     onSuccess: (data) => {
-      refetch();
+      utils.content.get.invalidate({ id: contentId });
       toast.success(`${data.totalGenerated} imagens geradas!`);
     },
-    onError: (e) => toast.error("Erro: " + e.message),
-  });
-
-  const uploadSlideImage = trpc.slides.uploadImage.useMutation({
-    onSuccess: () => {
-      refetch();
-      setLightboxOpen(false);
-      toast.success("Imagem enviada!");
+    onError: (error) => {
+      toast.error(error.message || "Erro ao gerar imagens");
     },
-    onError: (e) => toast.error("Erro: " + e.message),
   });
 
-  const slides = content?.slides || [];
+  const uploadImage = trpc.upload.image.useMutation();
+
   const currentSlide = slides[currentSlideIndex];
 
-  // Carregar template do slide atual
   useEffect(() => {
-    if (currentSlide) {
-      setSlideText(currentSlide.text || "");
-      if (currentSlide.designTemplateId) {
-        setSelectedTemplateId(currentSlide.designTemplateId);
-      }
-      if (currentSlide.colorPaletteId) {
-        setSelectedPaletteId(currentSlide.colorPaletteId);
-      }
+    if (currentSlide?.text) {
+      setSlideText(currentSlide.text);
     }
-  }, [currentSlide?.id]);
-
-  // Carregar kit de marca do projeto
-  useEffect(() => {
-    if (project) {
-      if (project.colorPaletteId && !currentSlide?.colorPaletteId) {
-        setSelectedPaletteId(project.colorPaletteId);
-      }
-      if (project.defaultTemplateId && !currentSlide?.designTemplateId) {
-        setSelectedTemplateId(project.defaultTemplateId);
-      }
+    if (currentSlide?.imagePrompt) {
+      setTempPrompt(currentSlide.imagePrompt);
     }
-  }, [project?.id]);
+    // Carregar template salvo do slide se existir
+    if (currentSlide?.visualTemplate) {
+      setSelectedTemplateId(currentSlide.visualTemplate);
+    }
+    const slideStyle = (currentSlide as any)?.style;
+    if (slideStyle?.colorPaletteId) {
+      setSelectedPaletteId(slideStyle.colorPaletteId);
+    }
+  }, [currentSlide]);
 
-  const handleStyleChange = (style: SlideStyle) => {
+  const handleGenerateImage = async () => {
     if (!currentSlide) return;
-    updateSlide.mutate({ id: currentSlide.id, style: style as any });
+    const prompt = tempPrompt || currentSlide.imagePrompt || `Imagem para: ${currentSlide.text}`;
+    // Reforçar: SEM TEXTO na imagem
+    const enhancedPrompt = `${prompt}. IMPORTANTE: A imagem deve ser APENAS VISUAL, SEM NENHUM TEXTO, SEM LETRAS, SEM PALAVRAS, SEM NÚMEROS. Apenas elementos visuais.`;
+    await generateImage.mutateAsync({ slideId: currentSlide.id, prompt: enhancedPrompt });
   };
 
-  const handleTextChange = (text: string) => {
-    if (!currentSlide) return;
-    updateSlide.mutate({ id: currentSlide.id, text: text });
-  };
-
-  const handleTemplateChange = (templateId: string) => {
-    setSelectedTemplateId(templateId);
-    if (currentSlide) {
-      updateDesignTemplate.mutate({
-        slideId: currentSlide.id,
-        designTemplateId: templateId,
-        colorPaletteId: selectedPaletteId,
-      });
-    }
-  };
-
-  const handlePaletteChange = (paletteId: string) => {
-    setSelectedPaletteId(paletteId);
-    if (currentSlide) {
-      updateDesignTemplate.mutate({
-        slideId: currentSlide.id,
-        designTemplateId: selectedTemplateId,
-        colorPaletteId: paletteId,
-      });
-    }
-  };
-
-  const handleAutoSelectTemplates = () => {
+  const handleGenerateAllImages = async () => {
     if (!content) return;
-    setIsAutoSelecting(true);
-    toast.info("IA selecionando templates variados...");
-    selectVariedTemplates.mutate({ contentId: content.id });
-  };
-
-  const handleGenerateImage = () => {
-    if (!currentSlide) return;
-    generateImage.mutate({
-      slideId: currentSlide.id,
-      prompt: tempPrompt || currentSlide.imagePrompt || undefined,
-      quantity: imageQuantity,
-    });
-  };
-
-  const handleRegenerateImage = async (newPrompt: string) => {
-    if (!currentSlide) return;
-    await generateImage.mutateAsync({
-      slideId: currentSlide.id,
-      prompt: newPrompt,
-      quantity: 1,
-    });
-  };
-
-  const handleGenerateAllImages = () => {
-    if (!content) return;
-    toast.info(`Gerando imagens para ${slides.length} slides...`);
-    generateAllImages.mutate({ contentId: content.id });
+    await generateAllImages.mutateAsync({ contentId: content.id });
   };
 
   const handleUploadImage = async (file: File) => {
     if (!currentSlide) return;
     
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = reader.result as string;
-      try {
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: JSON.stringify({ base64, filename: file.name, contentType: file.type }),
-          headers: { 'Content-Type': 'application/json' },
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target?.result as string;
+        const result = await uploadImage.mutateAsync({
+          base64,
+          filename: file.name,
+          contentType: file.type,
         });
         
-        if (response.ok) {
-          const { url } = await response.json();
-          uploadSlideImage.mutate({ slideId: currentSlide.id, imageUrl: url });
-        } else {
-          uploadSlideImage.mutate({ slideId: currentSlide.id, imageUrl: base64 });
-        }
-      } catch (error) {
-        toast.error("Erro ao fazer upload");
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleDeleteImage = async () => {
-    if (!currentSlide || lightboxImageIndex === null) return;
-    const bank = (currentSlide.imageBank as string[]) || [];
-    const newBank = bank.filter((_, i) => i !== lightboxImageIndex);
-    const newImageUrl = newBank.length > 0 ? newBank[0] : null;
-    
-    await updateSlide.mutateAsync({
-      id: currentSlide.id,
-      imageUrl: newImageUrl || undefined,
-    });
-    
-    setLightboxImageIndex(null);
-    setLightboxOpen(false);
-    toast.success("Imagem removida");
+        await updateSlide.mutateAsync({
+          id: currentSlide.id,
+          imageUrl: result.url,
+        });
+        
+        toast.success("Imagem enviada com sucesso!");
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error("Erro ao enviar imagem");
+    }
   };
 
   const handleSelectImage = async (index: number) => {
@@ -278,60 +141,91 @@ export default function ContentEdit() {
     setLightboxOpen(true);
   };
 
+  // Salvar template no slide
+  const handleTemplateChange = async (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    if (currentSlide) {
+      await updateSlide.mutateAsync({
+        id: currentSlide.id,
+        visualTemplate: templateId,
+      });
+    }
+  };
+
+  const handlePaletteChange = async (paletteId: string) => {
+    setSelectedPaletteId(paletteId);
+    if (currentSlide) {
+      await updateSlide.mutateAsync({
+        id: currentSlide.id,
+        // Salvar palette no style ou visualTemplate
+        style: { ...((currentSlide as any).style || {}), colorPaletteId: paletteId },
+      });
+    }
+  };
+
   // Download com template renderizado
   const handleDownloadRendered = async () => {
     if (!currentSlide) return;
     
-    // Criar canvas temporário para renderizar
+    const template = designTemplates.find((t: DesignTemplate) => t.id === selectedTemplateId) || designTemplates[0];
+    const palette = colorPalettes.find((p) => p.id === selectedPaletteId);
+    
+    // Criar canvas temporário
     const canvas = document.createElement('canvas');
     canvas.width = 1080;
     canvas.height = 1080;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const template = designTemplates.find(t => t.id === selectedTemplateId) || designTemplates[0];
-    const palette = colorPalettes.find(p => p.id === selectedPaletteId);
+    // Cores
+    const bgColor = palette?.colors.background || template.colors.background;
+    const textColor = palette?.colors.text || template.colors.text;
+    const accentColor = palette?.colors.accent || template.colors.accent;
 
-    // Renderizar fundo
-    ctx.fillStyle = palette?.colors.background || template.defaultStyle.backgroundColor;
+    // Desenhar fundo
+    if (bgColor.startsWith('linear-gradient')) {
+      ctx.fillStyle = '#0a0a0a'; // Fallback
+    } else {
+      ctx.fillStyle = bgColor;
+    }
     ctx.fillRect(0, 0, 1080, 1080);
 
-    // Se tiver imagem, desenhar
-    if (currentSlide.imageUrl) {
+    // Desenhar imagem na moldura
+    if (currentSlide.imageUrl && template.imageFrame.position !== 'none') {
       await new Promise<void>((resolve) => {
         const img = new window.Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
-          // Calcular posição baseada no layout do template
-          const layout = template.layout.image;
-          let dx = 0, dy = 0, dw = 1080, dh = 1080;
+          const frame = template.imageFrame;
+          const frameX = parsePercent(frame.x, 1080);
+          const frameY = parsePercent(frame.y, 1080);
+          const frameW = parsePercent(frame.width, 1080);
+          const frameH = parsePercent(frame.height, 1080);
+          const borderRadius = parsePercent(frame.borderRadius, 1080);
+
+          ctx.save();
           
-          if (layout.position === 'top') {
-            dh = 1080 * (layout.height / 100);
-          } else if (layout.position === 'bottom') {
-            dy = 1080 * (1 - layout.height / 100);
-            dh = 1080 * (layout.height / 100);
-          } else if (layout.position === 'left') {
-            dw = 1080 * (layout.width / 100);
-          } else if (layout.position === 'right') {
-            dx = 1080 * (1 - layout.width / 100);
-            dw = 1080 * (layout.width / 100);
+          // Criar clip com bordas arredondadas
+          if (borderRadius > 0) {
+            roundedRect(ctx, frameX, frameY, frameW, frameH, borderRadius);
+            ctx.clip();
           }
-          
-          // Crop para manter aspect ratio
+
+          // Calcular crop para manter aspect ratio
           const imgRatio = img.width / img.height;
-          const targetRatio = dw / dh;
+          const frameRatio = frameW / frameH;
           let sx = 0, sy = 0, sw = img.width, sh = img.height;
           
-          if (imgRatio > targetRatio) {
-            sw = img.height * targetRatio;
+          if (imgRatio > frameRatio) {
+            sw = img.height * frameRatio;
             sx = (img.width - sw) / 2;
           } else {
-            sh = img.width / targetRatio;
+            sh = img.width / frameRatio;
             sy = (img.height - sh) / 2;
           }
           
-          ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+          ctx.drawImage(img, sx, sy, sw, sh, frameX, frameY, frameW, frameH);
+          ctx.restore();
           resolve();
         };
         img.onerror = () => resolve();
@@ -339,92 +233,131 @@ export default function ContentEdit() {
       });
     }
 
-    // Desenhar overlay se necessário
-    if (template.category === 'fullbleed') {
-      const gradient = ctx.createLinearGradient(0, 540, 0, 1080);
-      gradient.addColorStop(0, 'rgba(0,0,0,0)');
-      gradient.addColorStop(1, 'rgba(0,0,0,0.85)');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 1080, 1080);
+    // Desenhar overlay se existir
+    if (template.overlay && template.overlay.type !== 'none') {
+      const opacity = template.overlay.opacity;
+      
+      switch (template.overlay.type) {
+        case 'gradient-bottom': {
+          const gradient = ctx.createLinearGradient(0, 432, 0, 1080);
+          gradient.addColorStop(0, `rgba(0,0,0,0)`);
+          gradient.addColorStop(1, `rgba(0,0,0,${opacity})`);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, 1080, 1080);
+          break;
+        }
+        case 'gradient-top': {
+          const gradient = ctx.createLinearGradient(0, 0, 0, 648);
+          gradient.addColorStop(0, `rgba(0,0,0,${opacity})`);
+          gradient.addColorStop(1, `rgba(0,0,0,0)`);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, 1080, 1080);
+          break;
+        }
+        case 'solid': {
+          ctx.fillStyle = `rgba(0,0,0,${opacity})`;
+          ctx.fillRect(0, 0, 1080, 1080);
+          break;
+        }
+      }
     }
 
     // Desenhar texto
     const text = currentSlide.text || "";
-    const textColor = palette?.colors.text || template.defaultStyle.textColor;
-    const accentColor = palette?.colors.accent || template.defaultStyle.accentColor;
+    const textStyle = template.textStyle;
     
-    ctx.font = `${template.defaultStyle.fontWeight === 'black' ? '900' : '700'} 48px Inter, system-ui, sans-serif`;
+    const fontSizes: Record<string, number> = {
+      'sm': 32, 'base': 40, 'lg': 48, 'xl': 60, '2xl': 70, '3xl': 86
+    };
+    const fontWeights: Record<string, string> = {
+      'normal': '400', 'medium': '500', 'semibold': '600', 'bold': '700', 'black': '900'
+    };
+    const lineHeights: Record<string, number> = {
+      'tight': 1.1, 'normal': 1.4, 'relaxed': 1.6
+    };
+    
+    const fontSize = fontSizes[textStyle.fontSize] || 60;
+    const fontWeight = fontWeights[textStyle.fontWeight] || '700';
+    const lineHeight = lineHeights[textStyle.lineHeight] || 1.4;
+    const padding = parsePercent(textStyle.padding, 1080);
+    const maxWidth = parsePercent(textStyle.maxWidth, 1080);
+    
+    ctx.font = `${fontWeight} ${fontSize}px Inter, system-ui, sans-serif`;
     ctx.fillStyle = textColor;
-    ctx.textAlign = template.layout.text.alignment as CanvasTextAlign;
+    ctx.textAlign = textStyle.alignment as CanvasTextAlign;
+    ctx.textBaseline = 'top';
     
-    // Posição do texto baseada no layout
-    let textY = 540;
-    let textX = 540;
-    
-    if (template.layout.text.position === 'bottom' || template.layout.text.position === 'overlay-bottom') {
-      textY = 800;
-    } else if (template.layout.text.position === 'top' || template.layout.text.position === 'overlay-top') {
-      textY = 200;
+    // Sombra de texto
+    if (textStyle.textShadow) {
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
     }
     
-    if (template.layout.text.alignment === 'left') {
-      textX = 60;
-    } else if (template.layout.text.alignment === 'right') {
-      textX = 1020;
-    }
+    // Posição do texto
+    const { x: textX, y: textY } = getTextPosition(textStyle.position, 1080, 1080, padding);
     
     // Quebrar texto em linhas
-    const words = text.split(' ');
-    const lines: string[] = [];
-    let currentLine = '';
-    const maxWidth = 900;
+    const lines = wrapText(ctx, text, maxWidth);
+    const totalHeight = lines.length * fontSize * lineHeight;
     
-    for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const metrics = ctx.measureText(testLine.replace(/\*\*/g, ''));
-      
-      if (metrics.width > maxWidth && currentLine) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = testLine;
-      }
+    let startY = textY;
+    if (textStyle.position.includes('center')) {
+      startY = textY - totalHeight / 2;
+    } else if (textStyle.position.includes('bottom')) {
+      startY = textY - totalHeight;
     }
-    if (currentLine) lines.push(currentLine);
     
-    // Desenhar linhas
-    const lineHeight = 60;
-    const startY = textY - (lines.length * lineHeight) / 2;
-    
+    // Desenhar cada linha
     lines.forEach((line, i) => {
-      const y = startY + i * lineHeight;
+      const lineY = startY + i * fontSize * lineHeight;
+      const parts = line.split(/(\*\*[^*]+\*\*)/g);
+      let currentX = textX;
       
-      // Verificar texto destacado
-      const parts = line.split(/(\*\*[^*]+\*\*)/);
-      let lineX = textX;
-      
-      if (template.layout.text.alignment === 'center') {
-        const cleanLine = line.replace(/\*\*/g, '');
-        const lineWidth = ctx.measureText(cleanLine).width;
-        lineX = textX - lineWidth / 2;
+      if (textStyle.alignment === 'center') {
+        let totalWidth = 0;
+        parts.forEach(part => {
+          const cleanPart = part.replace(/\*\*/g, '');
+          totalWidth += ctx.measureText(cleanPart).width;
+        });
+        
+        currentX = textX - totalWidth / 2;
         ctx.textAlign = 'left';
+        
+        parts.forEach(part => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            const word = part.slice(2, -2);
+            ctx.fillStyle = accentColor;
+            ctx.fillText(word, currentX, lineY);
+            currentX += ctx.measureText(word).width;
+            ctx.fillStyle = textColor;
+          } else if (part) {
+            ctx.fillText(part, currentX, lineY);
+            currentX += ctx.measureText(part).width;
+          }
+        });
+        
+        ctx.textAlign = textStyle.alignment as CanvasTextAlign;
+      } else {
+        parts.forEach(part => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            const word = part.slice(2, -2);
+            ctx.fillStyle = accentColor;
+            ctx.fillText(word, currentX, lineY);
+            currentX += ctx.measureText(word).width;
+            ctx.fillStyle = textColor;
+          } else if (part) {
+            ctx.fillText(part, currentX, lineY);
+            currentX += ctx.measureText(part).width;
+          }
+        });
       }
-      
-      for (const part of parts) {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          const highlightText = part.slice(2, -2);
-          ctx.fillStyle = accentColor;
-          ctx.fillText(highlightText, lineX, y);
-          lineX += ctx.measureText(highlightText).width;
-          ctx.fillStyle = textColor;
-        } else if (part) {
-          ctx.fillText(part, lineX, y);
-          lineX += ctx.measureText(part).width;
-        }
-      }
-      
-      ctx.textAlign = template.layout.text.alignment as CanvasTextAlign;
     });
+    
+    // Resetar sombra
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
 
     // Desenhar logo se houver
     if (project?.logoUrl) {
@@ -432,9 +365,25 @@ export default function ContentEdit() {
         const logo = new window.Image();
         logo.crossOrigin = 'anonymous';
         logo.onload = () => {
-          const logoSize = 80;
-          const padding = 30;
-          ctx.drawImage(logo, 1080 - logoSize - padding, padding, logoSize, logoSize);
+          const logoSize = 86;
+          const logoPadding = 32;
+          let logoX = logoPadding;
+          let logoY = logoPadding;
+          
+          switch (template.logoPosition) {
+            case 'top-right':
+              logoX = 1080 - logoSize - logoPadding;
+              break;
+            case 'bottom-left':
+              logoY = 1080 - logoSize - logoPadding;
+              break;
+            case 'bottom-right':
+              logoX = 1080 - logoSize - logoPadding;
+              logoY = 1080 - logoSize - logoPadding;
+              break;
+          }
+          
+          ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
           resolve();
         };
         logo.onerror = () => resolve();
@@ -449,73 +398,30 @@ export default function ContentEdit() {
     link.href = dataUrl;
     link.click();
     
-    toast.success("Download iniciado!");
+    toast.success("Slide baixado com sucesso!");
   };
 
-  const handleDownload = async (withText: boolean) => {
-    if (!currentSlide || !currentSlide.imageUrl) return;
-    try {
-      if (withText) {
-        await downloadCarouselSlide(
-          currentSlide.imageUrl,
-          currentSlide.text || "",
-          `slide_${currentSlideIndex + 1}.png`,
-          currentSlideIndex === 0
-        );
-      } else {
-        await downloadSingleImage(
-          currentSlide.imageUrl,
-          `slide_${currentSlideIndex + 1}.png`
-        );
-      }
-      toast.success("Download iniciado!");
-    } catch (error) {
-      toast.error("Erro no download");
+  // Download de todos os slides
+  const handleDownloadAll = async () => {
+    for (let i = 0; i < slides.length; i++) {
+      setCurrentSlideIndex(i);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await handleDownloadRendered();
     }
-  };
-
-  const handleDownloadAll = async (withText: boolean) => {
-    try {
-      const slidesWithImages = slides.filter((s: any) => s.imageUrl);
-      if (slidesWithImages.length === 0) {
-        toast.error("Nenhum slide com imagem para baixar");
-        return;
-      }
-      
-      if (withText) {
-        const slidesData = slidesWithImages.map((s: any, index: number) => ({
-          url: s.imageUrl,
-          text: s.text || "",
-          isFirst: index === 0,
-        }));
-        toast.info(`Baixando ${slidesData.length} slides...`);
-        await downloadAllSlidesWithText(slidesData, content?.title || "carrossel", (current, total) => {
-          toast.info(`Baixando slide ${current} de ${total}...`);
-        });
-      } else {
-        const slidesData = slidesWithImages.map((s: any) => ({ url: s.imageUrl }));
-        toast.info(`Baixando ${slidesData.length} imagens...`);
-        await downloadAllSlidesWithoutText(slidesData, content?.title || "carrossel", (current, total) => {
-          toast.info(`Baixando imagem ${current} de ${total}...`);
-        });
-      }
-      toast.success("Downloads concluídos!");
-    } catch (error) {
-      toast.error("Erro nos downloads");
-    }
+    toast.success("Todos os slides baixados!");
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
   }
 
   if (!content) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <p>Conteúdo não encontrado</p>
       </div>
     );
@@ -532,8 +438,8 @@ export default function ContentEdit() {
     ? imageBank[lightboxImageIndex] 
     : currentSlide?.imageUrl || "";
 
-  const selectedTemplate = designTemplates.find(t => t.id === selectedTemplateId) || designTemplates[0];
-  const selectedPalette = colorPalettes.find(p => p.id === selectedPaletteId);
+  const selectedTemplate = designTemplates.find((t: DesignTemplate) => t.id === selectedTemplateId) || designTemplates[0];
+  const selectedPalette = colorPalettes.find((p) => p.id === selectedPaletteId);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -557,35 +463,22 @@ export default function ContentEdit() {
                 <DialogTitle>Opções de Download</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium">Slide Atual</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" onClick={() => handleDownload(true)}>
-                      Com Texto
-                    </Button>
-                    <Button variant="outline" onClick={() => handleDownload(false)}>
-                      Só Imagem
-                    </Button>
-                    <Button 
-                      className="col-span-2 bg-gradient-to-r from-purple-600 to-pink-600"
-                      onClick={handleDownloadRendered}
-                    >
-                      <Layout className="w-4 h-4 mr-2" />
-                      Com Template Renderizado
-                    </Button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Todos os Slides</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" onClick={() => handleDownloadAll(true)}>
-                      Com Texto
-                    </Button>
-                    <Button variant="outline" onClick={() => handleDownloadAll(false)}>
-                      Só Imagens
-                    </Button>
-                  </div>
-                </div>
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline"
+                  onClick={handleDownloadRendered}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Baixar Slide Atual (com template)
+                </Button>
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline"
+                  onClick={handleDownloadAll}
+                >
+                  <Images className="w-4 h-4 mr-2" />
+                  Baixar Todos os Slides
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -594,240 +487,277 @@ export default function ContentEdit() {
 
       <main className="container px-4 py-6 space-y-6">
         {/* Preview do Slide com Template */}
-        <div className="relative">
-          <SlideRenderer
-            text={currentSlide?.text || ""}
-            imageUrl={currentSlide?.imageUrl || undefined}
-            templateId={selectedTemplateId}
-            paletteId={selectedPaletteId}
-            logoUrl={project?.logoUrl || undefined}
-            className="w-full rounded-lg shadow-2xl"
-          />
-          
-          {/* Overlay de informações */}
-          <div className="absolute top-2 left-2 flex gap-2">
-            <span className="bg-black/70 text-white text-xs px-2 py-1 rounded">
-              {selectedTemplate.name}
-            </span>
-            {selectedPalette && (
-              <span className="bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: selectedPalette.colors.accent }}
-                />
-                {selectedPalette.name}
+        <Card className="overflow-hidden">
+          <div className="relative">
+            {/* Badge do template */}
+            <div className="absolute top-2 left-2 z-10 flex gap-2">
+              <span className="px-2 py-1 bg-black/70 rounded text-xs text-white">
+                {selectedTemplate.name}
               </span>
-            )}
-          </div>
-          
-          {/* Botão de expandir */}
-          {currentSlide?.imageUrl && (
-            <Button 
-              size="icon" 
-              variant="secondary" 
-              className="absolute top-2 right-2 bg-black/50 hover:bg-black/70"
+              <span className="px-2 py-1 bg-black/70 rounded text-xs flex items-center gap-1">
+                <span 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ background: selectedPalette?.colors.accent || selectedTemplate.colors.accent }}
+                />
+                {selectedPalette?.name || 'Padrão'}
+              </span>
+            </div>
+            
+            {/* Botão de expandir */}
+            <button 
+              className="absolute top-2 right-2 z-10 p-2 bg-black/50 rounded-lg hover:bg-black/70 transition-colors"
               onClick={() => setLightboxOpen(true)}
             >
               <Maximize2 className="w-4 h-4 text-white" />
-            </Button>
-          )}
-        </div>
+            </button>
 
-        {/* Navegação de Slides */}
-        <div className="flex items-center justify-between">
-          <Button variant="outline" size="icon" disabled={currentSlideIndex === 0} onClick={() => setCurrentSlideIndex(currentSlideIndex - 1)}>
+            {/* Preview do slide */}
+            <SlidePreview
+              text={currentSlide?.text || ""}
+              imageUrl={currentSlide?.imageUrl || undefined}
+              templateId={selectedTemplateId}
+              paletteId={selectedPaletteId}
+              logoUrl={project?.logoUrl || undefined}
+              className="w-full"
+            />
+          </div>
+        </Card>
+
+        {/* Navegação de slides */}
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentSlideIndex(Math.max(0, currentSlideIndex - 1))}
+            disabled={currentSlideIndex === 0}
+          >
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <div className="flex gap-2 overflow-x-auto py-2">
-            {slides.map((_: any, index: number) => (
+          
+          <div className="flex gap-1">
+            {slides.map((_slide: unknown, i: number) => (
               <button
-                key={index}
-                className={`w-8 h-8 rounded-full text-sm font-medium transition-colors flex-shrink-0 ${
-                  index === currentSlideIndex
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                key={i}
+                onClick={() => setCurrentSlideIndex(i)}
+                className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
+                  i === currentSlideIndex 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted hover:bg-muted/80'
                 }`}
-                onClick={() => setCurrentSlideIndex(index)}
               >
-                {index + 1}
+                {i + 1}
               </button>
             ))}
           </div>
-          <Button variant="outline" size="icon" disabled={currentSlideIndex === slides.length - 1} onClick={() => setCurrentSlideIndex(currentSlideIndex + 1)}>
+          
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentSlideIndex(Math.min(slides.length - 1, currentSlideIndex + 1))}
+            disabled={currentSlideIndex === slides.length - 1}
+          >
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
 
         {/* Painel de Design */}
         <Card>
-          <CardContent className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold flex items-center gap-2">
-                <Layout className="w-4 h-4" />
-                Design do Slide
-              </h3>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowDesignPanel(!showDesignPanel)}
-              >
-                {showDesignPanel ? "Fechar" : "Editar"}
-              </Button>
-            </div>
-
-            {showDesignPanel && (
-              <div className="space-y-4 pt-2 border-t">
-                {/* Botão Automático */}
-                <Button 
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600"
-                  onClick={handleAutoSelectTemplates}
-                  disabled={isAutoSelecting}
-                >
-                  {isAutoSelecting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Selecionando...
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="w-4 h-4 mr-2" />
-                      Automático (IA escolhe templates variados)
-                    </>
-                  )}
-                </Button>
-
-                {/* Seletor de Template */}
-                <div className="space-y-2">
-                  <Label>Template de Layout</Label>
-                  <DesignTemplateSelector
-                    selectedId={selectedTemplateId}
-                    onSelect={handleTemplateChange}
-                  />
-                </div>
-
-                {/* Seletor de Paleta */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Palette className="w-4 h-4" />
-                    Paleta de Cores
-                  </Label>
-                  <ColorPaletteSelector
-                    selectedId={selectedPaletteId}
-                    onSelect={handlePaletteChange}
-                  />
-                </div>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Layout className="w-5 h-5" />
+                <h3 className="font-semibold">Design do Slide</h3>
               </div>
-            )}
+              <Sheet open={designSheetOpen} onOpenChange={setDesignSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Editar
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Template Visual</SheetTitle>
+                  </SheetHeader>
+                  <div className="py-4">
+                    <TemplateSelector
+                      selectedId={selectedTemplateId}
+                      onSelect={handleTemplateChange}
+                      paletteId={selectedPaletteId}
+                      onPaletteSelect={handlePaletteChange}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+            
+            {/* Preview rápido do template */}
+            <div className="grid grid-cols-3 gap-2">
+              {designTemplates.slice(0, 3).map(template => (
+                <button
+                  key={template.id}
+                  onClick={() => handleTemplateChange(template.id)}
+                  className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                    selectedTemplateId === template.id 
+                      ? 'border-primary ring-2 ring-primary/50' 
+                      : 'border-transparent hover:border-muted-foreground/30'
+                  }`}
+                >
+                  <div 
+                    className="w-full h-full"
+                    style={{ background: template.colors.background }}
+                  >
+                    {template.imageFrame.position !== 'none' && (
+                      <div
+                        className="absolute bg-muted/50"
+                        style={{
+                          left: template.imageFrame.x,
+                          top: template.imageFrame.y,
+                          width: template.imageFrame.width,
+                          height: template.imageFrame.height,
+                          borderRadius: template.imageFrame.borderRadius
+                        }}
+                      />
+                    )}
+                  </div>
+                  <span className="absolute bottom-0 left-0 right-0 bg-black/70 px-1 py-0.5 text-[10px] text-white truncate">
+                    {template.name}
+                  </span>
+                </button>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Edição de Texto */}
+        {/* Texto do Slide */}
         <Card>
-          <CardContent className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Texto do Slide</Label>
-              <Button size="sm" variant="ghost" onClick={() => setEditingText(!editingText)}>
-                <Edit2 className="w-4 h-4 mr-1" /> {editingText ? "Cancelar" : "Editar"}
-              </Button>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <Label className="text-base font-semibold">Texto do Slide</Label>
+              {editingText ? (
+                <div className="flex gap-2">
+                  <Button size="sm" variant="ghost" onClick={() => setEditingText(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" onClick={handleSaveText} disabled={updateSlide.isPending}>
+                    <Check className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button size="sm" variant="ghost" onClick={() => setEditingText(true)}>
+                  <Edit2 className="w-4 h-4 mr-1" />
+                  Editar
+                </Button>
+              )}
             </div>
             
             {editingText ? (
-              <div className="space-y-2">
-                <Textarea
-                  value={slideText}
-                  onChange={(e) => setSlideText(e.target.value)}
-                  placeholder="Use **palavra** para destacar com cor neon"
-                  rows={3}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Dica: Use **palavra** para destacar com a cor de destaque
-                </p>
-                <Button size="sm" onClick={handleSaveText} disabled={updateSlide.isPending}>
-                  <Check className="w-4 h-4 mr-1" /> Salvar
-                </Button>
-              </div>
+              <Textarea
+                value={slideText}
+                onChange={(e) => setSlideText(e.target.value)}
+                className="min-h-[100px]"
+                placeholder="Digite o texto do slide..."
+              />
             ) : (
-              <p className="text-sm text-muted-foreground">{currentSlide?.text || "Sem texto"}</p>
+              <p className="text-muted-foreground whitespace-pre-wrap">
+                {currentSlide?.text || "Sem texto"}
+              </p>
             )}
           </CardContent>
         </Card>
 
-        {/* Geração de Imagem */}
+        {/* Imagem do Slide */}
         <Card>
-          <CardContent className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Imagem do Slide</Label>
-              <div className="flex gap-2">
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={handleGenerateAllImages}
-                  disabled={generateAllImages.isPending}
-                >
-                  {generateAllImages.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Images className="w-4 h-4 mr-1" />
-                      Gerar Todas
-                    </>
-                  )}
-                </Button>
-              </div>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <Label className="text-base font-semibold">Imagem do Slide</Label>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={handleGenerateAllImages}
+                disabled={generateAllImages.isPending}
+              >
+                {generateAllImages.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Images className="w-4 h-4 mr-2" />
+                )}
+                Gerar Todas
+              </Button>
             </div>
 
-            {/* Banco de Imagens */}
+            {/* Banco de imagens */}
             {imageBank.length > 0 && (
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Banco de Imagens ({imageBank.length})</Label>
-                <div className="grid grid-cols-4 gap-2">
-                  {imageBank.map((url, index) => (
+              <div className="mb-4">
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  Banco de Imagens ({imageBank.length})
+                </Label>
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {imageBank.map((url, i) => (
                     <button
-                      key={index}
-                      className={`aspect-square rounded overflow-hidden border-2 transition-all ${
-                        currentSlide?.imageUrl === url ? "border-primary" : "border-transparent hover:border-muted-foreground/50"
+                      key={i}
+                      onClick={() => handleImageClick(url, i)}
+                      className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                        currentSlide?.selectedImageIndex === i 
+                          ? 'border-primary ring-2 ring-primary/50' 
+                          : 'border-transparent hover:border-muted-foreground/30'
                       }`}
-                      onClick={() => handleImageClick(url, index)}
                     >
-                      <img src={url} alt={`Imagem ${index + 1}`} className="w-full h-full object-cover" />
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      {currentSlide?.selectedImageIndex === i && (
+                        <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                          <Check className="w-4 h-4 text-white" />
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Prompt de Geração */}
-            <div className="space-y-2">
-              <Label>Prompt da Imagem</Label>
+            {/* Prompt da imagem */}
+            <div className="space-y-3">
+              <Label className="text-sm text-muted-foreground">Prompt da Imagem</Label>
               <Textarea
-                value={tempPrompt || currentSlide?.imagePrompt || ""}
+                value={tempPrompt}
                 onChange={(e) => setTempPrompt(e.target.value)}
                 placeholder="Descreva a imagem que deseja gerar..."
-                rows={2}
+                className="min-h-[80px]"
               />
+              <p className="text-xs text-muted-foreground">
+                Dica: As imagens são geradas SEM TEXTO para não conflitar com o template.
+              </p>
+              
               <div className="flex gap-2">
                 <Button 
-                  size="sm" 
                   onClick={handleGenerateImage}
                   disabled={generateImage.isPending}
+                  className="flex-1"
                 >
                   {generateImage.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
-                    <Sparkles className="w-4 h-4 mr-1" />
+                    <Sparkles className="w-4 h-4 mr-2" />
                   )}
                   Gerar
                 </Button>
-                <select 
-                  className="text-sm border rounded px-2 bg-background"
-                  value={imageQuantity}
-                  onChange={(e) => setImageQuantity(parseInt(e.target.value))}
-                >
-                  <option value={1}>1 imagem</option>
-                  <option value={2}>2 imagens</option>
-                  <option value={3}>3 imagens</option>
-                  <option value={4}>4 imagens</option>
-                </select>
+                
+                <label className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleUploadImage(file);
+                    }}
+                  />
+                  <Button variant="outline" className="w-full" asChild>
+                    <span>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload
+                    </span>
+                  </Button>
+                </label>
               </div>
             </div>
           </CardContent>
@@ -837,13 +767,95 @@ export default function ContentEdit() {
       {/* Lightbox */}
       <ImageLightbox
         isOpen={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
+        onClose={() => {
+          setLightboxOpen(false);
+          setLightboxImageIndex(null);
+        }}
         imageUrl={lightboxImageUrl}
-        prompt={currentSlide?.imagePrompt || ""}
-        onRegenerate={handleRegenerateImage}
+        prompt={tempPrompt || currentSlide?.imagePrompt || ""}
+        onRegenerate={async (newPrompt: string) => {
+          setTempPrompt(newPrompt);
+          if (!currentSlide) return;
+          const enhancedPrompt = `${newPrompt}. IMPORTANTE: A imagem deve ser APENAS VISUAL, SEM NENHUM TEXTO, SEM LETRAS, SEM PALAVRAS, SEM NÚMEROS. Apenas elementos visuais.`;
+          await generateImage.mutateAsync({ slideId: currentSlide.id, prompt: enhancedPrompt });
+        }}
         onUpload={handleUploadImage}
-        onDelete={handleDeleteImage}
+        title={`Slide ${currentSlideIndex + 1}`}
       />
     </div>
   );
+}
+
+// Helpers
+function parsePercent(value: string, reference: number): number {
+  if (value.endsWith('%')) {
+    return (parseFloat(value) / 100) * reference;
+  }
+  if (value.endsWith('px')) {
+    return parseFloat(value);
+  }
+  return parseFloat(value) || 0;
+}
+
+function roundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function getTextPosition(
+  position: string,
+  width: number,
+  height: number,
+  padding: number
+): { x: number; y: number } {
+  const positions: Record<string, { x: number; y: number }> = {
+    'top-left': { x: padding, y: padding },
+    'top-center': { x: width / 2, y: padding },
+    'top-right': { x: width - padding, y: padding },
+    'center-left': { x: padding, y: height / 2 },
+    'center': { x: width / 2, y: height / 2 },
+    'center-right': { x: width - padding, y: height / 2 },
+    'bottom-left': { x: padding, y: height - padding },
+    'bottom-center': { x: width / 2, y: height - padding },
+    'bottom-right': { x: width - padding, y: height - padding }
+  };
+  return positions[position] || positions['center'];
+}
+
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let currentLine = '';
+  
+  for (const word of words) {
+    const cleanWord = word.replace(/\*\*/g, '');
+    const testLine = currentLine ? `${currentLine} ${cleanWord}` : cleanWord;
+    const metrics = ctx.measureText(testLine);
+    
+    if (metrics.width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = currentLine ? `${currentLine} ${word}` : word;
+    }
+  }
+  
+  if (currentLine) lines.push(currentLine);
+  return lines;
 }

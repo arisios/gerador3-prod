@@ -1,42 +1,49 @@
 // Templates Visuais Completos com Layouts Profissionais
-// Cada template tem layout fixo, posicionamento de texto, imagem e logo
+// Cada template é uma "moldura" com área fixa para imagem e texto
+
+export interface TextStyle {
+  position: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+  alignment: 'left' | 'center' | 'right';
+  fontSize: 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl';
+  fontWeight: 'normal' | 'medium' | 'semibold' | 'bold' | 'black';
+  maxWidth: string; // CSS value like '60%', '80%'
+  padding: string; // CSS value like '24px', '32px'
+  textShadow: boolean;
+  lineHeight: 'tight' | 'normal' | 'relaxed';
+}
+
+export interface ImageFrame {
+  position: 'top' | 'bottom' | 'left' | 'right' | 'full' | 'center' | 'none';
+  // Área do quadro/moldura (porcentagem do slide)
+  x: string; // CSS left position
+  y: string; // CSS top position
+  width: string; // CSS width
+  height: string; // CSS height
+  borderRadius: string; // CSS border-radius
+  objectFit: 'cover' | 'contain';
+}
 
 export interface DesignTemplate {
   id: string;
   name: string;
   category: 'split' | 'card' | 'fullbleed' | 'minimal' | 'bold' | 'editorial';
   description: string;
-  layout: {
-    // Área da imagem (porcentagem)
-    image: {
-      position: 'top' | 'bottom' | 'left' | 'right' | 'full' | 'center' | 'none';
-      width: number; // 0-100%
-      height: number; // 0-100%
-    };
-    // Área do texto
-    text: {
-      position: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'overlay-top' | 'overlay-bottom' | 'overlay-center';
-      alignment: 'left' | 'center' | 'right';
-      maxWidth: number; // 0-100%
-    };
-    // Posição do logo
-    logo: {
-      position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
-      size: 'small' | 'medium' | 'large';
-    };
-    // Elementos decorativos
-    decorations: {
-      type: 'none' | 'line' | 'border' | 'gradient-overlay' | 'shape' | 'dots' | 'grid';
-      position?: string;
-    };
+  // Moldura/quadro da imagem
+  imageFrame: ImageFrame;
+  // Estilo do texto
+  textStyle: TextStyle;
+  // Posição do logo
+  logoPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'none';
+  // Cores padrão
+  colors: {
+    background: string;
+    text: string;
+    accent: string;
   };
-  // Estilos padrão
-  defaultStyle: {
-    backgroundColor: string;
-    textColor: string;
-    accentColor: string;
-    fontWeight: 'normal' | 'medium' | 'bold' | 'black';
-    fontSize: 'small' | 'medium' | 'large' | 'xlarge';
+  // Overlay sobre a imagem (para legibilidade do texto)
+  overlay?: {
+    type: 'gradient-bottom' | 'gradient-top' | 'gradient-left' | 'gradient-right' | 'solid' | 'none';
+    opacity: number; // 0-1
   };
 }
 
@@ -47,18 +54,30 @@ export const designTemplates: DesignTemplate[] = [
     name: 'Imagem Topo',
     category: 'split',
     description: 'Imagem ocupa metade superior, texto na metade inferior',
-    layout: {
-      image: { position: 'top', width: 100, height: 50 },
-      text: { position: 'bottom', alignment: 'center', maxWidth: 90 },
-      logo: { position: 'bottom-right', size: 'small' },
-      decorations: { type: 'none' }
+    imageFrame: {
+      position: 'top',
+      x: '0',
+      y: '0',
+      width: '100%',
+      height: '50%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#0a0a0a',
-      textColor: '#ffffff',
-      accentColor: '#8b5cf6',
+    textStyle: {
+      position: 'bottom-center',
+      alignment: 'center',
+      fontSize: '2xl',
       fontWeight: 'bold',
-      fontSize: 'large'
+      maxWidth: '90%',
+      padding: '24px',
+      textShadow: false,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#0a0a0a',
+      text: '#ffffff',
+      accent: '#8b5cf6'
     }
   },
   {
@@ -66,37 +85,61 @@ export const designTemplates: DesignTemplate[] = [
     name: 'Imagem Base',
     category: 'split',
     description: 'Texto na metade superior, imagem na metade inferior',
-    layout: {
-      image: { position: 'bottom', width: 100, height: 50 },
-      text: { position: 'top', alignment: 'center', maxWidth: 90 },
-      logo: { position: 'top-left', size: 'small' },
-      decorations: { type: 'none' }
+    imageFrame: {
+      position: 'bottom',
+      x: '0',
+      y: '50%',
+      width: '100%',
+      height: '50%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#0a0a0a',
-      textColor: '#ffffff',
-      accentColor: '#10b981',
+    textStyle: {
+      position: 'top-center',
+      alignment: 'center',
+      fontSize: '2xl',
       fontWeight: 'bold',
-      fontSize: 'large'
+      maxWidth: '90%',
+      padding: '24px',
+      textShadow: false,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'top-left',
+    colors: {
+      background: '#0a0a0a',
+      text: '#ffffff',
+      accent: '#10b981'
     }
   },
   {
     id: 'split-60-40',
     name: 'Split 60/40',
     category: 'split',
-    description: 'Imagem 60% topo, texto 40% base com destaque',
-    layout: {
-      image: { position: 'top', width: 100, height: 60 },
-      text: { position: 'bottom', alignment: 'left', maxWidth: 85 },
-      logo: { position: 'bottom-right', size: 'small' },
-      decorations: { type: 'line', position: 'left' }
+    description: 'Imagem 60% topo, texto 40% base',
+    imageFrame: {
+      position: 'top',
+      x: '0',
+      y: '0',
+      width: '100%',
+      height: '60%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#1a1a2e',
-      textColor: '#ffffff',
-      accentColor: '#f59e0b',
+    textStyle: {
+      position: 'bottom-left',
+      alignment: 'left',
+      fontSize: 'xl',
       fontWeight: 'bold',
-      fontSize: 'large'
+      maxWidth: '85%',
+      padding: '24px',
+      textShadow: false,
+      lineHeight: 'normal'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#1a1a2e',
+      text: '#ffffff',
+      accent: '#f59e0b'
     }
   },
   {
@@ -104,18 +147,30 @@ export const designTemplates: DesignTemplate[] = [
     name: 'Texto Destaque',
     category: 'split',
     description: 'Pequena imagem topo, grande área de texto',
-    layout: {
-      image: { position: 'top', width: 100, height: 30 },
-      text: { position: 'bottom', alignment: 'center', maxWidth: 90 },
-      logo: { position: 'bottom-center', size: 'medium' },
-      decorations: { type: 'gradient-overlay' }
+    imageFrame: {
+      position: 'top',
+      x: '0',
+      y: '0',
+      width: '100%',
+      height: '30%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#0f172a',
-      textColor: '#ffffff',
-      accentColor: '#3b82f6',
+    textStyle: {
+      position: 'bottom-center',
+      alignment: 'center',
+      fontSize: '3xl',
       fontWeight: 'black',
-      fontSize: 'xlarge'
+      maxWidth: '90%',
+      padding: '32px',
+      textShadow: false,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#0f172a',
+      text: '#ffffff',
+      accent: '#3b82f6'
     }
   },
 
@@ -125,18 +180,30 @@ export const designTemplates: DesignTemplate[] = [
     name: 'Imagem Esquerda',
     category: 'split',
     description: 'Imagem à esquerda, texto à direita',
-    layout: {
-      image: { position: 'left', width: 50, height: 100 },
-      text: { position: 'right', alignment: 'left', maxWidth: 90 },
-      logo: { position: 'top-right', size: 'small' },
-      decorations: { type: 'none' }
+    imageFrame: {
+      position: 'left',
+      x: '0',
+      y: '0',
+      width: '50%',
+      height: '100%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#18181b',
-      textColor: '#ffffff',
-      accentColor: '#ec4899',
+    textStyle: {
+      position: 'center-right',
+      alignment: 'left',
+      fontSize: 'xl',
       fontWeight: 'bold',
-      fontSize: 'large'
+      maxWidth: '90%',
+      padding: '24px',
+      textShadow: false,
+      lineHeight: 'normal'
+    },
+    logoPosition: 'top-right',
+    colors: {
+      background: '#18181b',
+      text: '#ffffff',
+      accent: '#ec4899'
     }
   },
   {
@@ -144,37 +211,30 @@ export const designTemplates: DesignTemplate[] = [
     name: 'Imagem Direita',
     category: 'split',
     description: 'Texto à esquerda, imagem à direita',
-    layout: {
-      image: { position: 'right', width: 50, height: 100 },
-      text: { position: 'left', alignment: 'left', maxWidth: 90 },
-      logo: { position: 'top-left', size: 'small' },
-      decorations: { type: 'line', position: 'bottom' }
+    imageFrame: {
+      position: 'right',
+      x: '50%',
+      y: '0',
+      width: '50%',
+      height: '100%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#1e1e1e',
-      textColor: '#ffffff',
-      accentColor: '#22c55e',
+    textStyle: {
+      position: 'center-left',
+      alignment: 'left',
+      fontSize: 'xl',
       fontWeight: 'bold',
-      fontSize: 'large'
-    }
-  },
-  {
-    id: 'split-diagonal',
-    name: 'Diagonal',
-    category: 'split',
-    description: 'Divisão diagonal entre imagem e texto',
-    layout: {
-      image: { position: 'left', width: 55, height: 100 },
-      text: { position: 'right', alignment: 'left', maxWidth: 85 },
-      logo: { position: 'bottom-right', size: 'small' },
-      decorations: { type: 'shape', position: 'diagonal' }
+      maxWidth: '90%',
+      padding: '24px',
+      textShadow: false,
+      lineHeight: 'normal'
     },
-    defaultStyle: {
-      backgroundColor: '#0c0c0c',
-      textColor: '#ffffff',
-      accentColor: '#f97316',
-      fontWeight: 'bold',
-      fontSize: 'large'
+    logoPosition: 'top-left',
+    colors: {
+      background: '#1e1e1e',
+      text: '#ffffff',
+      accent: '#22c55e'
     }
   },
 
@@ -183,19 +243,31 @@ export const designTemplates: DesignTemplate[] = [
     id: 'card-centered',
     name: 'Card Central',
     category: 'card',
-    description: 'Card centralizado com borda e sombra',
-    layout: {
-      image: { position: 'center', width: 85, height: 50 },
-      text: { position: 'bottom', alignment: 'center', maxWidth: 85 },
-      logo: { position: 'top-center', size: 'medium' },
-      decorations: { type: 'border' }
+    description: 'Imagem em card centralizado, texto abaixo',
+    imageFrame: {
+      position: 'center',
+      x: '10%',
+      y: '8%',
+      width: '80%',
+      height: '50%',
+      borderRadius: '12px',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#0a0a0a',
-      textColor: '#ffffff',
-      accentColor: '#a855f7',
-      fontWeight: 'medium',
-      fontSize: 'medium'
+    textStyle: {
+      position: 'bottom-center',
+      alignment: 'center',
+      fontSize: 'lg',
+      fontWeight: 'semibold',
+      maxWidth: '85%',
+      padding: '20px',
+      textShadow: false,
+      lineHeight: 'normal'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#0a0a0a',
+      text: '#ffffff',
+      accent: '#a855f7'
     }
   },
   {
@@ -203,37 +275,61 @@ export const designTemplates: DesignTemplate[] = [
     name: 'Card Arredondado',
     category: 'card',
     description: 'Card com cantos muito arredondados',
-    layout: {
-      image: { position: 'top', width: 90, height: 55 },
-      text: { position: 'bottom', alignment: 'center', maxWidth: 85 },
-      logo: { position: 'bottom-center', size: 'small' },
-      decorations: { type: 'border' }
+    imageFrame: {
+      position: 'top',
+      x: '5%',
+      y: '5%',
+      width: '90%',
+      height: '55%',
+      borderRadius: '24px',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#1a1a1a',
-      textColor: '#ffffff',
-      accentColor: '#06b6d4',
+    textStyle: {
+      position: 'bottom-center',
+      alignment: 'center',
+      fontSize: 'xl',
       fontWeight: 'bold',
-      fontSize: 'large'
+      maxWidth: '85%',
+      padding: '24px',
+      textShadow: false,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#1a1a1a',
+      text: '#ffffff',
+      accent: '#06b6d4'
     }
   },
   {
     id: 'card-polaroid',
     name: 'Polaroid',
     category: 'card',
-    description: 'Estilo polaroid com margem branca',
-    layout: {
-      image: { position: 'top', width: 85, height: 60 },
-      text: { position: 'bottom', alignment: 'center', maxWidth: 80 },
-      logo: { position: 'bottom-right', size: 'small' },
-      decorations: { type: 'border' }
+    description: 'Estilo polaroid com margem',
+    imageFrame: {
+      position: 'top',
+      x: '10%',
+      y: '8%',
+      width: '80%',
+      height: '58%',
+      borderRadius: '4px',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#fafafa',
-      textColor: '#1a1a1a',
-      accentColor: '#ef4444',
+    textStyle: {
+      position: 'bottom-center',
+      alignment: 'center',
+      fontSize: 'lg',
       fontWeight: 'medium',
-      fontSize: 'medium'
+      maxWidth: '80%',
+      padding: '20px',
+      textShadow: false,
+      lineHeight: 'normal'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#fafafa',
+      text: '#1a1a1a',
+      accent: '#ef4444'
     }
   },
   {
@@ -241,77 +337,137 @@ export const designTemplates: DesignTemplate[] = [
     name: 'Card Neon',
     category: 'card',
     description: 'Card com borda neon brilhante',
-    layout: {
-      image: { position: 'center', width: 80, height: 50 },
-      text: { position: 'bottom', alignment: 'center', maxWidth: 85 },
-      logo: { position: 'top-left', size: 'small' },
-      decorations: { type: 'border' }
+    imageFrame: {
+      position: 'center',
+      x: '10%',
+      y: '10%',
+      width: '80%',
+      height: '50%',
+      borderRadius: '16px',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#0a0a0a',
-      textColor: '#ffffff',
-      accentColor: '#00ff88',
+    textStyle: {
+      position: 'bottom-center',
+      alignment: 'center',
+      fontSize: 'xl',
       fontWeight: 'bold',
-      fontSize: 'large'
+      maxWidth: '85%',
+      padding: '24px',
+      textShadow: false,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'top-left',
+    colors: {
+      background: '#0a0a0a',
+      text: '#ffffff',
+      accent: '#00ff88'
     }
   },
 
   // === FULL BLEED ===
   {
-    id: 'fullbleed-overlay-bottom',
-    name: 'Texto Sobreposto Base',
+    id: 'fullbleed-bottom',
+    name: 'Full + Texto Base',
     category: 'fullbleed',
-    description: 'Imagem full, texto sobreposto na base com gradiente',
-    layout: {
-      image: { position: 'full', width: 100, height: 100 },
-      text: { position: 'overlay-bottom', alignment: 'left', maxWidth: 90 },
-      logo: { position: 'top-right', size: 'small' },
-      decorations: { type: 'gradient-overlay' }
+    description: 'Imagem full, texto sobreposto na base',
+    imageFrame: {
+      position: 'full',
+      x: '0',
+      y: '0',
+      width: '100%',
+      height: '100%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#000000',
-      textColor: '#ffffff',
-      accentColor: '#fbbf24',
+    textStyle: {
+      position: 'bottom-left',
+      alignment: 'left',
+      fontSize: '2xl',
       fontWeight: 'black',
-      fontSize: 'xlarge'
+      maxWidth: '85%',
+      padding: '32px',
+      textShadow: true,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'top-right',
+    colors: {
+      background: '#000000',
+      text: '#ffffff',
+      accent: '#fbbf24'
+    },
+    overlay: {
+      type: 'gradient-bottom',
+      opacity: 0.7
     }
   },
   {
-    id: 'fullbleed-overlay-center',
-    name: 'Texto Central',
+    id: 'fullbleed-center',
+    name: 'Full + Texto Central',
     category: 'fullbleed',
-    description: 'Imagem full, texto centralizado com overlay escuro',
-    layout: {
-      image: { position: 'full', width: 100, height: 100 },
-      text: { position: 'overlay-center', alignment: 'center', maxWidth: 85 },
-      logo: { position: 'bottom-center', size: 'medium' },
-      decorations: { type: 'gradient-overlay' }
+    description: 'Imagem full, texto centralizado',
+    imageFrame: {
+      position: 'full',
+      x: '0',
+      y: '0',
+      width: '100%',
+      height: '100%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#000000',
-      textColor: '#ffffff',
-      accentColor: '#f43f5e',
+    textStyle: {
+      position: 'center',
+      alignment: 'center',
+      fontSize: '3xl',
       fontWeight: 'black',
-      fontSize: 'xlarge'
+      maxWidth: '80%',
+      padding: '32px',
+      textShadow: true,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#000000',
+      text: '#ffffff',
+      accent: '#f43f5e'
+    },
+    overlay: {
+      type: 'solid',
+      opacity: 0.5
     }
   },
   {
-    id: 'fullbleed-overlay-top',
-    name: 'Texto Sobreposto Topo',
+    id: 'fullbleed-top',
+    name: 'Full + Texto Topo',
     category: 'fullbleed',
     description: 'Imagem full, texto sobreposto no topo',
-    layout: {
-      image: { position: 'full', width: 100, height: 100 },
-      text: { position: 'overlay-top', alignment: 'left', maxWidth: 90 },
-      logo: { position: 'bottom-right', size: 'small' },
-      decorations: { type: 'gradient-overlay' }
+    imageFrame: {
+      position: 'full',
+      x: '0',
+      y: '0',
+      width: '100%',
+      height: '100%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#000000',
-      textColor: '#ffffff',
-      accentColor: '#14b8a6',
+    textStyle: {
+      position: 'top-left',
+      alignment: 'left',
+      fontSize: '2xl',
       fontWeight: 'bold',
-      fontSize: 'large'
+      maxWidth: '85%',
+      padding: '32px',
+      textShadow: true,
+      lineHeight: 'normal'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#000000',
+      text: '#ffffff',
+      accent: '#14b8a6'
+    },
+    overlay: {
+      type: 'gradient-top',
+      opacity: 0.6
     }
   },
 
@@ -321,134 +477,187 @@ export const designTemplates: DesignTemplate[] = [
     name: 'Só Texto',
     category: 'minimal',
     description: 'Apenas texto centralizado, sem imagem',
-    layout: {
-      image: { position: 'none', width: 0, height: 0 },
-      text: { position: 'center', alignment: 'center', maxWidth: 80 },
-      logo: { position: 'bottom-center', size: 'small' },
-      decorations: { type: 'none' }
+    imageFrame: {
+      position: 'none',
+      x: '0',
+      y: '0',
+      width: '0',
+      height: '0',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#0a0a0a',
-      textColor: '#ffffff',
-      accentColor: '#8b5cf6',
+    textStyle: {
+      position: 'center',
+      alignment: 'center',
+      fontSize: '3xl',
       fontWeight: 'black',
-      fontSize: 'xlarge'
+      maxWidth: '80%',
+      padding: '40px',
+      textShadow: false,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#0a0a0a',
+      text: '#ffffff',
+      accent: '#8b5cf6'
+    }
+  },
+  {
+    id: 'minimal-left-aligned',
+    name: 'Texto Alinhado Esquerda',
+    category: 'minimal',
+    description: 'Texto alinhado à esquerda, sem imagem',
+    imageFrame: {
+      position: 'none',
+      x: '0',
+      y: '0',
+      width: '0',
+      height: '0',
+      borderRadius: '0',
+      objectFit: 'cover'
+    },
+    textStyle: {
+      position: 'center-left',
+      alignment: 'left',
+      fontSize: '2xl',
+      fontWeight: 'bold',
+      maxWidth: '75%',
+      padding: '40px',
+      textShadow: false,
+      lineHeight: 'normal'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#0f0f0f',
+      text: '#ffffff',
+      accent: '#22c55e'
     }
   },
   {
     id: 'minimal-quote',
     name: 'Citação',
     category: 'minimal',
-    description: 'Texto estilo citação com aspas grandes',
-    layout: {
-      image: { position: 'none', width: 0, height: 0 },
-      text: { position: 'center', alignment: 'center', maxWidth: 75 },
-      logo: { position: 'bottom-right', size: 'small' },
-      decorations: { type: 'shape', position: 'quotes' }
+    description: 'Estilo citação com aspas grandes',
+    imageFrame: {
+      position: 'none',
+      x: '0',
+      y: '0',
+      width: '0',
+      height: '0',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#18181b',
-      textColor: '#ffffff',
-      accentColor: '#d946ef',
+    textStyle: {
+      position: 'center',
+      alignment: 'center',
+      fontSize: '2xl',
       fontWeight: 'medium',
-      fontSize: 'large'
-    }
-  },
-  {
-    id: 'minimal-left-align',
-    name: 'Alinhado Esquerda',
-    category: 'minimal',
-    description: 'Texto alinhado à esquerda com linha de destaque',
-    layout: {
-      image: { position: 'none', width: 0, height: 0 },
-      text: { position: 'center', alignment: 'left', maxWidth: 85 },
-      logo: { position: 'top-left', size: 'medium' },
-      decorations: { type: 'line', position: 'left' }
+      maxWidth: '75%',
+      padding: '48px',
+      textShadow: false,
+      lineHeight: 'relaxed'
     },
-    defaultStyle: {
-      backgroundColor: '#0c0c0c',
-      textColor: '#ffffff',
-      accentColor: '#22c55e',
-      fontWeight: 'bold',
-      fontSize: 'large'
-    }
-  },
-  {
-    id: 'minimal-gradient-bg',
-    name: 'Gradiente',
-    category: 'minimal',
-    description: 'Texto sobre fundo gradiente',
-    layout: {
-      image: { position: 'none', width: 0, height: 0 },
-      text: { position: 'center', alignment: 'center', maxWidth: 80 },
-      logo: { position: 'bottom-center', size: 'medium' },
-      decorations: { type: 'gradient-overlay' }
-    },
-    defaultStyle: {
-      backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      textColor: '#ffffff',
-      accentColor: '#fbbf24',
-      fontWeight: 'black',
-      fontSize: 'xlarge'
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#1a1a1a',
+      text: '#e5e5e5',
+      accent: '#f59e0b'
     }
   },
 
   // === BOLD / IMPACTO ===
   {
-    id: 'bold-big-number',
-    name: 'Número Grande',
+    id: 'bold-statement',
+    name: 'Declaração Bold',
     category: 'bold',
-    description: 'Destaque para números/estatísticas',
-    layout: {
-      image: { position: 'none', width: 0, height: 0 },
-      text: { position: 'center', alignment: 'center', maxWidth: 90 },
-      logo: { position: 'bottom-right', size: 'small' },
-      decorations: { type: 'shape', position: 'circle' }
+    description: 'Texto grande e impactante, imagem pequena',
+    imageFrame: {
+      position: 'bottom',
+      x: '25%',
+      y: '70%',
+      width: '50%',
+      height: '25%',
+      borderRadius: '8px',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#0a0a0a',
-      textColor: '#ffffff',
-      accentColor: '#ef4444',
+    textStyle: {
+      position: 'top-center',
+      alignment: 'center',
+      fontSize: '3xl',
       fontWeight: 'black',
-      fontSize: 'xlarge'
+      maxWidth: '90%',
+      padding: '32px',
+      textShadow: false,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#0a0a0a',
+      text: '#ffffff',
+      accent: '#ef4444'
     }
   },
   {
-    id: 'bold-breaking',
-    name: 'Breaking News',
+    id: 'bold-number',
+    name: 'Número Destaque',
     category: 'bold',
-    description: 'Estilo urgente/notícia',
-    layout: {
-      image: { position: 'bottom', width: 100, height: 40 },
-      text: { position: 'top', alignment: 'left', maxWidth: 95 },
-      logo: { position: 'top-right', size: 'small' },
-      decorations: { type: 'line', position: 'top' }
+    description: 'Para estatísticas e números grandes',
+    imageFrame: {
+      position: 'right',
+      x: '60%',
+      y: '20%',
+      width: '35%',
+      height: '60%',
+      borderRadius: '12px',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#1a0a0a',
-      textColor: '#ffffff',
-      accentColor: '#dc2626',
+    textStyle: {
+      position: 'center-left',
+      alignment: 'left',
+      fontSize: '3xl',
       fontWeight: 'black',
-      fontSize: 'xlarge'
+      maxWidth: '55%',
+      padding: '32px',
+      textShadow: false,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'bottom-left',
+    colors: {
+      background: '#0f172a',
+      text: '#ffffff',
+      accent: '#3b82f6'
     }
   },
   {
-    id: 'bold-checklist',
-    name: 'Checklist',
+    id: 'bold-cta',
+    name: 'Call to Action',
     category: 'bold',
-    description: 'Lista com checkmarks',
-    layout: {
-      image: { position: 'none', width: 0, height: 0 },
-      text: { position: 'center', alignment: 'left', maxWidth: 85 },
-      logo: { position: 'top-left', size: 'small' },
-      decorations: { type: 'dots' }
+    description: 'Slide de CTA com texto grande',
+    imageFrame: {
+      position: 'top',
+      x: '20%',
+      y: '5%',
+      width: '60%',
+      height: '40%',
+      borderRadius: '16px',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#0f172a',
-      textColor: '#ffffff',
-      accentColor: '#10b981',
-      fontWeight: 'medium',
-      fontSize: 'medium'
+    textStyle: {
+      position: 'bottom-center',
+      alignment: 'center',
+      fontSize: '2xl',
+      fontWeight: 'black',
+      maxWidth: '85%',
+      padding: '28px',
+      textShadow: false,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#0a0a0a',
+      text: '#ffffff',
+      accent: '#10b981'
     }
   },
 
@@ -457,62 +666,98 @@ export const designTemplates: DesignTemplate[] = [
     id: 'editorial-magazine',
     name: 'Magazine',
     category: 'editorial',
-    description: 'Estilo revista com tipografia elegante',
-    layout: {
-      image: { position: 'top', width: 100, height: 55 },
-      text: { position: 'bottom', alignment: 'left', maxWidth: 90 },
-      logo: { position: 'top-left', size: 'small' },
-      decorations: { type: 'line', position: 'bottom' }
+    description: 'Estilo revista com layout elegante',
+    imageFrame: {
+      position: 'left',
+      x: '0',
+      y: '0',
+      width: '45%',
+      height: '100%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#fafaf9',
-      textColor: '#1c1917',
-      accentColor: '#b91c1c',
+    textStyle: {
+      position: 'center-right',
+      alignment: 'left',
+      fontSize: 'xl',
       fontWeight: 'medium',
-      fontSize: 'large'
+      maxWidth: '90%',
+      padding: '32px',
+      textShadow: false,
+      lineHeight: 'relaxed'
+    },
+    logoPosition: 'top-right',
+    colors: {
+      background: '#fafafa',
+      text: '#1a1a1a',
+      accent: '#dc2626'
     }
   },
   {
-    id: 'editorial-luxury',
-    name: 'Luxo',
+    id: 'editorial-news',
+    name: 'Breaking News',
     category: 'editorial',
-    description: 'Estilo luxuoso com dourado',
-    layout: {
-      image: { position: 'center', width: 75, height: 55 },
-      text: { position: 'bottom', alignment: 'center', maxWidth: 80 },
-      logo: { position: 'top-center', size: 'medium' },
-      decorations: { type: 'border' }
+    description: 'Estilo notícia urgente',
+    imageFrame: {
+      position: 'top',
+      x: '0',
+      y: '15%',
+      width: '100%',
+      height: '50%',
+      borderRadius: '0',
+      objectFit: 'cover'
     },
-    defaultStyle: {
-      backgroundColor: '#0a0a0a',
-      textColor: '#fafafa',
-      accentColor: '#d4af37',
-      fontWeight: 'medium',
-      fontSize: 'large'
-    }
-  },
-  {
-    id: 'editorial-clean',
-    name: 'Clean',
-    category: 'editorial',
-    description: 'Design limpo e profissional',
-    layout: {
-      image: { position: 'top', width: 100, height: 45 },
-      text: { position: 'bottom', alignment: 'center', maxWidth: 85 },
-      logo: { position: 'bottom-center', size: 'small' },
-      decorations: { type: 'none' }
-    },
-    defaultStyle: {
-      backgroundColor: '#ffffff',
-      textColor: '#171717',
-      accentColor: '#2563eb',
+    textStyle: {
+      position: 'bottom-left',
+      alignment: 'left',
+      fontSize: 'xl',
       fontWeight: 'bold',
-      fontSize: 'large'
+      maxWidth: '95%',
+      padding: '20px',
+      textShadow: false,
+      lineHeight: 'tight'
+    },
+    logoPosition: 'top-left',
+    colors: {
+      background: '#dc2626',
+      text: '#ffffff',
+      accent: '#fbbf24'
     }
-  }
+  },
+  {
+    id: 'editorial-story',
+    name: 'Storytelling',
+    category: 'editorial',
+    description: 'Layout para contar histórias',
+    imageFrame: {
+      position: 'full',
+      x: '0',
+      y: '0',
+      width: '100%',
+      height: '65%',
+      borderRadius: '0',
+      objectFit: 'cover'
+    },
+    textStyle: {
+      position: 'bottom-center',
+      alignment: 'center',
+      fontSize: 'lg',
+      fontWeight: 'medium',
+      maxWidth: '90%',
+      padding: '24px',
+      textShadow: false,
+      lineHeight: 'relaxed'
+    },
+    logoPosition: 'bottom-right',
+    colors: {
+      background: '#1a1a1a',
+      text: '#e5e5e5',
+      accent: '#8b5cf6'
+    }
+  },
 ];
 
-// Paletas de cores predefinidas
+// Paletas de cores
 export interface ColorPalette {
   id: string;
   name: string;
@@ -520,134 +765,32 @@ export interface ColorPalette {
     background: string;
     text: string;
     accent: string;
-    secondary: string;
   };
 }
 
 export const colorPalettes: ColorPalette[] = [
-  {
-    id: 'dark-purple',
-    name: 'Roxo Escuro',
-    colors: { background: '#0a0a0a', text: '#ffffff', accent: '#8b5cf6', secondary: '#a78bfa' }
-  },
-  {
-    id: 'dark-green',
-    name: 'Verde Escuro',
-    colors: { background: '#0a0a0a', text: '#ffffff', accent: '#10b981', secondary: '#34d399' }
-  },
-  {
-    id: 'dark-blue',
-    name: 'Azul Escuro',
-    colors: { background: '#0f172a', text: '#ffffff', accent: '#3b82f6', secondary: '#60a5fa' }
-  },
-  {
-    id: 'dark-red',
-    name: 'Vermelho Escuro',
-    colors: { background: '#0a0a0a', text: '#ffffff', accent: '#ef4444', secondary: '#f87171' }
-  },
-  {
-    id: 'dark-orange',
-    name: 'Laranja Escuro',
-    colors: { background: '#0c0c0c', text: '#ffffff', accent: '#f97316', secondary: '#fb923c' }
-  },
-  {
-    id: 'dark-pink',
-    name: 'Rosa Escuro',
-    colors: { background: '#0a0a0a', text: '#ffffff', accent: '#ec4899', secondary: '#f472b6' }
-  },
-  {
-    id: 'dark-cyan',
-    name: 'Ciano Escuro',
-    colors: { background: '#0a0a0a', text: '#ffffff', accent: '#06b6d4', secondary: '#22d3ee' }
-  },
-  {
-    id: 'dark-gold',
-    name: 'Dourado Escuro',
-    colors: { background: '#0a0a0a', text: '#ffffff', accent: '#d4af37', secondary: '#fbbf24' }
-  },
-  {
-    id: 'light-blue',
-    name: 'Azul Claro',
-    colors: { background: '#ffffff', text: '#1e293b', accent: '#2563eb', secondary: '#3b82f6' }
-  },
-  {
-    id: 'light-green',
-    name: 'Verde Claro',
-    colors: { background: '#fafafa', text: '#166534', accent: '#16a34a', secondary: '#22c55e' }
-  },
-  {
-    id: 'light-red',
-    name: 'Vermelho Claro',
-    colors: { background: '#fafaf9', text: '#1c1917', accent: '#dc2626', secondary: '#ef4444' }
-  },
-  {
-    id: 'neon-green',
-    name: 'Neon Verde',
-    colors: { background: '#0a0a0a', text: '#ffffff', accent: '#00ff88', secondary: '#39ff14' }
-  },
-  {
-    id: 'neon-pink',
-    name: 'Neon Rosa',
-    colors: { background: '#0a0a0a', text: '#ffffff', accent: '#ff00ff', secondary: '#ff69b4' }
-  },
-  {
-    id: 'neon-blue',
-    name: 'Neon Azul',
-    colors: { background: '#0a0a0a', text: '#ffffff', accent: '#00f5ff', secondary: '#00bfff' }
-  },
-  {
-    id: 'gradient-purple',
-    name: 'Gradiente Roxo',
-    colors: { background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', text: '#ffffff', accent: '#fbbf24', secondary: '#f59e0b' }
-  },
-  {
-    id: 'gradient-sunset',
-    name: 'Gradiente Pôr do Sol',
-    colors: { background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', text: '#ffffff', accent: '#fbbf24', secondary: '#ffffff' }
-  }
+  { id: 'dark-purple', name: 'Roxo Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#8b5cf6' } },
+  { id: 'dark-green', name: 'Verde Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#10b981' } },
+  { id: 'dark-blue', name: 'Azul Escuro', colors: { background: '#0f172a', text: '#ffffff', accent: '#3b82f6' } },
+  { id: 'dark-red', name: 'Vermelho Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#ef4444' } },
+  { id: 'dark-orange', name: 'Laranja Escuro', colors: { background: '#1a1a1a', text: '#ffffff', accent: '#f97316' } },
+  { id: 'dark-pink', name: 'Rosa Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#ec4899' } },
+  { id: 'dark-cyan', name: 'Ciano Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#06b6d4' } },
+  { id: 'dark-gold', name: 'Dourado Escuro', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#fbbf24' } },
+  { id: 'light-minimal', name: 'Claro Minimalista', colors: { background: '#fafafa', text: '#1a1a1a', accent: '#0a0a0a' } },
+  { id: 'light-warm', name: 'Claro Quente', colors: { background: '#fffbeb', text: '#1a1a1a', accent: '#d97706' } },
+  { id: 'neon-green', name: 'Neon Verde', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#00ff88' } },
+  { id: 'neon-pink', name: 'Neon Rosa', colors: { background: '#0a0a0a', text: '#ffffff', accent: '#ff00ff' } },
+  { id: 'gradient-sunset', name: 'Gradiente Sunset', colors: { background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', text: '#ffffff', accent: '#fbbf24' } },
+  { id: 'gradient-ocean', name: 'Gradiente Ocean', colors: { background: 'linear-gradient(135deg, #0c4a6e 0%, #0891b2 100%)', text: '#ffffff', accent: '#22d3ee' } },
 ];
 
-// Função para obter template por ID
-export function getTemplateById(id: string): DesignTemplate | undefined {
+// Helper para obter template por ID
+export function getDesignTemplate(id: string): DesignTemplate | undefined {
   return designTemplates.find(t => t.id === id);
 }
 
-// Função para obter templates por categoria
-export function getTemplatesByCategory(category: DesignTemplate['category']): DesignTemplate[] {
-  return designTemplates.filter(t => t.category === category);
-}
-
-// Função para obter paleta por ID
-export function getPaletteById(id: string): ColorPalette | undefined {
+// Helper para obter paleta por ID
+export function getColorPalette(id: string): ColorPalette | undefined {
   return colorPalettes.find(p => p.id === id);
-}
-
-// Função para selecionar templates variados para um carrossel
-export function selectVariedTemplates(count: number, preferredCategories?: string[]): DesignTemplate[] {
-  const selected: DesignTemplate[] = [];
-  const availableTemplates = [...designTemplates];
-  
-  // Embaralhar templates
-  for (let i = availableTemplates.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [availableTemplates[i], availableTemplates[j]] = [availableTemplates[j], availableTemplates[i]];
-  }
-  
-  // Selecionar templates variados (evitando repetir categoria consecutivamente)
-  let lastCategory = '';
-  let index = 0;
-  
-  while (selected.length < count && index < availableTemplates.length * 2) {
-    const template = availableTemplates[index % availableTemplates.length];
-    
-    // Evitar mesma categoria consecutiva
-    if (template.category !== lastCategory || selected.length === 0) {
-      selected.push(template);
-      lastCategory = template.category;
-    }
-    
-    index++;
-  }
-  
-  return selected;
 }

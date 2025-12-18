@@ -207,3 +207,13 @@
 - [x] Se for logo, indicar detecção e razão
 - [x] Mostrar notificação de logo detectada no fluxo de criação
 - [x] Indicar no step final que logo foi detectada para configurar no kit de marca
+
+## Refatoração de Templates Visuais (18/12/2024)
+- [x] Cada template com textStyle completo (posição, alinhamento, fonte, cor, sombra, área máxima)
+- [x] SlideRenderer com moldura/quadro real (CSS object-fit: cover, overflow: hidden)
+- [x] Imagem fica contida no quadro, pode ser ajustada para enquadrar
+- [x] Salvar designTemplateId por slide no banco de dados
+- [x] Template não muda ao navegar entre slides
+- [x] Reforçar prompt: imagens SEM TEXTO, apenas visual (6 regras obrigatórias)
+- [x] Corrigir bug do texto duplicado - verificado e não há duplicação no código
+- [x] Formatação de texto automática baseada no template selecionado

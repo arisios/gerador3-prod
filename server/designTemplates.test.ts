@@ -11,10 +11,10 @@ describe("Design Templates", () => {
       expect(template).toHaveProperty("id");
       expect(template).toHaveProperty("name");
       expect(template).toHaveProperty("category");
-      expect(template).toHaveProperty("layout");
-      expect(template).toHaveProperty("defaultStyle");
-      expect(template.layout).toHaveProperty("image");
-      expect(template.layout).toHaveProperty("text");
+      expect(template).toHaveProperty("imageFrame");
+      expect(template).toHaveProperty("textStyle");
+      expect(template.imageFrame).toHaveProperty("position");
+      expect(template.textStyle).toHaveProperty("position");
     }
   });
 
@@ -39,7 +39,7 @@ describe("Design Templates", () => {
   });
 
   it("should have templates with different image positions", () => {
-    const positions = new Set(designTemplates.map(t => t.layout.image.position));
+    const positions = new Set(designTemplates.map(t => t.imageFrame.position));
     expect(positions.size).toBeGreaterThan(2);
   });
 
