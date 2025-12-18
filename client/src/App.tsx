@@ -4,32 +4,54 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+
+// Pages
 import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import ProjectCreate from "./pages/ProjectCreate";
+import ProjectDetail from "./pages/ProjectDetail";
+import ContentEdit from "./pages/ContentEdit";
+import ImageEdit from "./pages/ImageEdit";
+import VideoEdit from "./pages/VideoEdit";
+import History from "./pages/History";
+import Influencers from "./pages/Influencers";
+import InfluencerCreate from "./pages/InfluencerCreate";
+import InfluencerCreateByPhoto from "./pages/InfluencerCreateByPhoto";
+import InfluencerDetail from "./pages/InfluencerDetail";
+import InfluencerContentCreate from "./pages/InfluencerContentCreate";
+import InfluencerContentEdit from "./pages/InfluencerContentEdit";
+import Trends from "./pages/Trends";
+import Virals from "./pages/Virals";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      <Route path="/" component={Home} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/project/new" component={ProjectCreate} />
+      <Route path="/project/:id" component={ProjectDetail} />
+      <Route path="/content/:id" component={ContentEdit} />
+      <Route path="/content/:id/image" component={ImageEdit} />
+      <Route path="/content/:id/video" component={VideoEdit} />
+      <Route path="/history" component={History} />
+      <Route path="/influencers" component={Influencers} />
+      <Route path="/influencer/new" component={InfluencerCreate} />
+      <Route path="/influencer/new/photo" component={InfluencerCreateByPhoto} />
+      <Route path="/influencer/:id" component={InfluencerDetail} />
+      <Route path="/influencer/:id/content/new" component={InfluencerContentCreate} />
+      <Route path="/influencer/:id/content/:contentId" component={InfluencerContentEdit} />
+      <Route path="/trends" component={Trends} />
+      <Route path="/virals" component={Virals} />
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
           <Router />

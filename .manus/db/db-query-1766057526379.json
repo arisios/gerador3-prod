@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, name, sourceType, analysis FROM projects WHERE id = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT id, name, sourceType, analysis FROM projects WHERE id = 1;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Loja de Moda Feminina",
+      "sourceType": "description",
+      "analysis": "{\"raw\": \"```json\\n{\\n  \\\"businessName\\\": \\\"Loja de Moda Feminina (Sugestão: Usar um nome que remeta a elegância e conforto)\\\",\\n  \\\"niche\\\": \\\"Moda feminina casual e elegante (Day-to-day fashion)\\\",\\n  \\\"mainProduct\\\": \\\"Vestuário feminino (vestidos, blusas, calças) e acessórios\\\",\\n  \\\"targetAudience\\\": \\\"Mulheres de 25 a 45 anos que valorizam elegância, conforto e praticidade no vestuário diário.\\\",\\n  \\\"tone\\\": \\\"Sofisticado, acolhedor, consultivo e focado em bem-estar e autoconfiança.\\\",\\n  \\\"uniqueValue\\\": \\\"Atendimento personalizado e peças exclusivas importadas (diferenciação por curadoria e serviço premium).\\\",\\n  \\\"keywords\\\": [\\n    \\\"moda feminina\\\",\\n    \\\"roupas elegantes\\\",\\n    \\\"conforto e estilo\\\",\\n    \\\"moda dia a dia\\\",\\n    \\\"peças exclusivas\\\",\\n    \\\"atendimento personalizado\\\",\\n    \\\"vestido casual\\\",\\n    \\\"look trabalho\\\",\\n    \\\"moda importada\\\",\\n    \\\"tendências femininas\\\"\\n  ]\\n}\\n```\"}"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tsourceType\tanalysis\n1\tLoja de Moda Feminina\tdescription\t{\"raw\": \"```json\\n{\\n  \\\"businessName\\\": \\\"Loja de Moda Feminina (Sugestão: Usar um nome que remeta a elegância e conforto)\\\",\\n  \\\"niche\\\": \\\"Moda feminina casual e elegante (Day-to-day fashion)\\\",\\n  \\\"mainProduct\\\": \\\"Vestuário feminino (vestidos, blusas, calças) e acessórios\\\",\\n  \\\"targetAudience\\\": \\\"Mulheres de 25 a 45 anos que valorizam elegância, conforto e praticidade no vestuário diário.\\\",\\n  \\\"tone\\\": \\\"Sofisticado, acolhedor, consultivo e focado em bem-estar e autoconfiança.\\\",\\n  \\\"uniqueValue\\\": \\\"Atendimento personalizado e peças exclusivas importadas (diferenciação por curadoria e serviço premium).\\\",\\n  \\\"keywords\\\": [\\n    \\\"moda feminina\\\",\\n    \\\"roupas elegantes\\\",\\n    \\\"conforto e estilo\\\",\\n    \\\"moda dia a dia\\\",\\n    \\\"peças exclusivas\\\",\\n    \\\"atendimento personalizado\\\",\\n    \\\"vestido casual\\\",\\n    \\\"look trabalho\\\",\\n    \\\"moda importada\\\",\\n    \\\"tendências femininas\\\"\\n  ]\\n}\\n```\"}\n",
+  "stderr": "",
+  "execution_time_ms": 142
+}
