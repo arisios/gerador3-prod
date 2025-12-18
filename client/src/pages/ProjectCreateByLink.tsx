@@ -48,7 +48,6 @@ interface BusinessAnalysis {
 export default function ProjectCreateByLink() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
-  const [name, setName] = useState("");
   const [sourceType, setSourceType] = useState<SourceType | null>(null);
   const [sourceUrl, setSourceUrl] = useState("");
   
@@ -109,11 +108,35 @@ export default function ProjectCreateByLink() {
     }
   };
 
-  const handleAnalyze = () => {
-    if (!name.trim()) {
-      toast.error("Digite um nome para o projeto");
-      return;
+  // Extrair nome do link (domínio ou username)
+  const extractNameFromUrl = (url: string): string => {
+    try {
+      const urlObj = new URL(url);
+      // Para Instagram/TikTok, pegar o username
+      if (url.includes("instagram.com") || url.includes("tiktok.com")) {
+        const pathParts = urlObj.pathname.split("/").filter(Boolean);
+        if (pathParts.length > 0 && pathParts[0] !== "p" && pathParts[0] !== "reel") {
+          return "@" + pathParts[0];
+        }
+      }
+      // Para YouTube, pegar o canal
+      if (url.includes("youtube.com")) {
+        const pathParts = urlObj.pathname.split("/").filter(Boolean);
+        if (pathParts[0] === "@" || pathParts[0]?.startsWith("@")) {
+          return pathParts[0];
+        }
+        if (pathParts[0] === "channel" && pathParts[1]) {
+          return pathParts[1];
+        }
+      }
+      // Para sites, usar o domínio
+      return urlObj.hostname.replace("www.", "");
+    } catch {
+      return url;
     }
+  };
+
+  const handleAnalyze = () => {
     if (!sourceUrl.trim()) {
       toast.error("Cole o link para análise");
       return;
@@ -123,9 +146,11 @@ export default function ProjectCreateByLink() {
       return;
     }
     
+    const projectName = extractNameFromUrl(sourceUrl);
+    
     setStep(2);
     analyzeLink.mutate({
-      name,
+      name: projectName,
       sourceType,
       sourceUrl,
     });
@@ -234,16 +259,6 @@ export default function ProjectCreateByLink() {
             </div>
 
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nome do Projeto</label>
-                <Input
-                  placeholder="Ex: Loja de Roupas, Curso de Marketing..."
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-12"
-                />
-              </div>
-
               <div className="space-y-2">
                 <label className="text-sm font-medium">Link</label>
                 <div className="relative">
@@ -497,7 +512,7 @@ export default function ProjectCreateByLink() {
             <div>
               <h2 className="text-xl font-bold mb-2">Projeto criado!</h2>
               <p className="text-muted-foreground text-sm">
-                Seu projeto "{name}" está pronto com dores mapeadas em 3 níveis.
+                Seu projeto está pronto com dores mapeadas em 3 níveis.
               </p>
             </div>
             <div className="flex flex-col gap-2 text-sm">
@@ -526,7 +541,7 @@ export default function ProjectCreateByLink() {
               className="w-full" 
               size="lg"
               onClick={handleAnalyze}
-              disabled={!name.trim() || !sourceUrl.trim() || !sourceType}
+              disabled={!sourceUrl.trim() || !sourceType}
             >
               Analisar Link
               <ArrowRight className="w-4 h-4 ml-2" />

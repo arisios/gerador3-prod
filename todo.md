@@ -161,3 +161,7 @@
 - [x] Manter apenas 2 opções: Projetos e Influenciadores
 - [x] Projetos → Link ou Descrição
 - [x] Influenciadores → Foto ou Descrição
+
+## Simplificação do Fluxo por Link (18/12/2024)
+- [x] Remover campo de nome do projeto no fluxo por link
+- [x] Usar o link como nome do projeto automaticamente (extrai domínio ou @username)
