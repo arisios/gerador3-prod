@@ -779,45 +779,27 @@ export function TemplateSelector({
   paletteId,
   onPaletteSelect
 }: TemplateSelectorProps) {
-  const [category, setCategory] = useState<string>('all');
-  const [showAll, setShowAll] = useState(false);
+  // Excluir apenas variações de posição de texto (fullbleed-bottom, fullbleed-top)
+  const excludeTemplateIds = ['fullbleed-bottom', 'fullbleed-top'];
   
-  const categories = [
-    { id: 'all', name: 'Todos' },
-    { id: 'split', name: 'Split' },
-    { id: 'card', name: 'Card' },
-    { id: 'fullbleed', name: 'Full Bleed' },
-    { id: 'minimal', name: 'Minimal' },
-    { id: 'bold', name: 'Impacto' },
-    { id: 'editorial', name: 'Editorial' }
+  // Cores principais (8 cores)
+  const mainPaletteIds = [
+    'dark-purple', 'dark-green', 'dark-blue', 'dark-red',
+    'dark-orange', 'dark-pink', 'dark-cyan', 'dark-gold'
   ];
   
-  const filteredTemplates = category === 'all' 
-    ? designTemplates 
-    : designTemplates.filter(t => t.category === category);
+  const displayTemplates = designTemplates.filter(t => !excludeTemplateIds.includes(t.id));
   
-  const displayTemplates = showAll ? filteredTemplates : filteredTemplates.slice(0, 6);
+  const displayPalettes = mainPaletteIds
+    .map(id => colorPalettes.find(p => p.id === id))
+    .filter(Boolean);
 
   return (
     <div className="space-y-4">
-      {/* Filtros de categoria */}
-      <div className="flex flex-wrap gap-2">
-        {categories.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setCategory(cat.id)}
-            className={`px-3 py-1 rounded-full text-sm transition-colors ${
-              category === cat.id 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-muted hover:bg-muted/80'
-            }`}
-          >
-            {cat.name}
-          </button>
-        ))}
-      </div>
-
-      {/* Grid de templates */}
+      {/* Título */}
+      <h4 className="text-sm font-medium">Layout</h4>
+      
+      {/* Grid de templates - 3 colunas para 6 templates em 2 linhas */}
       <div className="grid grid-cols-3 gap-2">
         {displayTemplates.map(template => (
           <button
@@ -881,28 +863,12 @@ export function TemplateSelector({
         ))}
       </div>
 
-      {/* Ver mais */}
-      {filteredTemplates.length > 6 && (
-        <button
-          onClick={() => setShowAll(!showAll)}
-          className="w-full py-2 text-sm text-muted-foreground hover:text-foreground flex items-center justify-center gap-1"
-        >
-          <svg className={`w-4 h-4 transition-transform ${showAll ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-          {showAll ? 'Ver menos' : `Ver mais (${filteredTemplates.length - 6})`}
-        </button>
-      )}
-
-      {/* Paleta de cores */}
+      {/* Paleta de cores - 8 cores principais */}
       {onPaletteSelect && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" />
-            Paleta de Cores
-          </h4>
+          <h4 className="text-sm font-medium">Cor de Fundo</h4>
           <div className="flex flex-wrap gap-2">
-            {colorPalettes.map(palette => (
+            {displayPalettes.map(palette => palette && (
               <button
                 key={palette.id}
                 onClick={() => onPaletteSelect(palette.id)}

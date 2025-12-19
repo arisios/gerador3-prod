@@ -451,3 +451,154 @@ export async function getRecentContents(userId: number, limit = 10): Promise<Con
     .orderBy(desc(contents.createdAt))
     .limit(limit);
 }
+
+
+// ===== CREDITS FUNCTIONS =====
+import { credits, creditTransactions, creditPackages, apiProviders, Credits, CreditTransaction, CreditPackage, ApiProvider } from "../drizzle/schema";
+
+export async function getUserCredits(userId: number): Promise<Credits | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(credits).where(eq(credits.userId, userId)).limit(1);
+  return result[0];
+}
+
+export async function getOrCreateUserCredits(userId: number): Promise<Credits> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  let userCredits = await getUserCredits(userId);
+  if (!userCredits) {
+    await db.insert(credits).values({ userId, balance: 0 });
+    userCredits = await getUserCredits(userId);
+  }
+  return userCredits!;
+}
+
+export async function addCredits(userId: number, amount: number, description: string, stripeSessionId?: string, stripePaymentIntentId?: string): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const userCredits = await getOrCreateUserCredits(userId);
+  const newBalance = userCredits.balance + amount;
+  
+  await db.update(credits).set({ balance: newBalance }).where(eq(credits.userId, userId));
+  
+  await db.insert(creditTransactions).values({
+    userId,
+    type: "purchase",
+    amount,
+    balance: newBalance,
+    description,
+    stripeSessionId,
+    stripePaymentIntentId,
+  });
+  
+  return newBalance;
+}
+
+export async function useCredits(userId: number, amount: number, description: string, provider?: string, generationType?: string, referenceId?: number): Promise<{ success: boolean; newBalance: number; error?: string }> {
+  const db = await getDb();
+  if (!db) return { success: false, newBalance: 0, error: "Database not available" };
+  
+  const userCredits = await getOrCreateUserCredits(userId);
+  
+  if (userCredits.balance < amount) {
+    return { success: false, newBalance: userCredits.balance, error: "Créditos insuficientes" };
+  }
+  
+  const newBalance = userCredits.balance - amount;
+  
+  await db.update(credits).set({ balance: newBalance }).where(eq(credits.userId, userId));
+  
+  await db.insert(creditTransactions).values({
+    userId,
+    type: "usage",
+    amount: -amount,
+    balance: newBalance,
+    description,
+    provider,
+    generationType,
+    referenceId,
+  });
+  
+  return { success: true, newBalance };
+}
+
+export async function addBonusCredits(userId: number, amount: number, description: string): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const userCredits = await getOrCreateUserCredits(userId);
+  const newBalance = userCredits.balance + amount;
+  
+  await db.update(credits).set({ balance: newBalance }).where(eq(credits.userId, userId));
+  
+  await db.insert(creditTransactions).values({
+    userId,
+    type: "bonus",
+    amount,
+    balance: newBalance,
+    description,
+  });
+  
+  return newBalance;
+}
+
+export async function getCreditTransactions(userId: number, limit = 50): Promise<CreditTransaction[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(creditTransactions).where(eq(creditTransactions.userId, userId)).orderBy(desc(creditTransactions.createdAt)).limit(limit);
+}
+
+export async function updateStripeCustomerId(userId: number, stripeCustomerId: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await getOrCreateUserCredits(userId);
+  await db.update(credits).set({ stripeCustomerId }).where(eq(credits.userId, userId));
+}
+
+// ===== CREDIT PACKAGES FUNCTIONS =====
+export async function getActiveCreditPackages(): Promise<CreditPackage[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(creditPackages).where(eq(creditPackages.isActive, true)).orderBy(creditPackages.credits);
+}
+
+export async function getCreditPackageById(id: number): Promise<CreditPackage | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(creditPackages).where(eq(creditPackages.id, id)).limit(1);
+  return result[0];
+}
+
+export async function createCreditPackage(data: { name: string; credits: number; priceInCents: number; stripePriceId?: string; isFeatured?: boolean }): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(creditPackages).values(data);
+  return result[0].insertId;
+}
+
+// ===== API PROVIDERS FUNCTIONS =====
+export async function getActiveApiProviders(type?: "image" | "video"): Promise<ApiProvider[]> {
+  const db = await getDb();
+  if (!db) return [];
+  if (type) {
+    return db.select().from(apiProviders).where(and(eq(apiProviders.isActive, true), eq(apiProviders.type, type))).orderBy(apiProviders.creditsPerUse);
+  }
+  return db.select().from(apiProviders).where(eq(apiProviders.isActive, true)).orderBy(apiProviders.creditsPerUse);
+}
+
+export async function getApiProviderByName(name: string): Promise<ApiProvider | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(apiProviders).where(eq(apiProviders.name, name)).limit(1);
+  return result[0];
+}
+
+export async function createApiProvider(data: { name: string; displayName: string; type: "image" | "video"; creditsPerUse: number; costPerUseInCents: number; quality: "economy" | "standard" | "premium"; config?: unknown }): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(apiProviders).values(data);
+  return result[0].insertId;
+}

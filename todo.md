@@ -502,3 +502,113 @@
 - [ ] Implementar download usando html2canvas para capturar o preview
 - [ ] Escalar a imagem capturada para 1080x1350
 - [ ] Garantir que download seja exatamente igual ao preview
+
+
+## Melhorias de Usabilidade - Interface de Edição (19/12/2024)
+- [ ] Reorganizar barra de ferramentas do editor de forma mais intuitiva
+- [ ] Simplificar menu de templates para facilitar escolha
+- [ ] Remover elementos desnecessários da interface
+- [ ] Melhorar feedback visual ao selecionar opções
+- [ ] Deixar interface mais minimalista estilo apps de edição (Canva, InShot)
+- [ ] Template padrão Full + Texto Central para todos os novos slides
+
+
+## Sistema de Pagamentos e Créditos (19/12/2024)
+
+### Stripe
+- [ ] Integrar Stripe via webdev_add_feature
+- [ ] Configurar produtos/preços no Stripe
+- [ ] Criar página de compra de créditos
+- [ ] Implementar webhook de pagamento confirmado
+
+### Sistema de Créditos
+- [ ] Criar tabela de créditos no banco de dados
+- [ ] Criar tabela de transações/histórico
+- [ ] Implementar lógica de débito de créditos
+- [ ] Implementar lógica de crédito após pagamento
+- [ ] Mostrar saldo de créditos na interface
+
+### Ken Burns (Vídeo Local)
+- [ ] Criar componente de animação Ken Burns
+- [ ] Implementar zoom e pan em imagens
+- [ ] Gerar vídeo MP4 a partir da animação
+- [ ] Integrar com sistema de créditos (1 crédito)
+
+### Multi-API de Imagens
+- [ ] Criar estrutura de providers de imagem
+- [ ] Integrar OmniInfer API (R$0,009/img - 1 crédito)
+- [ ] Integrar Dezgo API (R$0,012/img - 1 crédito)
+- [ ] Integrar Replicate API (R$0,019/img - 2 créditos)
+- [ ] Integrar Runware API (R$0,020/img - 2 créditos)
+- [ ] Manter Manus como opção (R$0,12/img - 2 créditos)
+- [ ] Interface para usuário escolher provider
+- [ ] Consumir créditos conforme provider escolhido
+
+### Multi-API de Vídeos
+- [ ] Criar estrutura de providers de vídeo
+- [ ] Ken Burns local (R$0 - 1 crédito)
+- [ ] Integrar Replicate Wan 480p (R$2,79 - 5 créditos)
+- [ ] Integrar Runware HD (R$5,70 - 10 créditos)
+- [ ] Integrar Runware Luma Premium (R$7,44 - 15 créditos)
+- [ ] Interface para usuário escolher provider
+- [ ] Consumir créditos conforme provider escolhido
+
+### Interface de Créditos
+- [ ] Página de configurações com saldo
+- [ ] Histórico de transações
+- [ ] Seletor de qualidade/provider na geração
+- [ ] Aviso quando créditos estiverem baixos
+
+
+## Sistema de Pagamentos e Créditos (19/12/2024)
+- [x] Integrar Stripe para pagamentos
+- [x] Criar schema de créditos (userCredits, creditTransactions, creditPackages)
+- [x] Criar funções de DB para créditos
+- [x] Criar página de créditos (/credits)
+- [x] Criar rotas de créditos (getBalance, getTransactions, getPackages, getProviders)
+- [x] Testes do sistema de créditos
+- [ ] Configurar produtos no Stripe
+- [ ] Webhook do Stripe para confirmar pagamentos
+- [ ] Interface de checkout funcional
+
+## Sistema Multi-API de Imagens (19/12/2024)
+- [x] Criar estrutura de providers (index.ts)
+- [x] Provider OmniInfer (econômico - R$0,01/img)
+- [x] Provider Dezgo (econômico - R$0,01/img)
+- [x] Provider Replicate (padrão - R$0,02/img)
+- [x] Provider Runware (padrão - R$0,02/img)
+- [x] Provider Manus (premium - incluso)
+- [x] Serviço unificado de imagens (imageService.ts)
+- [ ] Interface para escolher provider
+- [ ] Dedução de créditos ao gerar
+
+## Sistema de Vídeo (19/12/2024)
+- [x] Ken Burns (local, gratuito) - componente frontend
+- [x] Ken Burns - configurações e presets
+- [x] Serviço de vídeo (videoService.ts)
+- [ ] Provider Replicate Wan 480p (R$2,79/vídeo)
+- [ ] Provider Replicate Wan 720p HD (R$5,70/vídeo)
+- [ ] Provider Runware Luma (R$7,44/vídeo)
+- [ ] Interface de geração de vídeo
+- [ ] Preview de Ken Burns no frontend
+- [ ] Exportação de Ken Burns como MP4
+
+## Tabela de Preços por Crédito
+| Serviço | Créditos | Custo Real |
+|---------|----------|------------|
+| Imagem OmniInfer | 1 | R$0,01 |
+| Imagem Dezgo | 1 | R$0,01 |
+| Imagem Replicate | 2 | R$0,02 |
+| Imagem Runware | 2 | R$0,02 |
+| Imagem Manus | 2 | ~R$0,12 |
+| Ken Burns | 3 | R$0,00 |
+| Vídeo Wan 480p | 15 | R$2,79 |
+| Vídeo Wan 720p | 30 | R$5,70 |
+| Vídeo Luma | 40 | R$7,44 |
+
+## Pacotes de Créditos
+| Pacote | Créditos | Preço | Margem |
+|--------|----------|-------|--------|
+| Starter | 30 | R$39,90 | ~150%+ |
+| Popular | 100 | R$99,90 | ~150%+ |
+| Pro | 300 | R$249,90 | ~150%+ |

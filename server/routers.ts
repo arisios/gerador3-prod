@@ -178,7 +178,7 @@ export const appRouter = router({
             const slide = slides.find(s => s.order === slideResult.order);
             if (slide) {
               const validTemplate = designTemplates.find(t => t.id === slideResult.templateId);
-              const templateId = validTemplate ? slideResult.templateId : 'split-top';
+              const templateId = validTemplate ? slideResult.templateId : 'fullbleed-center';
               // Cada slide recebe uma cor diferente (rotaciona se tiver mais slides que cores)
               const slidePaletteId = darkPalettes[i % darkPalettes.length];
               
@@ -199,7 +199,8 @@ export const appRouter = router({
           return { paletteId: 'varied', updates };
         } catch (e) {
           // Fallback: distribuir templates variados manualmente COM cores variadas
-          const fallbackTemplates = ['split-top-image', 'bold-statement', 'card-centered', 'editorial-story', 'split-left-image', 'card-rounded', 'editorial-magazine', 'split-60-40', 'minimal-left-aligned', 'split-right-image'];
+          // Template padrão: Full + Texto Central para todos os slides
+          const fallbackTemplates = ['fullbleed-center'];
           const darkPalettes = ['dark-purple', 'dark-green', 'dark-blue', 'dark-red', 'dark-orange', 'dark-pink', 'dark-cyan', 'dark-gold'];
           const updates: { slideId: number; templateId: string; paletteId: string; reason: string }[] = [];
           
@@ -797,6 +798,8 @@ export const appRouter = router({
               order: s.order || idx + 1,
               text: s.text,
               visualTemplate: visualTemplates[0]?.id || "lifestyle-editorial",
+              designTemplateId: 'fullbleed-center', // Template padrão: Full + Texto Central
+              colorPaletteId: 'dark-purple', // Cor padrão: Roxo Escuro
             }));
             await db.createSlides(contentId, slidesData);
           }
@@ -1647,6 +1650,124 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
           throw new TRPCError({ code: "BAD_REQUEST", message: "Failed to fetch image" });
         }
       }),
+  }),
+
+  // ===== CREDITS =====
+  credits: router({
+    // Obter saldo de créditos do usuário
+    getBalance: protectedProcedure.query(async ({ ctx }) => {
+      const credits = await db.getOrCreateUserCredits(ctx.user.id);
+      return { balance: credits.balance };
+    }),
+
+    // Obter histórico de transações
+    getTransactions: protectedProcedure
+      .input(z.object({ limit: z.number().optional() }).optional())
+      .query(async ({ ctx, input }) => {
+        return db.getCreditTransactions(ctx.user.id, input?.limit || 50);
+      }),
+
+    // Obter pacotes de créditos disponíveis
+    getPackages: publicProcedure.query(async () => {
+      const packages = await db.getActiveCreditPackages();
+      if (packages.length === 0) {
+        // Retornar pacotes padrão se não houver no banco
+        return [
+          { id: 1, name: "Starter", credits: 30, priceInCents: 3990, isFeatured: false },
+          { id: 2, name: "Popular", credits: 100, priceInCents: 9990, isFeatured: true },
+          { id: 3, name: "Pro", credits: 300, priceInCents: 24990, isFeatured: false },
+        ];
+      }
+      return packages;
+    }),
+
+    // Obter providers disponíveis
+    getProviders: publicProcedure.query(() => {
+      return {
+        image: [
+          { name: "omniinfer", displayName: "OmniInfer (Econômico)", creditsPerUse: 1, quality: "economy" },
+          { name: "dezgo", displayName: "Dezgo (Econômico)", creditsPerUse: 1, quality: "economy" },
+          { name: "replicate", displayName: "Replicate FLUX (Padrão)", creditsPerUse: 2, quality: "standard" },
+          { name: "runware", displayName: "Runware (Padrão)", creditsPerUse: 2, quality: "standard" },
+          { name: "manus", displayName: "Manus AI (Premium)", creditsPerUse: 2, quality: "premium" },
+        ],
+        video: [
+          { name: "kenburns", displayName: "Ken Burns (Local)", creditsPerUse: 3, quality: "economy" },
+          { name: "replicate_wan", displayName: "Replicate Wan 480p", creditsPerUse: 15, quality: "standard" },
+          { name: "replicate_wan_hd", displayName: "Replicate Wan 720p HD", creditsPerUse: 30, quality: "premium" },
+          { name: "runware_luma", displayName: "Runware Luma (Premium)", creditsPerUse: 40, quality: "premium" },
+        ],
+      };
+    }),
+
+    // Adicionar créditos bônus (admin only)
+    addBonus: protectedProcedure
+      .input(z.object({
+        userId: z.number(),
+        amount: z.number().positive(),
+        description: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Apenas administradores podem adicionar bônus" });
+        }
+        const newBalance = await db.addBonusCredits(input.userId, input.amount, input.description);
+        return { success: true, newBalance };
+      }),
+  }),
+
+  // ===== STRIPE/PAYMENTS =====
+  payments: router({
+    // Criar sessão de checkout
+    createCheckout: protectedProcedure
+      .input(z.object({
+        packageId: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { createCheckoutSession } = await import("./stripe");
+        const baseUrl = process.env.VITE_APP_URL || "http://localhost:3000";
+        
+        const result = await createCheckoutSession(
+          ctx.user.id,
+          ctx.user.email || "",
+          input.packageId,
+          `${baseUrl}/credits?success=true`,
+          `${baseUrl}/credits?canceled=true`
+        );
+        
+        return result;
+      }),
+
+    // Verificar status do Stripe
+    getStatus: publicProcedure.query(async () => {
+      const { isStripeConfigured } = await import("./stripe");
+      return { configured: isStripeConfigured() };
+    }),
+  }),
+
+  // ===== PROVIDERS =====
+  providers: router({
+    // Obter providers de imagem disponíveis
+    getImageProviders: publicProcedure.query(() => {
+      const { IMAGE_PROVIDERS } = require("./providers/index");
+      return Object.values(IMAGE_PROVIDERS).map((p: any) => ({
+        name: p.name,
+        displayName: p.displayName,
+        creditsPerUse: p.creditsPerUse,
+        quality: p.quality,
+      }));
+    }),
+
+    // Obter providers de vídeo disponíveis
+    getVideoProviders: publicProcedure.query(() => {
+      const { VIDEO_PROVIDERS } = require("./providers/index");
+      return Object.values(VIDEO_PROVIDERS).map((p: any) => ({
+        name: p.name,
+        displayName: p.displayName,
+        creditsPerUse: p.creditsPerUse,
+        quality: p.quality,
+      }));
+    }),
   }),
 });
 

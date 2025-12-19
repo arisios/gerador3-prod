@@ -170,6 +170,60 @@ export const virals = mysqlTable("virals", {
   collectedAt: timestamp("collectedAt").defaultNow().notNull(),
 });
 
+// Credits table - saldo de créditos do usuário
+export const credits = mysqlTable("credits", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  balance: int("balance").notNull().default(0),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+// Credit Transactions table - histórico de transações
+export const creditTransactions = mysqlTable("creditTransactions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", ["purchase", "usage", "refund", "bonus"]).notNull(),
+  amount: int("amount").notNull(), // positivo = crédito, negativo = débito
+  balance: int("balance").notNull(), // saldo após transação
+  description: text("description"),
+  // Para compras
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
+  stripeSessionId: varchar("stripeSessionId", { length: 255 }),
+  // Para uso
+  provider: varchar("provider", { length: 50 }), // omniinfer, dezgo, replicate, runware, manus
+  generationType: varchar("generationType", { length: 50 }), // image, video, ken_burns
+  referenceId: int("referenceId"), // ID do conteúdo/slide gerado
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+// Credit Packages table - pacotes de créditos disponíveis
+export const creditPackages = mysqlTable("creditPackages", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  credits: int("credits").notNull(),
+  priceInCents: int("priceInCents").notNull(), // preço em centavos BRL
+  stripePriceId: varchar("stripePriceId", { length: 255 }),
+  isActive: boolean("isActive").default(true),
+  isFeatured: boolean("isFeatured").default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+// API Providers table - configuração de providers de API
+export const apiProviders = mysqlTable("apiProviders", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 50 }).notNull().unique(),
+  displayName: varchar("displayName", { length: 100 }).notNull(),
+  type: mysqlEnum("type", ["image", "video"]).notNull(),
+  creditsPerUse: int("creditsPerUse").notNull(),
+  costPerUseInCents: int("costPerUseInCents").notNull(), // custo real em centavos
+  quality: mysqlEnum("quality", ["economy", "standard", "premium"]).notNull(),
+  isActive: boolean("isActive").default(true),
+  config: json("config"), // configurações específicas do provider
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 // User Settings table
 export const userSettings = mysqlTable("userSettings", {
   id: int("id").autoincrement().primaryKey(),
@@ -200,3 +254,7 @@ export type InfluencerSlide = typeof influencerSlides.$inferSelect;
 export type Trend = typeof trends.$inferSelect;
 export type Viral = typeof virals.$inferSelect;
 export type UserSettings = typeof userSettings.$inferSelect;
+export type Credits = typeof credits.$inferSelect;
+export type CreditTransaction = typeof creditTransactions.$inferSelect;
+export type CreditPackage = typeof creditPackages.$inferSelect;
+export type ApiProvider = typeof apiProviders.$inferSelect;
