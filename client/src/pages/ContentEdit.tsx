@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { trpc } from "@/lib/trpc";
 import { SlideRenderer, SlidePreview, TemplateSelector, downloadSlide } from "@/components/SlideRenderer";
 import SlideComposer, { SlideStyle } from "@/components/SlideComposer";
+import SlideComposerNew from "@/components/SlideComposerNew";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { designTemplates, colorPalettes, type DesignTemplate } from "../../../shared/designTemplates";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Images, Palette, Layout, Wand2, Upload } from "lucide-react";
@@ -28,6 +29,7 @@ export default function ContentEdit() {
   const [selectedPaletteId, setSelectedPaletteId] = useState("dark-purple");
   const [designSheetOpen, setDesignSheetOpen] = useState(false);
   const [showComposer, setShowComposer] = useState(false);
+  const [showNewComposer, setShowNewComposer] = useState(false);
 
   const { data: content, isLoading } = trpc.content.get.useQuery({ id: contentId });
   const { data: project } = trpc.projects.get.useQuery(
@@ -539,8 +541,15 @@ export default function ContentEdit() {
       </header>
 
       <main className="container px-4 py-6 space-y-6">
-        {/* SlideComposer ou Preview do Slide com Template */}
-        {showComposer && currentSlide ? (
+        {/* Novo Editor com Drag and Drop */}
+        {showNewComposer && currentSlide ? (
+          <SlideComposerNew
+            imageUrl={currentSlide.imageUrl || undefined}
+            initialText={currentSlide.text || ""}
+            backgroundColor={colorPalettes.find(p => p.id === selectedPaletteId)?.colors.background || "#1a1a2e"}
+            slideIndex={currentSlideIndex}
+          />
+        ) : showComposer && currentSlide ? (
           <SlideComposer
             text={currentSlide.text || ""}
             imageUrl={currentSlide.imageUrl || undefined}
@@ -640,14 +649,28 @@ export default function ContentEdit() {
                 <Layout className="w-5 h-5" />
                 <h3 className="font-semibold">Design do Slide</h3>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                  <Button 
+                    variant={showNewComposer ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => {
+                      setShowNewComposer(!showNewComposer);
+                      setShowComposer(false);
+                    }}
+                  >
+                    <Edit2 className="w-4 h-4 mr-1" />
+                    {showNewComposer ? "Fechar" : "Editor Novo"}
+                  </Button>
                   <Button 
                     variant={showComposer ? "default" : "outline"} 
                     size="sm"
-                    onClick={() => setShowComposer(!showComposer)}
+                    onClick={() => {
+                      setShowComposer(!showComposer);
+                      setShowNewComposer(false);
+                    }}
                   >
                     <Edit2 className="w-4 h-4 mr-1" />
-                    {showComposer ? "Fechar Editor" : "Editar Visual"}
+                    {showComposer ? "Fechar" : "Editor Antigo"}  
                   </Button>
                   <Sheet open={designSheetOpen} onOpenChange={setDesignSheetOpen}>
                     <SheetTrigger asChild>

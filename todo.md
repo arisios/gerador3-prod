@@ -295,3 +295,47 @@
 - [x] Download veio sem imagem - RESOLVIDO: imagem está aparecendo corretamente
 - [x] Unificar renderização para que preview e download sejam idênticos - CORRIGIDO: preview e download usam positionY
 - [x] Correção baseada no arquivo enviado pelo usuário: preview usa top: ${positionY}%, download usa textY = height * positionY / 100
+
+## Novo Editor Visual - Drag and Drop (19/12/2024)
+
+### Conceito Base
+- [ ] Canvas = Parede (100% da área)
+- [ ] Imagem = Quadro móvel (pode ser posicionado e redimensionado)
+- [ ] Texto = Post-it móvel (pode ser posicionado e redimensionado)
+- [ ] Template define posição INICIAL, mas usuário pode ajustar
+
+### Funcionalidades de Imagem
+- [ ] Arrastar imagem com toque/mouse para reposicionar
+- [ ] Redimensionar imagem (pinça no mobile, handles no desktop)
+- [ ] Posição X e Y ajustáveis (0-100%)
+- [ ] Tamanho/altura ajustável (% do canvas)
+
+### Funcionalidades de Texto
+- [ ] Arrastar texto com toque/mouse para reposicionar
+- [ ] Suporte a MÚLTIPLOS blocos de texto
+- [ ] Botão "Adicionar Texto" para criar novos blocos
+- [ ] Cada bloco com posição, tamanho e cor independentes
+- [ ] Botão deletar para remover blocos de texto
+
+### Interface
+- [ ] Botões +/- para ajustar tamanhos (em vez de sliders)
+- [ ] Miniaturas de slides menores (ocupar menos espaço)
+- [ ] Preview grande e interativo
+- [ ] Controles compactos
+
+### Garantia Preview = Download
+- [ ] Mesma lógica de renderização para preview e download
+- [ ] Posições em % do canvas (não depende de template)
+- [ ] Download usa Canvas API com as mesmas coordenadas do preview
+
+
+
+## Novo Editor Visual - Drag and Drop (19/12/2024)
+- [x] Criar componente SlideComposerNew com drag-and-drop
+- [x] Imagem arrastável (toque/mouse)
+- [x] Texto arrastável (toque/mouse)
+- [x] Suporte a múltiplos blocos de texto
+- [x] Botões +/- para tamanho (imagem e texto)
+- [ ] Testar em dispositivo real (sandbox tem viewport muito grande)
+- [ ] Garantir que preview = download
+- [ ] Integrar com sistema de salvamento de estilos
