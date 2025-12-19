@@ -133,6 +133,7 @@ export default function SlideComposerNew({
   
   const canvasRef = useRef<HTMLDivElement>(null);
   
+
   // Bloquear/liberar scroll ao arrastar
   useEffect(() => {
     if (dragMode !== "none") {

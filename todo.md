@@ -442,3 +442,37 @@
 - [ ] Tamanho da fonte inconsistente no download: segunda linha fica maior que as outras
 - [ ] Handles não redimensionam o conteúdo (fonte/imagem), só a área/moldura
 - [ ] Handles da imagem estão fora da área visível do preview
+
+
+## Bugs CRÍTICOS - Editor Visual (19/12/2024)
+- [ ] Edição de um slide está copiando para todos os outros slides
+- [ ] Texto do primeiro slide está sendo repetido em todos os slides
+- [ ] Download de todos os slides baixa apenas o primeiro slide repetido
+- [ ] Cada slide deve ter estado independente (texto, posição, estilo)
+
+
+## Editor Estilo Canva Mobile (19/12/2024)
+- [ ] Criar componente SlideEditorCanva com layout mobile
+- [ ] Canvas em tela cheia (ocupa quase toda a tela)
+- [ ] Header fino com navegação (← 1/7 →) + Salvar + Baixar
+- [ ] Barra de ferramentas fixa embaixo (ícones: Texto, Imagem, Cor, Fonte)
+- [ ] Painel desliza de baixo ao clicar em ferramenta
+- [ ] Arrastar imagem e texto (igual Canva)
+- [ ] Redimensionar com handles nos cantos
+- [ ] Botão Salvar: salva configuração do slide no banco
+- [ ] Botão Baixar: menu com opções (este slide, todos, com/sem texto)
+- [ ] Baixar Todos: usa configurações salvas de cada slide
+- [ ] Carregar configuração salva ao abrir cada slide
+
+
+## Editor Estilo Canva Mobile - IMPLEMENTADO (19/12/2024)
+- [x] Canvas em tela cheia (imagem ocupa quase toda a tela)
+- [x] Header fino (navegação + Salvar + Baixar)
+- [x] Barra de ferramentas fixa embaixo (ícones: Texto, Imagem, Cor)
+- [x] Painel desliza de baixo quando clica num ícone
+- [x] Botão Baixar com menu (Este slide com/sem texto, Todos com/sem texto)
+- [x] Botão Salvar (salva configuração no banco)
+- [x] Navegação entre slides funcionando (cada slide com seu texto/imagem)
+- [x] Download funcionando com imagem + texto
+- [x] Proxy de imagem para evitar CORS
+- [ ] Baixar Todos (usa configurações salvas de cada slide)

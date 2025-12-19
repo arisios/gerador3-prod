@@ -8,8 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { trpc } from "@/lib/trpc";
 import { SlideRenderer, SlidePreview, TemplateSelector, downloadSlide } from "@/components/SlideRenderer";
-// SlideComposer antigo removido - usando apenas SlideComposerNew
-import SlideComposerNew from "@/components/SlideComposerNew";
+// Editor estilo Canva mobile
+import SlideEditorCanva from "@/components/SlideEditorCanva";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { designTemplates, colorPalettes, type DesignTemplate } from "../../../shared/designTemplates";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Images, Palette, Layout, Wand2, Upload } from "lucide-react";
@@ -485,15 +485,49 @@ export default function ContentEdit() {
       </header>
 
       <main className="container px-4 py-6 space-y-6">
-        {/* Novo Editor com Drag and Drop */}
-        {showNewComposer && currentSlide ? (
-          <SlideComposerNew
+        {/* Editor Canva Mobile - Tela Cheia */}
+        {showNewComposer && currentSlide && (
+          <SlideEditorCanva
+            key={`slide-${currentSlide.id}-${currentSlideIndex}`}
             imageUrl={currentSlide.imageUrl || undefined}
             initialText={currentSlide.text || ""}
             backgroundColor={colorPalettes.find(p => p.id === selectedPaletteId)?.colors.background || "#1a1a2e"}
             slideIndex={currentSlideIndex}
+            totalSlides={slides.length}
+            slideId={currentSlide.id}
+            savedConfig={(currentSlide as any).style?.editorConfig || null}
+            onSave={async (config) => {
+              await updateSlide.mutateAsync({
+                id: currentSlide.id,
+                style: { ...((currentSlide as any).style || {}), editorConfig: config }
+              });
+            }}
+            onNavigate={(direction) => {
+              if (direction === "prev" && currentSlideIndex > 0) {
+                setCurrentSlideIndex(currentSlideIndex - 1);
+              } else if (direction === "next" && currentSlideIndex < slides.length - 1) {
+                setCurrentSlideIndex(currentSlideIndex + 1);
+              }
+            }}
+            onDownload={async (type) => {
+              if (type === "current-with" || type === "current-without") {
+                // Download do slide atual
+                await handleDownloadRendered();
+              } else {
+                // Download de todos
+                toast.info("Baixando todos os slides...");
+                for (let i = 0; i < slides.length; i++) {
+                  setCurrentSlideIndex(i);
+                  await new Promise(r => setTimeout(r, 500));
+                  await handleDownloadRendered();
+                }
+                toast.success("Todos os slides baixados!");
+              }
+            }}
           />
-        ) : (
+        )}
+        
+        {!showNewComposer && currentSlide && (
           <Card className="overflow-hidden">
             <div className="relative">
               {/* Badge do template */}
