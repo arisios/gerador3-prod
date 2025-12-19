@@ -394,3 +394,15 @@
 - [x] Múltiplos blocos de texto suportados
 - [x] Drag-and-drop para mover texto
 - [x] Todas as opções de edição de texto (tamanho, cor, sombra, contorno, glow, etc.)
+
+
+## Bugs Reportados - Editor (19/12/2024)
+- [x] Texto comprimido no meio - adicionado controles de margem esquerda/direita
+- [x] Tela rola junto ao arrastar texto no mobile - bloqueado scroll durante drag com useEffect
+
+
+## Correção do Proxy de Imagem (19/12/2024)
+- [x] Corrigido URL do proxy: /api/image-proxy (não /api/proxy-image)
+- [x] Download agora funciona com imagem cobrindo 100% do canvas
+- [x] Bloqueio de scroll ao arrastar texto implementado
+- [x] Controles de margem esquerda/direita já existem no código

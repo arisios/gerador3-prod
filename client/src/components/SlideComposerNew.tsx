@@ -7,8 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { 
-  Plus, Minus, Trash2, Download, Move, Type, Image as ImageIcon,
-  AlignLeft, AlignCenter, AlignRight, Bold
+  Plus, Minus, Trash2, Download, Type,
+  AlignLeft, AlignCenter, AlignRight
 } from "lucide-react";
 
 // Tipos
@@ -22,6 +22,8 @@ interface TextBlock {
   fontFamily: string;
   fontWeight: string;
   textAlign: "left" | "center" | "right";
+  marginLeft: number;
+  marginRight: number;
   shadowEnabled: boolean;
   shadowColor: string;
   shadowBlur: number;
@@ -53,11 +55,13 @@ const DEFAULT_TEXT_BLOCK: Omit<TextBlock, "id"> = {
   text: "Seu texto aqui",
   x: 50,
   y: 75,
-  fontSize: 24,
+  fontSize: 28,
   color: "#FFFFFF",
   fontFamily: "Inter",
   fontWeight: "bold",
   textAlign: "center",
+  marginLeft: 5,
+  marginRight: 5,
   shadowEnabled: true,
   shadowColor: "#000000",
   shadowBlur: 4,
@@ -79,73 +83,82 @@ const DEFAULT_TEXT_BLOCK: Omit<TextBlock, "id"> = {
 const COLOR_PRESETS = [
   { name: "Branco", text: "#FFFFFF", bg: "#1a1a2e" },
   { name: "Neon Verde", text: "#39FF14", bg: "#0a0a0a" },
-  { name: "Neon Rosa", text: "#FF10F0", bg: "#0a0a0a" },
-  { name: "Amarelo", text: "#FFFF00", bg: "#0a0a0a" },
-  { name: "Laranja", text: "#FF6B00", bg: "#0a0a0a" },
-  { name: "Azul", text: "#00D4FF", bg: "#0a0a0a" },
-  { name: "Roxo", text: "#A855F7", bg: "#1a1a2e" },
+  { name: "Neon Rosa", text: "#FF10F0", bg: "#1a0a1a" },
+  { name: "Neon Azul", text: "#00D4FF", bg: "#0a1a2e" },
+  { name: "Dourado", text: "#FFD700", bg: "#1a1a0a" },
+  { name: "Coral", text: "#FF6B6B", bg: "#1a0a0a" },
 ];
 
-const FONT_FAMILIES = ["Inter", "Arial", "Georgia", "Times New Roman", "Verdana", "Impact"];
-
-const generateId = () => Math.random().toString(36).substr(2, 9);
+const FONT_OPTIONS = [
+  "Inter", "Roboto", "Montserrat", "Playfair Display", 
+  "Oswald", "Poppins", "Bebas Neue", "Anton"
+];
 
 export default function SlideComposerNew({
   imageUrl,
   initialText = "",
-  backgroundColor: initialBgColor = "#1a1a2e",
+  backgroundColor: initialBg = "#1a1a2e",
   onSave,
-  slideIndex = 0,
+  slideIndex = 1,
 }: SlideComposerNewProps) {
+  // Estados
   const [textBlocks, setTextBlocks] = useState<TextBlock[]>([
-    { ...DEFAULT_TEXT_BLOCK, id: generateId(), text: initialText || "Seu texto aqui" }
+    { ...DEFAULT_TEXT_BLOCK, id: "text-1", text: initialText || DEFAULT_TEXT_BLOCK.text }
   ]);
-  const [backgroundColor, setBackgroundColor] = useState(initialBgColor);
-  const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [selectedTextId, setSelectedTextId] = useState<string>("text-1");
+  const [backgroundColor, setBackgroundColor] = useState(initialBg);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [downloading, setDownloading] = useState(false);
-  const [activeTab, setActiveTab] = useState("basico");
   
   const canvasRef = useRef<HTMLDivElement>(null);
   
+  // Bloquear/liberar scroll ao arrastar
   useEffect(() => {
-    if (initialText && textBlocks.length > 0) {
-      setTextBlocks(prev => [{ ...prev[0], text: initialText }, ...prev.slice(1)]);
+    if (isDragging) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
     }
-  }, [initialText]);
-  
-  const selectedTextBlock = textBlocks.find(b => b.id === selectedElement);
-  
-  // Funções de texto
-  const addTextBlock = () => {
-    const newBlock: TextBlock = {
-      ...DEFAULT_TEXT_BLOCK,
-      id: generateId(),
-      text: "Novo texto",
-      y: 50 + textBlocks.length * 10,
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
     };
-    setTextBlocks([...textBlocks, newBlock]);
-    setSelectedElement(newBlock.id);
+  }, [isDragging]);
+  
+  // Texto selecionado
+  const selectedText = textBlocks.find(b => b.id === selectedTextId) || textBlocks[0];
+  
+  // Funções de manipulação
+  const updateTextBlock = (id: string, updates: Partial<TextBlock>) => {
+    setTextBlocks(blocks => blocks.map(b => b.id === id ? { ...b, ...updates } : b));
+  };
+  
+  const addTextBlock = () => {
+    const newId = `text-${Date.now()}`;
+    setTextBlocks(blocks => [...blocks, { ...DEFAULT_TEXT_BLOCK, id: newId, y: 50 }]);
+    setSelectedTextId(newId);
   };
   
   const removeTextBlock = (id: string) => {
     if (textBlocks.length <= 1) {
-      toast.error("Deve haver pelo menos um bloco de texto");
+      toast.error("Precisa ter pelo menos um texto");
       return;
     }
-    setTextBlocks(textBlocks.filter(b => b.id !== id));
-    if (selectedElement === id) setSelectedElement(null);
+    setTextBlocks(blocks => blocks.filter(b => b.id !== id));
+    if (selectedTextId === id) {
+      setSelectedTextId(textBlocks[0].id === id ? textBlocks[1]?.id : textBlocks[0].id);
+    }
   };
   
-  const updateTextBlock = (id: string, updates: Partial<TextBlock>) => {
-    setTextBlocks(textBlocks.map(b => b.id === id ? { ...b, ...updates } : b));
-  };
-  
-  // Drag handlers
-  const handleMouseDown = (e: React.MouseEvent, elementId: string) => {
+  // Handlers de drag - MOUSE
+  const handleMouseDown = (e: React.MouseEvent, textId: string) => {
     e.preventDefault();
-    setSelectedElement(elementId);
+    e.stopPropagation();
+    setSelectedTextId(textId);
     setIsDragging(true);
     
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -153,12 +166,12 @@ export default function SlideComposerNew({
     
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    const block = textBlocks.find(b => b.id === elementId);
+    const block = textBlocks.find(b => b.id === textId);
     if (block) setDragOffset({ x: x - block.x, y: y - block.y });
   };
   
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !selectedElement) return;
+    if (!isDragging || !selectedTextId) return;
     
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -166,27 +179,32 @@ export default function SlideComposerNew({
     const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100 - dragOffset.x));
     const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100 - dragOffset.y));
     
-    updateTextBlock(selectedElement, { x, y });
+    updateTextBlock(selectedTextId, { x, y });
   };
   
   const handleMouseUp = () => setIsDragging(false);
   
-  const handleTouchStart = (e: React.TouchEvent, elementId: string) => {
-    const touch = e.touches[0];
-    setSelectedElement(elementId);
+  // Handlers de drag - TOUCH
+  const handleTouchStart = (e: React.TouchEvent, textId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedTextId(textId);
     setIsDragging(true);
     
+    const touch = e.touches[0];
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
     
     const x = ((touch.clientX - rect.left) / rect.width) * 100;
     const y = ((touch.clientY - rect.top) / rect.height) * 100;
-    const block = textBlocks.find(b => b.id === elementId);
+    const block = textBlocks.find(b => b.id === textId);
     if (block) setDragOffset({ x: x - block.x, y: y - block.y });
   };
   
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !selectedElement) return;
+    if (!isDragging || !selectedTextId) return;
+    e.preventDefault();
+    e.stopPropagation();
     
     const touch = e.touches[0];
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -195,10 +213,30 @@ export default function SlideComposerNew({
     const x = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100 - dragOffset.x));
     const y = Math.max(0, Math.min(100, ((touch.clientY - rect.top) / rect.height) * 100 - dragOffset.y));
     
-    updateTextBlock(selectedElement, { x, y });
+    updateTextBlock(selectedTextId, { x, y });
   };
   
-  // Download - USANDO A MESMA LÓGICA DO ARQUIVO QUE FUNCIONA
+  const handleTouchEnd = () => setIsDragging(false);
+  
+  // Função para calcular estilo do texto (usada no preview E no download)
+  const getTextStyle = (block: TextBlock, containerWidth: number) => {
+    const marginLeftPx = (block.marginLeft / 100) * containerWidth;
+    const marginRightPx = (block.marginRight / 100) * containerWidth;
+    const availableWidth = containerWidth - marginLeftPx - marginRightPx;
+    
+    let textX: number;
+    if (block.textAlign === "center") {
+      textX = marginLeftPx + availableWidth / 2;
+    } else if (block.textAlign === "right") {
+      textX = containerWidth - marginRightPx;
+    } else {
+      textX = marginLeftPx;
+    }
+    
+    return { marginLeftPx, marginRightPx, availableWidth, textX };
+  };
+  
+  // Download
   const handleDownload = async (withText: boolean) => {
     setDownloading(true);
     
@@ -214,34 +252,30 @@ export default function SlideComposerNew({
       ctx.fillStyle = backgroundColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // 2. Carregar e desenhar imagem (COBRINDO 100% DO CANVAS)
+      // 2. Desenhar imagem (100% cover)
       if (imageUrl) {
-        const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
-        
         try {
-          const img = new Image();
-          img.crossOrigin = "anonymous";
-          
-          await new Promise<void>((resolve, reject) => {
-            img.onload = () => resolve();
-            img.onerror = () => reject(new Error("Falha ao carregar imagem"));
-            img.src = proxyUrl;
+          const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
+          const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image();
+            image.crossOrigin = "anonymous";
+            image.onload = () => resolve(image);
+            image.onerror = reject;
+            image.src = proxyUrl;
           });
           
-          // Desenhar imagem cobrindo TODO o canvas (cover)
+          // Cover - preencher todo o canvas mantendo proporção
           const imgRatio = img.width / img.height;
           const canvasRatio = canvas.width / canvas.height;
           
           let drawWidth, drawHeight, drawX, drawY;
           
           if (imgRatio > canvasRatio) {
-            // Imagem mais larga - ajustar pela altura
             drawHeight = canvas.height;
             drawWidth = img.width * (canvas.height / img.height);
             drawX = (canvas.width - drawWidth) / 2;
             drawY = 0;
           } else {
-            // Imagem mais alta - ajustar pela largura
             drawWidth = canvas.width;
             drawHeight = img.height * (canvas.width / img.width);
             drawX = 0;
@@ -251,13 +285,12 @@ export default function SlideComposerNew({
           ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
         } catch (imgError) {
           console.warn("Erro ao carregar imagem:", imgError);
-          toast.error("Erro ao carregar imagem, usando fundo sólido");
         }
       }
       
-      // 3. Desenhar textos (se withText)
+      // 3. Desenhar textos
       if (withText) {
-        const scale = canvas.width / 360;
+        const scale = canvas.width / 360; // Escala do preview para o canvas
         
         for (const block of textBlocks) {
           if (!block.text.trim()) continue;
@@ -268,23 +301,18 @@ export default function SlideComposerNew({
           ctx.textAlign = block.textAlign;
           ctx.textBaseline = "middle";
           
-          // Posição do texto
-          let textX: number;
-          if (block.textAlign === "center") textX = canvas.width / 2;
-          else if (block.textAlign === "right") textX = canvas.width - 40;
-          else textX = 40;
-          
+          // Calcular posição usando margens
+          const { availableWidth, textX } = getTextStyle(block, canvas.width);
           const textY = (block.y / 100) * canvas.height;
           
           // Quebrar texto em linhas
-          const maxWidth = canvas.width * 0.9;
           const words = block.text.split(" ");
           const lines: string[] = [];
           let currentLine = words[0] || "";
           
           for (let i = 1; i < words.length; i++) {
             const testLine = currentLine + " " + words[i];
-            if (ctx.measureText(testLine).width > maxWidth) {
+            if (ctx.measureText(testLine).width > availableWidth) {
               lines.push(currentLine);
               currentLine = words[i];
             } else {
@@ -310,7 +338,7 @@ export default function SlideComposerNew({
               if (block.textAlign === "left") bgX = textX - padding;
               if (block.textAlign === "right") bgX = textX - metrics.width - padding;
               
-              ctx.fillRect(bgX, lineY - fontSize / 2 - padding / 2, metrics.width + padding * 2, fontSize + padding);
+              ctx.fillRect(bgX, lineY - fontSize / 2 - padding, metrics.width + padding * 2, fontSize + padding * 2);
             });
             ctx.restore();
           }
@@ -331,23 +359,22 @@ export default function SlideComposerNew({
             ctx.shadowOffsetY = 0;
           }
           
-          // Borda/contorno
+          // Contorno
           if (block.borderEnabled) {
             ctx.strokeStyle = block.borderColor;
             ctx.lineWidth = block.borderWidth * scale;
-            ctx.lineJoin = "round";
             lines.forEach((line, index) => {
               ctx.strokeText(line, textX, startY + index * lineHeight);
             });
           }
           
-          // Desenhar texto
-          ctx.fillStyle = block.color;
+          // Texto
+          ctx.letterSpacing = `${block.letterSpacing}px`;
           lines.forEach((line, index) => {
             ctx.fillText(line, textX, startY + index * lineHeight);
           });
           
-          // Resetar sombra
+          // Reset shadow
           ctx.shadowColor = "transparent";
           ctx.shadowBlur = 0;
           ctx.shadowOffsetX = 0;
@@ -356,18 +383,12 @@ export default function SlideComposerNew({
       }
       
       // 4. Download
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `slide_${slideIndex + 1}${withText ? "_com_texto" : "_sem_texto"}.png`;
-          a.click();
-          URL.revokeObjectURL(url);
-          toast.success("Download iniciado!");
-        }
-      }, "image/png", 1.0);
+      const link = document.createElement("a");
+      link.download = `slide_${slideIndex}_${withText ? "com" : "sem"}_texto.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
       
+      toast.success("Download iniciado!");
     } catch (error) {
       console.error("Erro no download:", error);
       toast.error("Erro ao gerar imagem");
@@ -376,91 +397,106 @@ export default function SlideComposerNew({
     }
   };
   
+  // Render do preview de texto
+  const renderTextPreview = (block: TextBlock) => {
+    const previewWidth = 360; // Largura do preview em pixels
+    const { availableWidth, textX } = getTextStyle(block, previewWidth);
+    
+    // Converter textX para porcentagem
+    const leftPercent = (block.marginLeft);
+    const rightPercent = (block.marginRight);
+    const widthPercent = 100 - leftPercent - rightPercent;
+    
+    return (
+      <div
+        key={block.id}
+        className={`absolute cursor-move select-none ${selectedTextId === block.id ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-transparent' : ''}`}
+        style={{
+          left: `${leftPercent}%`,
+          right: `${rightPercent}%`,
+          top: `${block.y}%`,
+          transform: 'translateY(-50%)',
+          width: `${widthPercent}%`,
+          fontSize: `${block.fontSize}px`,
+          fontFamily: `${block.fontFamily}, sans-serif`,
+          fontWeight: block.fontWeight,
+          color: block.color,
+          textAlign: block.textAlign,
+          letterSpacing: `${block.letterSpacing}px`,
+          lineHeight: block.lineHeight,
+          textShadow: block.shadowEnabled 
+            ? `${block.shadowOffsetX}px ${block.shadowOffsetY}px ${block.shadowBlur}px ${block.shadowColor}`
+            : block.glowEnabled 
+              ? `0 0 ${block.glowIntensity}px ${block.glowColor}`
+              : 'none',
+          WebkitTextStroke: block.borderEnabled ? `${block.borderWidth}px ${block.borderColor}` : 'none',
+          backgroundColor: block.bgEnabled ? block.bgColor : 'transparent',
+          padding: block.bgEnabled ? `${block.bgPadding}px` : '0',
+          touchAction: 'none',
+        }}
+        onMouseDown={(e) => handleMouseDown(e, block.id)}
+        onTouchStart={(e) => handleTouchStart(e, block.id)}
+      >
+        {block.text}
+      </div>
+    );
+  };
+
   return (
-    <div className="w-full space-y-4">
+    <div className="flex flex-col gap-4 p-4 max-w-lg mx-auto">
       {/* Header com botões de download */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h3 className="font-semibold flex items-center gap-2">
-          <Move className="w-4 h-4" />
-          Editor Visual - Slide {slideIndex + 1}
-        </h3>
-        <div className="flex gap-2">
-          <Button size="sm" onClick={() => handleDownload(true)} disabled={downloading}>
-            <Download className="w-4 h-4 mr-1" />
-            Com Texto
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => handleDownload(false)} disabled={downloading}>
-            <Download className="w-4 h-4 mr-1" />
-            Sem Texto
-          </Button>
-        </div>
+      <div className="flex gap-2 justify-center">
+        <Button
+          onClick={() => handleDownload(true)}
+          disabled={downloading}
+          className="bg-purple-600 hover:bg-purple-700"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Com Texto
+        </Button>
+        <Button
+          onClick={() => handleDownload(false)}
+          disabled={downloading}
+          variant="outline"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Sem Texto
+        </Button>
       </div>
       
       {/* Preview */}
       <div
         ref={canvasRef}
-        className="relative w-full max-w-md mx-auto aspect-[4/5] rounded-lg overflow-hidden cursor-crosshair select-none"
-        style={{ backgroundColor }}
+        className="relative w-full bg-cover bg-center rounded-lg overflow-hidden select-none"
+        style={{
+          aspectRatio: "1080/1350",
+          backgroundColor,
+          backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onTouchMove={handleTouchMove}
-        onTouchEnd={handleMouseUp}
+        onTouchEnd={handleTouchEnd}
       >
-        {/* Imagem de fundo (100%) */}
-        {imageUrl && (
-          <img
-            src={imageUrl}
-            alt="Slide"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-            draggable={false}
-          />
-        )}
-        
-        {/* Textos arrastáveis */}
-        {textBlocks.map((block) => (
-          <div
-            key={block.id}
-            className={`absolute cursor-move px-2 py-1 ${selectedElement === block.id ? "ring-2 ring-primary ring-offset-2" : ""}`}
-            style={{
-              left: block.textAlign === "center" ? "50%" : block.textAlign === "right" ? "auto" : `${block.x}%`,
-              right: block.textAlign === "right" ? "5%" : "auto",
-              top: `${block.y}%`,
-              transform: block.textAlign === "center" ? "translateX(-50%)" : "none",
-              fontSize: `${block.fontSize}px`,
-              fontFamily: block.fontFamily,
-              fontWeight: block.fontWeight,
-              color: block.color,
-              textAlign: block.textAlign,
-              textShadow: block.shadowEnabled 
-                ? `${block.shadowOffsetX}px ${block.shadowOffsetY}px ${block.shadowBlur}px ${block.shadowColor}`
-                : block.glowEnabled ? `0 0 ${block.glowIntensity}px ${block.glowColor}` : "none",
-              WebkitTextStroke: block.borderEnabled ? `${block.borderWidth}px ${block.borderColor}` : "none",
-              letterSpacing: `${block.letterSpacing}px`,
-              lineHeight: block.lineHeight,
-              backgroundColor: block.bgEnabled ? block.bgColor : "transparent",
-              padding: block.bgEnabled ? `${block.bgPadding}px` : "0",
-              maxWidth: "90%",
-            }}
-            onMouseDown={(e) => handleMouseDown(e, block.id)}
-            onTouchStart={(e) => handleTouchStart(e, block.id)}
-          >
-            {block.text}
-          </div>
-        ))}
+        {/* Textos */}
+        {textBlocks.map(renderTextPreview)}
       </div>
       
-      {/* Seletor de elemento */}
-      <div className="flex gap-2 flex-wrap justify-center">
-        {textBlocks.map((block, i) => (
+      {/* Seletor de textos */}
+      <div className="flex gap-2 flex-wrap items-center">
+        {textBlocks.map((block, index) => (
           <Button
             key={block.id}
-            variant={selectedElement === block.id ? "default" : "outline"}
+            variant={selectedTextId === block.id ? "default" : "outline"}
             size="sm"
-            onClick={() => setSelectedElement(block.id)}
+            onClick={() => setSelectedTextId(block.id)}
+            className={selectedTextId === block.id ? "bg-purple-600" : ""}
           >
-            <Type className="w-4 h-4 mr-1" />
-            Texto {i + 1}
+            <Type className="w-3 h-3 mr-1" />
+            Texto {index + 1}
           </Button>
         ))}
         <Button variant="ghost" size="sm" onClick={addTextBlock}>
@@ -468,9 +504,9 @@ export default function SlideComposerNew({
         </Button>
       </div>
       
-      {/* Controles de Texto */}
-      {selectedTextBlock && (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      {/* Controles do texto selecionado */}
+      {selectedText && (
+        <Tabs defaultValue="basico" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="basico">Básico</TabsTrigger>
             <TabsTrigger value="cores">Cores</TabsTrigger>
@@ -478,145 +514,271 @@ export default function SlideComposerNew({
           </TabsList>
           
           {/* Aba Básico */}
-          <TabsContent value="basico" className="space-y-4 p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center justify-between">
-              <h4 className="font-medium">Texto {textBlocks.findIndex(b => b.id === selectedTextBlock.id) + 1}</h4>
-              {textBlocks.length > 1 && (
-                <Button variant="ghost" size="sm" onClick={() => removeTextBlock(selectedTextBlock.id)}>
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
-              )}
-            </div>
-            
+          <TabsContent value="basico" className="space-y-4 mt-4">
+            {/* Texto */}
             <div>
               <Label>Texto</Label>
               <textarea
-                value={selectedTextBlock.text}
-                onChange={(e) => updateTextBlock(selectedTextBlock.id, { text: e.target.value })}
-                className="w-full mt-1 p-2 rounded-md border bg-background text-sm min-h-[80px]"
+                value={selectedText.text}
+                onChange={(e) => updateTextBlock(selectedText.id, { text: e.target.value })}
+                className="w-full p-2 rounded bg-zinc-800 border border-zinc-700 text-white min-h-[80px]"
               />
             </div>
             
+            {/* Tamanho da fonte */}
             <div>
-              <Label className="text-xs">Tamanho: {selectedTextBlock.fontSize}px</Label>
+              <Label>Tamanho: {selectedText.fontSize}px</Label>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="h-8 w-8"
-                  onClick={() => updateTextBlock(selectedTextBlock.id, { fontSize: Math.max(12, selectedTextBlock.fontSize - 2) })}>
-                  <Minus className="w-3 h-3" />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => updateTextBlock(selectedText.id, { fontSize: Math.max(12, selectedText.fontSize - 2) })}
+                >
+                  <Minus className="w-4 h-4" />
                 </Button>
-                <Slider value={[selectedTextBlock.fontSize]} onValueChange={([v]) => updateTextBlock(selectedTextBlock.id, { fontSize: v })}
-                  min={12} max={72} step={1} className="flex-1" />
-                <Button variant="outline" size="icon" className="h-8 w-8"
-                  onClick={() => updateTextBlock(selectedTextBlock.id, { fontSize: Math.min(72, selectedTextBlock.fontSize + 2) })}>
-                  <Plus className="w-3 h-3" />
+                <Slider
+                  value={[selectedText.fontSize]}
+                  onValueChange={([v]) => updateTextBlock(selectedText.id, { fontSize: v })}
+                  min={12}
+                  max={72}
+                  step={1}
+                  className="flex-1"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => updateTextBlock(selectedText.id, { fontSize: Math.min(72, selectedText.fontSize + 2) })}
+                >
+                  <Plus className="w-4 h-4" />
                 </Button>
               </div>
             </div>
             
+            {/* Posição Y */}
             <div>
-              <Label className="text-xs">Posição Y: {selectedTextBlock.y.toFixed(0)}%</Label>
-              <Slider value={[selectedTextBlock.y]} onValueChange={([v]) => updateTextBlock(selectedTextBlock.id, { y: v })}
-                min={5} max={95} step={1} />
+              <Label>Posição Vertical: {selectedText.y.toFixed(0)}%</Label>
+              <Slider
+                value={[selectedText.y]}
+                onValueChange={([v]) => updateTextBlock(selectedText.id, { y: v })}
+                min={5}
+                max={95}
+                step={1}
+              />
             </div>
             
+            {/* Margens */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Margem Esquerda: {selectedText.marginLeft}%</Label>
+                <Slider
+                  value={[selectedText.marginLeft]}
+                  onValueChange={([v]) => updateTextBlock(selectedText.id, { marginLeft: v })}
+                  min={0}
+                  max={40}
+                  step={1}
+                />
+              </div>
+              <div>
+                <Label>Margem Direita: {selectedText.marginRight}%</Label>
+                <Slider
+                  value={[selectedText.marginRight]}
+                  onValueChange={([v]) => updateTextBlock(selectedText.id, { marginRight: v })}
+                  min={0}
+                  max={40}
+                  step={1}
+                />
+              </div>
+            </div>
+            
+            {/* Alinhamento */}
             <div>
               <Label>Alinhamento</Label>
-              <div className="flex gap-1 mt-1">
-                <Button variant={selectedTextBlock.textAlign === "left" ? "default" : "outline"} size="sm"
-                  onClick={() => updateTextBlock(selectedTextBlock.id, { textAlign: "left" })}>
+              <div className="flex gap-2">
+                <Button
+                  variant={selectedText.textAlign === "left" ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => updateTextBlock(selectedText.id, { textAlign: "left" })}
+                >
                   <AlignLeft className="w-4 h-4" />
                 </Button>
-                <Button variant={selectedTextBlock.textAlign === "center" ? "default" : "outline"} size="sm"
-                  onClick={() => updateTextBlock(selectedTextBlock.id, { textAlign: "center" })}>
+                <Button
+                  variant={selectedText.textAlign === "center" ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => updateTextBlock(selectedText.id, { textAlign: "center" })}
+                >
                   <AlignCenter className="w-4 h-4" />
                 </Button>
-                <Button variant={selectedTextBlock.textAlign === "right" ? "default" : "outline"} size="sm"
-                  onClick={() => updateTextBlock(selectedTextBlock.id, { textAlign: "right" })}>
+                <Button
+                  variant={selectedText.textAlign === "right" ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => updateTextBlock(selectedText.id, { textAlign: "right" })}
+                >
                   <AlignRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Fonte</Label>
-                <select value={selectedTextBlock.fontFamily}
-                  onChange={(e) => updateTextBlock(selectedTextBlock.id, { fontFamily: e.target.value })}
-                  className="w-full mt-1 p-2 rounded-md border bg-background text-sm">
-                  {FONT_FAMILIES.map(f => <option key={f} value={f}>{f}</option>)}
-                </select>
-              </div>
-              <div>
-                <Label>Peso</Label>
-                <div className="flex gap-1 mt-1">
-                  <Button variant={selectedTextBlock.fontWeight === "normal" ? "default" : "outline"} size="sm" className="flex-1"
-                    onClick={() => updateTextBlock(selectedTextBlock.id, { fontWeight: "normal" })}>Normal</Button>
-                  <Button variant={selectedTextBlock.fontWeight === "bold" ? "default" : "outline"} size="sm" className="flex-1"
-                    onClick={() => updateTextBlock(selectedTextBlock.id, { fontWeight: "bold" })}><Bold className="w-4 h-4" /></Button>
-                </div>
+            {/* Fonte */}
+            <div>
+              <Label>Fonte</Label>
+              <select
+                value={selectedText.fontFamily}
+                onChange={(e) => updateTextBlock(selectedText.id, { fontFamily: e.target.value })}
+                className="w-full p-2 rounded bg-zinc-800 border border-zinc-700 text-white"
+              >
+                {FONT_OPTIONS.map(font => (
+                  <option key={font} value={font}>{font}</option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Peso */}
+            <div>
+              <Label>Peso</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant={selectedText.fontWeight === "normal" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => updateTextBlock(selectedText.id, { fontWeight: "normal" })}
+                >
+                  Normal
+                </Button>
+                <Button
+                  variant={selectedText.fontWeight === "bold" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => updateTextBlock(selectedText.id, { fontWeight: "bold" })}
+                >
+                  Bold
+                </Button>
               </div>
             </div>
+            
+            {/* Espaçamento */}
+            <div>
+              <Label>Espaçamento entre letras: {selectedText.letterSpacing}px</Label>
+              <Slider
+                value={[selectedText.letterSpacing]}
+                onValueChange={([v]) => updateTextBlock(selectedText.id, { letterSpacing: v })}
+                min={-2}
+                max={10}
+                step={0.5}
+              />
+            </div>
+            
+            {/* Altura da linha */}
+            <div>
+              <Label>Altura da linha: {selectedText.lineHeight.toFixed(1)}</Label>
+              <Slider
+                value={[selectedText.lineHeight]}
+                onValueChange={([v]) => updateTextBlock(selectedText.id, { lineHeight: v })}
+                min={0.8}
+                max={2}
+                step={0.1}
+              />
+            </div>
+            
+            {/* Excluir texto */}
+            {textBlocks.length > 1 && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => removeTextBlock(selectedText.id)}
+                className="w-full"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Excluir este texto
+              </Button>
+            )}
           </TabsContent>
           
           {/* Aba Cores */}
-          <TabsContent value="cores" className="space-y-4 p-4 bg-muted/50 rounded-lg">
+          <TabsContent value="cores" className="space-y-4 mt-4">
+            {/* Cor do texto */}
             <div>
-              <Label>Cor do Texto</Label>
-              <div className="flex items-center gap-2 mt-1">
-                <input type="color" value={selectedTextBlock.color}
-                  onChange={(e) => updateTextBlock(selectedTextBlock.id, { color: e.target.value })}
-                  className="w-10 h-10 rounded cursor-pointer" />
-                <Input value={selectedTextBlock.color}
-                  onChange={(e) => updateTextBlock(selectedTextBlock.id, { color: e.target.value })}
-                  className="flex-1" />
+              <Label>Cor do texto</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="color"
+                  value={selectedText.color}
+                  onChange={(e) => updateTextBlock(selectedText.id, { color: e.target.value })}
+                  className="w-12 h-10 p-1"
+                />
+                <Input
+                  type="text"
+                  value={selectedText.color}
+                  onChange={(e) => updateTextBlock(selectedText.id, { color: e.target.value })}
+                  className="flex-1"
+                />
               </div>
             </div>
             
+            {/* Cor de fundo do slide */}
             <div>
-              <Label>Cor de Fundo do Slide</Label>
-              <div className="flex items-center gap-2 mt-1">
-                <input type="color" value={backgroundColor}
+              <Label>Cor de fundo do slide</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="color"
+                  value={backgroundColor}
                   onChange={(e) => setBackgroundColor(e.target.value)}
-                  className="w-10 h-10 rounded cursor-pointer" />
-                <Input value={backgroundColor} onChange={(e) => setBackgroundColor(e.target.value)} className="flex-1" />
+                  className="w-12 h-10 p-1"
+                />
+                <Input
+                  type="text"
+                  value={backgroundColor}
+                  onChange={(e) => setBackgroundColor(e.target.value)}
+                  className="flex-1"
+                />
               </div>
             </div>
             
+            {/* Presets */}
             <div>
-              <Label>Presets</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {COLOR_PRESETS.map((preset) => (
-                  <button key={preset.name}
+              <Label>Presets de cores</Label>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {COLOR_PRESETS.map(preset => (
+                  <Button
+                    key={preset.name}
+                    variant="outline"
+                    size="sm"
                     onClick={() => {
-                      updateTextBlock(selectedTextBlock.id, { color: preset.text });
+                      updateTextBlock(selectedText.id, { color: preset.text });
                       setBackgroundColor(preset.bg);
                     }}
-                    className="w-8 h-8 rounded-full border-2 border-white/20 hover:scale-110 transition-transform"
-                    style={{ backgroundColor: preset.text }}
-                    title={preset.name} />
+                    className="text-xs"
+                    style={{ color: preset.text, borderColor: preset.text }}
+                  >
+                    {preset.name}
+                  </Button>
                 ))}
               </div>
             </div>
             
+            {/* Fundo do texto */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Fundo do Texto</Label>
-                <Switch checked={selectedTextBlock.bgEnabled}
-                  onCheckedChange={(v) => updateTextBlock(selectedTextBlock.id, { bgEnabled: v })} />
+                <Label>Fundo do texto</Label>
+                <Switch
+                  checked={selectedText.bgEnabled}
+                  onCheckedChange={(v) => updateTextBlock(selectedText.id, { bgEnabled: v })}
+                />
               </div>
-              {selectedTextBlock.bgEnabled && (
-                <div className="space-y-2 pl-4 border-l-2 border-primary/30">
-                  <div className="flex items-center gap-2">
-                    <input type="color" value={selectedTextBlock.bgColor}
-                      onChange={(e) => updateTextBlock(selectedTextBlock.id, { bgColor: e.target.value })}
-                      className="w-8 h-8 rounded cursor-pointer" />
-                    <Label className="text-xs">Cor</Label>
-                  </div>
-                  <div>
-                    <Label className="text-xs">Padding: {selectedTextBlock.bgPadding}px</Label>
-                    <Slider value={[selectedTextBlock.bgPadding]}
-                      onValueChange={([v]) => updateTextBlock(selectedTextBlock.id, { bgPadding: v })}
-                      min={0} max={32} step={1} />
+              {selectedText.bgEnabled && (
+                <div className="space-y-2 pl-4 border-l-2 border-purple-500">
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      type="color"
+                      value={selectedText.bgColor}
+                      onChange={(e) => updateTextBlock(selectedText.id, { bgColor: e.target.value })}
+                      className="w-12 h-10 p-1"
+                    />
+                    <Label>Padding: {selectedText.bgPadding}px</Label>
+                    <Slider
+                      value={[selectedText.bgPadding]}
+                      onValueChange={([v]) => updateTextBlock(selectedText.id, { bgPadding: v })}
+                      min={0}
+                      max={20}
+                      className="flex-1"
+                    />
                   </div>
                 </div>
               )}
@@ -624,40 +786,54 @@ export default function SlideComposerNew({
           </TabsContent>
           
           {/* Aba Avançado */}
-          <TabsContent value="avancado" className="space-y-4 p-4 bg-muted/50 rounded-lg">
+          <TabsContent value="avancado" className="space-y-4 mt-4">
             {/* Sombra */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Sombra</Label>
-                <Switch checked={selectedTextBlock.shadowEnabled}
-                  onCheckedChange={(v) => updateTextBlock(selectedTextBlock.id, { shadowEnabled: v, glowEnabled: v ? false : selectedTextBlock.glowEnabled })} />
+                <Switch
+                  checked={selectedText.shadowEnabled}
+                  onCheckedChange={(v) => updateTextBlock(selectedText.id, { shadowEnabled: v, glowEnabled: v ? false : selectedText.glowEnabled })}
+                />
               </div>
-              {selectedTextBlock.shadowEnabled && (
-                <div className="space-y-2 pl-4 border-l-2 border-primary/30">
-                  <div className="flex items-center gap-2">
-                    <input type="color" value={selectedTextBlock.shadowColor}
-                      onChange={(e) => updateTextBlock(selectedTextBlock.id, { shadowColor: e.target.value })}
-                      className="w-8 h-8 rounded cursor-pointer" />
-                    <Label className="text-xs">Cor da sombra</Label>
+              {selectedText.shadowEnabled && (
+                <div className="space-y-2 pl-4 border-l-2 border-purple-500">
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      type="color"
+                      value={selectedText.shadowColor}
+                      onChange={(e) => updateTextBlock(selectedText.id, { shadowColor: e.target.value })}
+                      className="w-12 h-10 p-1"
+                    />
+                    <span className="text-sm text-zinc-400">Cor da sombra</span>
                   </div>
                   <div>
-                    <Label className="text-xs">Blur: {selectedTextBlock.shadowBlur}px</Label>
-                    <Slider value={[selectedTextBlock.shadowBlur]}
-                      onValueChange={([v]) => updateTextBlock(selectedTextBlock.id, { shadowBlur: v })}
-                      min={0} max={20} step={1} />
+                    <Label>Blur: {selectedText.shadowBlur}px</Label>
+                    <Slider
+                      value={[selectedText.shadowBlur]}
+                      onValueChange={([v]) => updateTextBlock(selectedText.id, { shadowBlur: v })}
+                      min={0}
+                      max={20}
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <Label className="text-xs">Offset X: {selectedTextBlock.shadowOffsetX}px</Label>
-                      <Slider value={[selectedTextBlock.shadowOffsetX]}
-                        onValueChange={([v]) => updateTextBlock(selectedTextBlock.id, { shadowOffsetX: v })}
-                        min={-10} max={10} step={1} />
+                      <Label>Offset X: {selectedText.shadowOffsetX}px</Label>
+                      <Slider
+                        value={[selectedText.shadowOffsetX]}
+                        onValueChange={([v]) => updateTextBlock(selectedText.id, { shadowOffsetX: v })}
+                        min={-10}
+                        max={10}
+                      />
                     </div>
                     <div>
-                      <Label className="text-xs">Offset Y: {selectedTextBlock.shadowOffsetY}px</Label>
-                      <Slider value={[selectedTextBlock.shadowOffsetY]}
-                        onValueChange={([v]) => updateTextBlock(selectedTextBlock.id, { shadowOffsetY: v })}
-                        min={-10} max={10} step={1} />
+                      <Label>Offset Y: {selectedText.shadowOffsetY}px</Label>
+                      <Slider
+                        value={[selectedText.shadowOffsetY]}
+                        onValueChange={([v]) => updateTextBlock(selectedText.id, { shadowOffsetY: v })}
+                        min={-10}
+                        max={10}
+                      />
                     </div>
                   </div>
                 </div>
@@ -668,22 +844,28 @@ export default function SlideComposerNew({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Contorno</Label>
-                <Switch checked={selectedTextBlock.borderEnabled}
-                  onCheckedChange={(v) => updateTextBlock(selectedTextBlock.id, { borderEnabled: v })} />
+                <Switch
+                  checked={selectedText.borderEnabled}
+                  onCheckedChange={(v) => updateTextBlock(selectedText.id, { borderEnabled: v })}
+                />
               </div>
-              {selectedTextBlock.borderEnabled && (
-                <div className="space-y-2 pl-4 border-l-2 border-primary/30">
-                  <div className="flex items-center gap-2">
-                    <input type="color" value={selectedTextBlock.borderColor}
-                      onChange={(e) => updateTextBlock(selectedTextBlock.id, { borderColor: e.target.value })}
-                      className="w-8 h-8 rounded cursor-pointer" />
-                    <Label className="text-xs">Cor</Label>
-                  </div>
-                  <div>
-                    <Label className="text-xs">Espessura: {selectedTextBlock.borderWidth}px</Label>
-                    <Slider value={[selectedTextBlock.borderWidth]}
-                      onValueChange={([v]) => updateTextBlock(selectedTextBlock.id, { borderWidth: v })}
-                      min={1} max={5} step={1} />
+              {selectedText.borderEnabled && (
+                <div className="space-y-2 pl-4 border-l-2 border-purple-500">
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      type="color"
+                      value={selectedText.borderColor}
+                      onChange={(e) => updateTextBlock(selectedText.id, { borderColor: e.target.value })}
+                      className="w-12 h-10 p-1"
+                    />
+                    <Label>Espessura: {selectedText.borderWidth}px</Label>
+                    <Slider
+                      value={[selectedText.borderWidth]}
+                      onValueChange={([v]) => updateTextBlock(selectedText.id, { borderWidth: v })}
+                      min={1}
+                      max={5}
+                      className="flex-1"
+                    />
                   </div>
                 </div>
               )}
@@ -692,41 +874,32 @@ export default function SlideComposerNew({
             {/* Glow */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Glow</Label>
-                <Switch checked={selectedTextBlock.glowEnabled}
-                  onCheckedChange={(v) => updateTextBlock(selectedTextBlock.id, { glowEnabled: v, shadowEnabled: v ? false : selectedTextBlock.shadowEnabled })} />
+                <Label>Efeito Glow</Label>
+                <Switch
+                  checked={selectedText.glowEnabled}
+                  onCheckedChange={(v) => updateTextBlock(selectedText.id, { glowEnabled: v, shadowEnabled: v ? false : selectedText.shadowEnabled })}
+                />
               </div>
-              {selectedTextBlock.glowEnabled && (
-                <div className="space-y-2 pl-4 border-l-2 border-primary/30">
-                  <div className="flex items-center gap-2">
-                    <input type="color" value={selectedTextBlock.glowColor}
-                      onChange={(e) => updateTextBlock(selectedTextBlock.id, { glowColor: e.target.value })}
-                      className="w-8 h-8 rounded cursor-pointer" />
-                    <Label className="text-xs">Cor</Label>
-                  </div>
-                  <div>
-                    <Label className="text-xs">Intensidade: {selectedTextBlock.glowIntensity}px</Label>
-                    <Slider value={[selectedTextBlock.glowIntensity]}
-                      onValueChange={([v]) => updateTextBlock(selectedTextBlock.id, { glowIntensity: v })}
-                      min={5} max={30} step={1} />
+              {selectedText.glowEnabled && (
+                <div className="space-y-2 pl-4 border-l-2 border-purple-500">
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      type="color"
+                      value={selectedText.glowColor}
+                      onChange={(e) => updateTextBlock(selectedText.id, { glowColor: e.target.value })}
+                      className="w-12 h-10 p-1"
+                    />
+                    <Label>Intensidade: {selectedText.glowIntensity}px</Label>
+                    <Slider
+                      value={[selectedText.glowIntensity]}
+                      onValueChange={([v]) => updateTextBlock(selectedText.id, { glowIntensity: v })}
+                      min={5}
+                      max={30}
+                      className="flex-1"
+                    />
                   </div>
                 </div>
               )}
-            </div>
-            
-            {/* Espaçamento */}
-            <div>
-              <Label className="text-xs">Espaçamento entre letras: {selectedTextBlock.letterSpacing}px</Label>
-              <Slider value={[selectedTextBlock.letterSpacing]}
-                onValueChange={([v]) => updateTextBlock(selectedTextBlock.id, { letterSpacing: v })}
-                min={-2} max={10} step={0.5} />
-            </div>
-            
-            <div>
-              <Label className="text-xs">Altura da linha: {selectedTextBlock.lineHeight.toFixed(1)}</Label>
-              <Slider value={[selectedTextBlock.lineHeight]}
-                onValueChange={([v]) => updateTextBlock(selectedTextBlock.id, { lineHeight: v })}
-                min={1} max={2} step={0.1} />
             </div>
           </TabsContent>
         </Tabs>
