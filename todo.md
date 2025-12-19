@@ -493,3 +493,6 @@
 - [x] Duplo toque no texto para editar diretamente (abre campo de input)
 
 - [x] BUG: Página rolando junto quando arrasta o texto no editor
+
+- [x] BUG: Painel de controles tampando o texto quando abre (não dá pra ver o que está editando) - CORRIGIDO: painel agora fica embaixo
+- [x] BUG: Imagem ficou deitada (horizontal) ao invés de vertical 1080x1350 - CORRIGIDO: aspect ratio ajustado

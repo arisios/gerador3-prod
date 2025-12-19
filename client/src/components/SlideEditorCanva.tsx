@@ -485,7 +485,18 @@ export default function SlideEditorCanva({
         <div className="flex justify-center gap-4">
           <button
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${activeTool === "text" ? "bg-purple-500/20 text-purple-400" : "text-zinc-400 hover:text-white"}`}
-            onClick={() => { setActiveTool(activeTool === "text" ? "none" : "text"); setTextSubPanel("basic"); }}
+            onClick={() => { 
+              if (activeTool === "text") {
+                setActiveTool("none");
+              } else {
+                setActiveTool("text");
+                setTextSubPanel("basic");
+                // Selecionar o primeiro bloco de texto automaticamente
+                if (textBlocks.length > 0) {
+                  setSelectedElement(textBlocks[0].id);
+                }
+              }
+            }}
           >
             <Type className="w-5 h-5" />
             <span className="text-sm">Texto</span>
@@ -522,9 +533,9 @@ export default function SlideEditorCanva({
           className="relative shadow-2xl"
           style={{
             aspectRatio: "1080 / 1350",
-            maxHeight: activeTool !== "none" ? "calc(100vh - 340px)" : "calc(100vh - 160px)",
-            maxWidth: "calc(100vw - 16px)",
-            width: "100%",
+            height: activeTool !== "none" ? "calc(100vh - 380px)" : "calc(100vh - 180px)",
+            width: "auto",
+            maxWidth: "100%",
             backgroundColor,
           }}
           onClick={() => setSelectedElement("image")}
@@ -618,7 +629,7 @@ export default function SlideEditorCanva({
       
       {/* Painel de controles EMBAIXO - sempre visível quando ferramenta ativa */}
       {activeTool !== "none" && (
-        <div className="bg-zinc-900 border-t border-zinc-800 p-3 max-h-[200px] overflow-y-auto">
+        <div className="bg-zinc-900 border-t border-zinc-800 p-2 max-h-[150px] overflow-y-auto">
           
           {/* TEXTO */}
           {activeTool === "text" && selectedText && (
