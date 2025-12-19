@@ -627,3 +627,15 @@
 - [x] Indicador "Upload = 0 créditos" vs "Gerar = X créditos"
 - [x] Atalho no menu para Galeria
 - [x] Otimizar layout mobile
+
+
+## Interface de Geração de Vídeo (19/12/2024)
+- [x] Componente VideoGeneratorSelector (escolher tipo de vídeo)
+- [x] Opção Ken Burns (3 créditos) - animação de imagem estática
+- [x] Opção Vídeo IA Básico (10 créditos) - Replicate Wan
+- [x] Opção Vídeo IA Premium (25 créditos) - Runware Luma
+- [x] Botão "Gerar Vídeo" nas telas de edição de conteúdo
+- [x] Preview de vídeo Ken Burns em tempo real
+- [x] Indicador de créditos por tipo de vídeo
+- [ ] Salvar vídeos gerados na galeria de mídia
+- [x] Permitir download de vídeos gerados

@@ -11,8 +11,9 @@ import { SlideRenderer, SlidePreview, TemplateSelector, downloadSlide } from "@/
 // Editor estilo Canva mobile
 import SlideEditorCanva, { downloadSlideAsImage, type SlideConfig } from "@/components/SlideEditorCanva";
 import { ImageLightbox } from "@/components/ImageLightbox";
+import { VideoGeneratorSelectorWithCredits } from "@/components/VideoGeneratorSelectorWithCredits";
 import { designTemplates, colorPalettes, type DesignTemplate } from "../../../shared/designTemplates";
-import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Images, Palette, Layout, Wand2, Upload } from "lucide-react";
+import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Images, Palette, Layout, Wand2, Upload, Video } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ContentEdit() {
@@ -918,6 +919,19 @@ export default function ContentEdit() {
                   </Button>
                 </label>
               </div>
+              
+              {/* Botão de Gerar Vídeo */}
+              {currentSlide?.imageUrl && (
+                <div className="mt-3 pt-3 border-t">
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Transforme a imagem em vídeo:
+                  </p>
+                  <VideoGeneratorSelectorWithCredits
+                    imageUrl={currentSlide.imageUrl}
+                    prompt={currentSlide.imagePrompt || ""}
+                  />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

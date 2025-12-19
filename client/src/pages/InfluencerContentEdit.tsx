@@ -9,8 +9,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { trpc } from "@/lib/trpc";
 import SlideComposer, { SlideStyle } from "@/components/SlideComposer";
 import { ImageLightbox } from "@/components/ImageLightbox";
+import { VideoGeneratorSelectorWithCredits } from "@/components/VideoGeneratorSelectorWithCredits";
 import { downloadCarouselSlide, downloadSingleImage, downloadAllSlidesWithText, downloadAllSlidesWithoutText } from "@/lib/downloadSlide";
-import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2 } from "lucide-react";
+import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Video } from "lucide-react";
 import { toast } from "sonner";
 
 const DEFAULT_STYLE: SlideStyle = {
@@ -478,6 +479,19 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
             {showComposer ? "Fechar Editor" : "Editar Visual"}
           </Button>
         </div>
+
+        {/* Botão de Gerar Vídeo */}
+        {currentSlide?.imageUrl && (
+          <div className="p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-2">
+              Transforme a imagem em vídeo:
+            </p>
+            <VideoGeneratorSelectorWithCredits
+              imageUrl={currentSlide.imageUrl}
+              prompt={getSlidePrompt()}
+            />
+          </div>
+        )}
 
         {/* Slide Thumbnails */}
         <div className="flex gap-2 overflow-x-auto pb-2">

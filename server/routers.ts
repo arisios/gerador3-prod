@@ -1700,6 +1700,34 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
       };
     }),
 
+    // Consumir créditos para geração
+    consume: protectedProcedure
+      .input(z.object({
+        amount: z.number().positive(),
+        type: z.enum(["image", "video"]),
+        provider: z.string(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Verificar saldo
+        const credits = await db.getOrCreateUserCredits(ctx.user.id);
+        if (credits.balance < input.amount) {
+          throw new TRPCError({ 
+            code: "BAD_REQUEST", 
+            message: `Créditos insuficientes. Você tem ${credits.balance} créditos, mas precisa de ${input.amount}.` 
+          });
+        }
+        
+        // Consumir créditos
+        const newBalance = await db.consumeCredits(
+          ctx.user.id, 
+          input.amount, 
+          input.description || `Geração de ${input.type} via ${input.provider}`
+        );
+        
+        return { success: true, newBalance, consumed: input.amount };
+      }),
+
     // Adicionar créditos bônus (admin only)
     addBonus: protectedProcedure
       .input(z.object({
