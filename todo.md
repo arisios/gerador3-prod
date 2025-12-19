@@ -612,3 +612,18 @@
 | Starter | 30 | R$39,90 | ~150%+ |
 | Popular | 100 | R$99,90 | ~150%+ |
 | Pro | 300 | R$249,90 | ~150%+ |
+
+
+## Galeria de Mídia Unificada (19/12/2024)
+- [x] Schema userMedia (uploads + geradas)
+- [x] Funções de DB para mídia
+- [x] Rotas de mídia (upload, list, delete)
+- [x] Página de Galeria (/media)
+- [x] Diferenciar visualmente: upload vs gerada (badge)
+- [x] Upload: preview simples ao clicar
+- [x] Gerada: ImageLightbox com prompt ao clicar
+- [ ] Botão "Usar esta imagem" para aplicar no conteúdo
+- [x] Botão de upload destacado (componente UploadButton)
+- [x] Indicador "Upload = 0 créditos" vs "Gerar = X créditos"
+- [x] Atalho no menu para Galeria
+- [x] Otimizar layout mobile

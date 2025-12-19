@@ -12,7 +12,8 @@ import {
   influencerSlides, InfluencerSlide,
   trends, Trend,
   virals, Viral,
-  userSettings, UserSettings
+  userSettings, UserSettings,
+  userMedia, UserMedia, InsertUserMedia
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -601,4 +602,102 @@ export async function createApiProvider(data: { name: string; displayName: strin
   if (!db) throw new Error("Database not available");
   const result = await db.insert(apiProviders).values(data);
   return result[0].insertId;
+}
+
+
+// ===== USER MEDIA FUNCTIONS =====
+
+export async function createUserMedia(data: InsertUserMedia): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(userMedia).values(data);
+  return result[0].insertId;
+}
+
+export async function getUserMediaByUser(
+  userId: number, 
+  options?: { 
+    type?: "image" | "video"; 
+    source?: "upload" | "generated";
+    limit?: number;
+    offset?: number;
+  }
+): Promise<UserMedia[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Construir condições
+  const conditions = [eq(userMedia.userId, userId)];
+  
+  if (options?.type) {
+    conditions.push(eq(userMedia.type, options.type));
+  }
+  
+  if (options?.source) {
+    conditions.push(eq(userMedia.source, options.source));
+  }
+  
+  const result = await db.select()
+    .from(userMedia)
+    .where(and(...conditions))
+    .orderBy(desc(userMedia.createdAt))
+    .limit(options?.limit || 100)
+    .offset(options?.offset || 0);
+  
+  return result;
+}
+
+export async function getUserMediaById(id: number): Promise<UserMedia | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(userMedia).where(eq(userMedia.id, id));
+  return result[0];
+}
+
+export async function updateUserMedia(id: number, data: Partial<UserMedia>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(userMedia).set(data).where(eq(userMedia.id, id));
+}
+
+export async function deleteUserMedia(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(userMedia).where(eq(userMedia.id, id));
+}
+
+export async function getUserMediaCount(userId: number, type?: "image" | "video"): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  let condition = eq(userMedia.userId, userId);
+  if (type) {
+    condition = and(eq(userMedia.userId, userId), eq(userMedia.type, type))!;
+  }
+  
+  const result = await db.select({ count: sql<number>`count(*)` }).from(userMedia).where(condition);
+  return result[0]?.count || 0;
+}
+
+export async function searchUserMedia(
+  userId: number,
+  searchTerm: string,
+  options?: { type?: "image" | "video"; limit?: number }
+): Promise<UserMedia[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Busca por filename ou prompt
+  const result = await db.select()
+    .from(userMedia)
+    .where(
+      and(
+        eq(userMedia.userId, userId),
+        sql`(${userMedia.filename} LIKE ${`%${searchTerm}%`} OR ${userMedia.prompt} LIKE ${`%${searchTerm}%`})`
+      )
+    )
+    .orderBy(desc(userMedia.createdAt))
+    .limit(options?.limit || 50);
+  
+  return result;
 }

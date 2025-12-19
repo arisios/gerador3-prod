@@ -224,6 +224,30 @@ export const apiProviders = mysqlTable("apiProviders", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+// User Media table - banco de mídia unificado (uploads + geradas)
+export const userMedia = mysqlTable("userMedia", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", ["image", "video"]).notNull(),
+  source: mysqlEnum("source", ["upload", "generated"]).notNull(),
+  url: text("url").notNull(),
+  thumbnailUrl: text("thumbnailUrl"),
+  filename: varchar("filename", { length: 255 }),
+  mimeType: varchar("mimeType", { length: 100 }),
+  size: int("size"), // tamanho em bytes
+  width: int("width"),
+  height: int("height"),
+  // Campos para imagens geradas
+  prompt: text("prompt"),
+  provider: varchar("provider", { length: 50 }),
+  // Metadados
+  tags: json("tags"), // array de tags para busca
+  projectId: int("projectId"), // projeto associado (opcional)
+  contentId: int("contentId"), // conteúdo associado (opcional)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 // User Settings table
 export const userSettings = mysqlTable("userSettings", {
   id: int("id").autoincrement().primaryKey(),
@@ -258,3 +282,5 @@ export type Credits = typeof credits.$inferSelect;
 export type CreditTransaction = typeof creditTransactions.$inferSelect;
 export type CreditPackage = typeof creditPackages.$inferSelect;
 export type ApiProvider = typeof apiProviders.$inferSelect;
+export type UserMedia = typeof userMedia.$inferSelect;
+export type InsertUserMedia = typeof userMedia.$inferInsert;

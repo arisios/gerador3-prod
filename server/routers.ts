@@ -1716,6 +1716,121 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
       }),
   }),
 
+  // ===== USER MEDIA =====
+  media: router({
+    // Upload de mídia
+    upload: protectedProcedure
+      .input(z.object({
+        base64: z.string(),
+        filename: z.string(),
+        type: z.enum(["image", "video"]),
+        mimeType: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Decode base64
+        const base64Data = input.base64.replace(/^data:(image|video)\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        
+        // Generate unique filename
+        const ext = input.mimeType?.split('/')[1] || (input.type === 'image' ? 'png' : 'mp4');
+        const key = `media/${ctx.user.id}/${Date.now()}-${nanoid()}.${ext}`;
+        
+        // Upload to S3
+        const { url } = await storagePut(key, buffer, input.mimeType || `${input.type}/${ext}`);
+        
+        // Save to database
+        const mediaId = await db.createUserMedia({
+          userId: ctx.user.id,
+          type: input.type,
+          source: "upload",
+          url,
+          filename: input.filename,
+          mimeType: input.mimeType,
+          size: buffer.length,
+        });
+        
+        return { id: mediaId, url };
+      }),
+
+    // Salvar mídia gerada por IA
+    saveGenerated: protectedProcedure
+      .input(z.object({
+        url: z.string(),
+        type: z.enum(["image", "video"]),
+        prompt: z.string().optional(),
+        provider: z.string().optional(),
+        projectId: z.number().optional(),
+        contentId: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const mediaId = await db.createUserMedia({
+          userId: ctx.user.id,
+          type: input.type,
+          source: "generated",
+          url: input.url,
+          prompt: input.prompt,
+          provider: input.provider,
+          projectId: input.projectId,
+          contentId: input.contentId,
+        });
+        
+        return { id: mediaId };
+      }),
+
+    // Listar mídia do usuário
+    list: protectedProcedure
+      .input(z.object({
+        type: z.enum(["image", "video"]).optional(),
+        source: z.enum(["upload", "generated"]).optional(),
+        limit: z.number().optional(),
+        offset: z.number().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        return db.getUserMediaByUser(ctx.user.id, input);
+      }),
+
+    // Obter mídia por ID
+    get: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const media = await db.getUserMediaById(input.id);
+        if (!media || media.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Mídia não encontrada" });
+        }
+        return media;
+      }),
+
+    // Excluir mídia
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const media = await db.getUserMediaById(input.id);
+        if (!media || media.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Mídia não encontrada" });
+        }
+        await db.deleteUserMedia(input.id);
+        return { success: true };
+      }),
+
+    // Contar mídia
+    count: protectedProcedure
+      .input(z.object({ type: z.enum(["image", "video"]).optional() }).optional())
+      .query(async ({ ctx, input }) => {
+        return db.getUserMediaCount(ctx.user.id, input?.type);
+      }),
+
+    // Buscar mídia
+    search: protectedProcedure
+      .input(z.object({
+        query: z.string(),
+        type: z.enum(["image", "video"]).optional(),
+        limit: z.number().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return db.searchUserMedia(ctx.user.id, input.query, { type: input.type, limit: input.limit });
+      }),
+  }),
+
   // ===== STRIPE/PAYMENTS =====
   payments: router({
     // Criar sessão de checkout

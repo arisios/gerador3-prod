@@ -1,0 +1,21 @@
+CREATE TABLE `userMedia` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`userId` int NOT NULL,
+	`type` enum('image','video') NOT NULL,
+	`source` enum('upload','generated') NOT NULL,
+	`url` text NOT NULL,
+	`thumbnailUrl` text,
+	`filename` varchar(255),
+	`mimeType` varchar(100),
+	`size` int,
+	`width` int,
+	`height` int,
+	`prompt` text,
+	`provider` varchar(50),
+	`tags` json,
+	`projectId` int,
+	`contentId` int,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `userMedia_id` PRIMARY KEY(`id`)
+);

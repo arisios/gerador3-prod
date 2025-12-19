@@ -25,6 +25,7 @@ import InfluencerContentEdit from "./pages/InfluencerContentEdit";
 import Trends from "./pages/Trends";
 import Virals from "./pages/Virals";
 import Credits from "./pages/Credits";
+import MediaGallery from "./pages/MediaGallery";
 
 function Router() {
   return (
@@ -48,6 +49,7 @@ function Router() {
       <Route path="/trends" component={Trends} />
       <Route path="/virals" component={Virals} />
       <Route path="/credits" component={Credits} />
+      <Route path="/media" component={MediaGallery} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
