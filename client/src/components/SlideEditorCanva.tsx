@@ -210,6 +210,10 @@ export default function SlideEditorCanva({
   const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDragging || !dragTarget || !canvasRef.current) return;
     
+    // Prevenir scroll da página durante o arrasto
+    e.preventDefault();
+    e.stopPropagation();
+    
     const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
     const rect = canvasRef.current.getBoundingClientRect();
@@ -490,6 +494,7 @@ export default function SlideEditorCanva({
       {/* Canvas - área principal */}
       <div 
         className="flex-1 flex items-center justify-center p-2 overflow-hidden"
+        style={{ touchAction: "none" }}
         onMouseMove={handleDragMove}
         onMouseUp={handleDragEnd}
         onMouseLeave={handleDragEnd}

@@ -491,3 +491,5 @@
 - [ ] Usar controles de tamanho no painel em vez de handles
 
 - [x] Duplo toque no texto para editar diretamente (abre campo de input)
+
+- [x] BUG: Página rolando junto quando arrasta o texto no editor
