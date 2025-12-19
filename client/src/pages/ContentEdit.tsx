@@ -190,8 +190,8 @@ export default function ContentEdit() {
 
   // Funções para o SlideComposer
   const handleStyleChange = (style: SlideStyle) => {
-    if (!currentSlide) return;
-    updateSlide.mutate({ id: currentSlide.id, style: style as any });
+    // Não salvar automaticamente - o usuário precisa clicar em "Salvar Edição"
+    // Apenas atualizar o estado local para o preview em tempo real
   };
 
   const handleComposerTextChange = (text: string) => {
@@ -548,33 +548,14 @@ export default function ContentEdit() {
             paletteId={selectedPaletteId}
             logoUrl={project?.logoUrl || undefined}
             slideIndex={currentSlideIndex}
-            style={(currentSlide as any).style || {
-              showText: true,
-              textAlign: "center",
-              positionY: 80,
-              fontSize: 32,
-              fontFamily: "Inter",
-              textColor: "#FFFFFF",
-              backgroundColor: "#000000",
-              overlayOpacity: 50,
-              shadowEnabled: true,
-              shadowColor: "#000000",
-              shadowBlur: 4,
-              shadowOffsetX: 2,
-              shadowOffsetY: 2,
-              borderEnabled: false,
-              borderColor: "#FFFFFF",
-              borderWidth: 2,
-              glowEnabled: false,
-              glowColor: "#A855F7",
-              glowIntensity: 10,
-              letterSpacing: 0,
-              lineHeight: 1.3,
-              padding: 24,
-            }}
+            slideId={currentSlide.id}
+            style={(currentSlide as any).style || {}}
             onStyleChange={handleStyleChange}
             onTextChange={handleComposerTextChange}
             onDownload={handleComposerDownload}
+            onSave={async (style) => {
+              await updateSlide.mutateAsync({ id: currentSlide.id, style: style as any });
+            }}
           />
         ) : (
           <Card className="overflow-hidden">

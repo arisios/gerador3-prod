@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { designTemplates, colorPalettes } from "../../../shared/designTemplates";
-import { downloadSlide } from "./SlideRenderer";
+import html2canvas from "html2canvas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -90,9 +90,11 @@ interface SlideComposerProps {
   paletteId?: string;
   logoUrl?: string;
   slideIndex?: number;
+  slideId?: number; // ID do slide para salvar no banco
   onStyleChange: (style: SlideStyle) => void;
   onTextChange: (text: string) => void;
   onDownload: (withText: boolean) => void;
+  onSave?: (style: SlideStyle) => Promise<void>; // Callback para salvar no banco
 }
 
 export default function SlideComposer({
@@ -103,16 +105,24 @@ export default function SlideComposer({
   paletteId,
   logoUrl,
   slideIndex = 0,
+  slideId,
   onStyleChange,
   onTextChange,
   onDownload,
+  onSave,
 }: SlideComposerProps) {
   // Obter template e paleta
   const template = templateId ? designTemplates.find(t => t.id === templateId) : designTemplates[0];
   const palette = paletteId ? colorPalettes.find(p => p.id === paletteId) : null;
   
-  // Inicializar localStyle com valores do template/paleta
+  // Inicializar localStyle com valores salvos ou do template/paleta
   const getInitialStyle = useCallback((): SlideStyle => {
+    // Se já existe um estilo salvo no banco, usar ele
+    if (style && Object.keys(style).length > 0 && style.textColor) {
+      return { ...DEFAULT_STYLE, ...style };
+    }
+    
+    // Caso contrário, usar cores do template/paleta
     const colors = {
       background: palette?.colors.background || template?.colors.background || "#1a1a2e",
       text: palette?.colors.text || template?.colors.text || "#FFFFFF",
@@ -123,24 +133,28 @@ export default function SlideComposer({
       backgroundColor: colors.background,
       textColor: colors.text,
     };
-  }, [template, palette]);
+  }, [template, palette, style]);
   
   const [localStyle, setLocalStyle] = useState<SlideStyle>(getInitialStyle);
   const [downloading, setDownloading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("basico");
   const [initialized, setInitialized] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  
+  // Ref para o preview - usado para capturar a imagem com html2canvas
+  const previewRef = useRef<HTMLDivElement>(null);
 
-  // Inicializar apenas uma vez ou quando template/paleta mudar
+  // Inicializar quando o slide mudar (slideId diferente)
   useEffect(() => {
-    if (!initialized) {
-      setLocalStyle(getInitialStyle());
-      setInitialized(true);
-    }
-  }, [getInitialStyle, initialized]);
+    setLocalStyle(getInitialStyle());
+    setHasUnsavedChanges(false);
+  }, [slideId]); // Reinicializar quando mudar de slide
 
   const updateStyle = useCallback((updates: Partial<SlideStyle>) => {
     const newStyle = { ...localStyle, ...updates };
     setLocalStyle(newStyle);
+    setHasUnsavedChanges(true);
     onStyleChange(newStyle);
   }, [localStyle, onStyleChange]);
 
@@ -165,37 +179,74 @@ export default function SlideComposer({
     const initial = getInitialStyle();
     setLocalStyle(initial);
     onStyleChange(initial);
+    setHasUnsavedChanges(true);
     toast.success("Estilo resetado!");
   };
 
-  // Download usando a função unificada do SlideRenderer
+  // Salvar edição no banco de dados
+  const handleSave = async () => {
+    if (!onSave) {
+      toast.error("Função de salvamento não disponível");
+      return;
+    }
+    
+    setSaving(true);
+    try {
+      await onSave(localStyle);
+      setHasUnsavedChanges(false);
+      toast.success("Edição salva com sucesso!");
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      toast.error("Erro ao salvar edição");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Download usando html2canvas para capturar exatamente o que está no preview
   const handleDownload = async (withText: boolean) => {
-    if (!templateId) {
-      toast.error("Template não selecionado");
+    if (!previewRef.current) {
+      toast.error("Preview não encontrado");
       return;
     }
 
     setDownloading(true);
+    
+    // Temporariamente ocultar o texto se withText for false
+    const originalShowText = localStyle.showText;
+    if (!withText) {
+      setLocalStyle(prev => ({ ...prev, showText: false }));
+    }
+    
+    // Aguardar um tick para o React atualizar o DOM
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     try {
-      await downloadSlide({
-        text: text,
-        imageUrl: imageUrl,
-        templateId: templateId,
-        paletteId: paletteId,
-        logoUrl: logoUrl,
-        showText: withText,
-        // Passar as cores customizadas do editor
-        customColors: {
-          background: localStyle.backgroundColor,
-          text: localStyle.textColor,
-        },
-        filename: `slide_${slideIndex + 1}${withText ? '_com_texto' : '_sem_texto'}.png`
+      // Capturar o preview com html2canvas
+      const canvas = await html2canvas(previewRef.current, {
+        scale: 3, // Alta resolução (1080px * 3 = 3240px)
+        useCORS: true, // Permitir imagens de outros domínios
+        allowTaint: true,
+        backgroundColor: localStyle.backgroundColor,
+        logging: false,
       });
+      
+      // Converter para PNG e fazer download
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
+      const link = document.createElement('a');
+      link.download = `slide_${slideIndex + 1}${withText ? '_com_texto' : '_sem_texto'}.png`;
+      link.href = dataUrl;
+      link.click();
+      
       toast.success("Download iniciado!");
     } catch (error) {
       console.error("Erro no download:", error);
       toast.error("Erro ao baixar slide");
     } finally {
+      // Restaurar o estado do texto
+      if (!withText) {
+        setLocalStyle(prev => ({ ...prev, showText: originalShowText }));
+      }
       setDownloading(false);
     }
   };
@@ -251,10 +302,13 @@ export default function SlideComposer({
     <div className="space-y-4">
       {/* Preview Customizado que responde às edições */}
       <div 
-        className="relative aspect-[4/5] rounded-lg overflow-hidden border border-border"
+        ref={previewRef}
+        className="relative aspect-[4/5] rounded-lg overflow-hidden"
         style={{ 
           backgroundColor: localStyle.backgroundColor,
-          maxHeight: "400px"
+          width: "100%",
+          maxWidth: "360px",
+          margin: "0 auto"
         }}
       >
         {/* Imagem na moldura do template */}
@@ -639,6 +693,23 @@ export default function SlideComposer({
           Carregar Padrão
         </Button>
       </div>
+
+      {/* Botão Salvar Edição - destaque quando há mudanças não salvas */}
+      {onSave && (
+        <Button 
+          onClick={handleSave} 
+          className={`w-full ${hasUnsavedChanges ? 'bg-primary hover:bg-primary/90' : ''}`}
+          variant={hasUnsavedChanges ? 'default' : 'outline'}
+          disabled={saving || !hasUnsavedChanges}
+        >
+          {saving ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Save className="w-4 h-4 mr-2" />
+          )}
+          {hasUnsavedChanges ? 'Salvar Edição *' : 'Edição Salva'}
+        </Button>
+      )}
 
       <div className="flex gap-2">
         <Button 

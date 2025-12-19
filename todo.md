@@ -256,3 +256,18 @@
 - [x] Preview parece uma foto estática que não responde às edições - CORRIGIDO: preview customizado usa localStyle
 - [x] Corrigir conexão entre controles e preview - CORRIGIDO: download agora usa customColors
 - [x] Download aplica as cores customizadas do editor - CORRIGIDO: passa textColor e backgroundColor para downloadSlide
+
+## Nova Abordagem - Download via html2canvas (18/12/2024)
+- [ ] Instalar html2canvas para capturar preview como imagem
+- [ ] Modificar SlideComposer para usar html2canvas no download
+- [ ] Garantir que download seja exatamente igual ao preview do editor
+- [ ] Remover lógica duplicada de renderização
+
+## Salvamento de Edições do SlideComposer (18/12/2024)
+- [x] Campo style (JSON) já existe na tabela slides
+- [x] Rota slides.update já aceita campo style
+- [x] Adicionar botão "Salvar Edição" no SlideComposer - IMPLEMENTADO
+- [x] Carregar estilos salvos ao abrir o editor de um slide - IMPLEMENTADO
+- [x] Indicador de "mudanças não salvas" com asterisco - IMPLEMENTADO
+- [x] Edições persistem ao navegar entre slides - TESTADO E FUNCIONANDO
+- [ ] Download em lote usa estilos salvos de cada slide
