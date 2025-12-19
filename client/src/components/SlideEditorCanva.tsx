@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { 
   ChevronLeft, ChevronRight, Save, Download, Type, Image as ImageIcon,
   Palette, AlignLeft, AlignCenter, AlignRight, Plus, Minus, X,
-  Bold, Trash2, Droplet, Sun, Square
+  Bold, Italic, Underline, Trash2, Droplet, Sun, Square
 } from "lucide-react";
 
 // Tipos
@@ -27,6 +27,8 @@ interface TextBlock {
   color: string;
   fontFamily: string;
   fontWeight: string;
+  fontStyle: string;
+  textDecoration: string;
   textAlign: "left" | "center" | "right";
   // Sombra
   shadowEnabled: boolean;
@@ -106,14 +108,18 @@ export async function downloadSlideAsImage(
   
   // Imagem
   if (imageUrl) {
-    await new Promise<void>((resolve, reject) => {
+    console.log("[Download] Carregando imagem:", imageUrl);
+    await new Promise<void>((resolve) => {
       const img = new window.Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
+        console.log("[Download] Imagem carregada com sucesso:", img.naturalWidth, "x", img.naturalHeight);
         const x = (imageObject.x / 100) * 1080;
         const y = (imageObject.y / 100) * 1350;
         const w = (imageObject.width / 100) * 1080;
         const h = (imageObject.height / 100) * 1350;
+        
+        console.log("[Download] Posição da imagem:", { x, y, w, h });
         
         // object-fit: cover
         const imgRatio = img.naturalWidth / img.naturalHeight;
@@ -132,9 +138,15 @@ export async function downloadSlideAsImage(
         ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
         resolve();
       };
-      img.onerror = () => reject(new Error("Erro ao carregar imagem"));
+      img.onerror = (err) => {
+        console.error("[Download] Erro ao carregar imagem:", err, "URL:", imageUrl);
+        // Continua mesmo se der erro - só não terá a imagem
+        resolve();
+      };
       img.src = `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
     });
+  } else {
+    console.log("[Download] Sem imageUrl para este slide");
   }
   
   // Textos
@@ -145,7 +157,8 @@ export async function downloadSlideAsImage(
       const w = (block.width / 100) * 1080;
       const fontSize = block.fontSize * 3;
       
-      ctx.font = `${block.fontWeight} ${fontSize}px ${block.fontFamily}`;
+      const fontStyleStr = block.fontStyle === "italic" ? "italic " : "";
+      ctx.font = `${fontStyleStr}${block.fontWeight} ${fontSize}px ${block.fontFamily}`;
       ctx.textAlign = block.textAlign;
       ctx.textBaseline = "top";
       
@@ -238,6 +251,8 @@ const DEFAULT_TEXT_BLOCK: Omit<TextBlock, "id"> = {
   color: "#FFFFFF",
   fontFamily: "Inter",
   fontWeight: "bold",
+  fontStyle: "normal",
+  textDecoration: "none",
   textAlign: "center",
   shadowEnabled: true,
   shadowColor: "#000000",
@@ -468,7 +483,8 @@ export default function SlideEditorCanva({
           const w = (block.width / 100) * 1080;
           const fontSize = block.fontSize * 3; // Escalar para 1080px
           
-          ctx.font = `${block.fontWeight} ${fontSize}px ${block.fontFamily}`;
+          const fontStyleStr = block.fontStyle === "italic" ? "italic " : "";
+      ctx.font = `${fontStyleStr}${block.fontWeight} ${fontSize}px ${block.fontFamily}`;
           ctx.textAlign = block.textAlign;
           ctx.textBaseline = "top";
           
@@ -603,6 +619,8 @@ export default function SlideEditorCanva({
       color: block.color,
       fontFamily: block.fontFamily,
       fontWeight: block.fontWeight,
+      fontStyle: block.fontStyle,
+      textDecoration: block.textDecoration,
       textAlign: block.textAlign,
       textShadow: textShadow || "none",
       letterSpacing: `${block.letterSpacing}px`,
@@ -860,87 +878,100 @@ export default function SlideEditorCanva({
                 ))}
               </div>
               
-              {/* Sub-painel: Básico */}
+              {/* Sub-painel: Básico - Compacto */}
               {textSubPanel === "basic" && (
-                <div className="space-y-3">
-                  <Input
-                    value={selectedText.text}
-                    onChange={(e) => updateTextBlock(selectedText.id, { text: e.target.value })}
-                    className="bg-zinc-800 border-zinc-700 text-white h-9"
-                    placeholder="Digite o texto..."
-                  />
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Fonte */}
+                  <select
+                    value={selectedText.fontFamily}
+                    onChange={(e) => updateTextBlock(selectedText.id, { fontFamily: e.target.value })}
+                    className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-white text-xs w-24"
+                  >
+                    {FONT_OPTIONS.map(font => (
+                      <option key={font} value={font}>{font}</option>
+                    ))}
+                  </select>
                   
-                  <div className="flex gap-2">
-                    <select
-                      value={selectedText.fontFamily}
-                      onChange={(e) => updateTextBlock(selectedText.id, { fontFamily: e.target.value })}
-                      className="flex-1 bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1.5 text-white text-sm"
-                    >
-                      {FONT_OPTIONS.map(font => (
-                        <option key={font} value={font}>{font}</option>
-                      ))}
-                    </select>
-                    
-                    <div className="flex items-center gap-1 bg-zinc-800 border border-zinc-700 rounded-md px-1">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => updateTextBlock(selectedText.id, { fontSize: Math.max(12, selectedText.fontSize - 2) })}>
-                        <Minus className="w-3 h-3" />
-                      </Button>
-                      <span className="text-white text-sm w-6 text-center">{selectedText.fontSize}</span>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => updateTextBlock(selectedText.id, { fontSize: Math.min(72, selectedText.fontSize + 2) })}>
-                        <Plus className="w-3 h-3" />
-                      </Button>
-                    </div>
+                  {/* Tamanho */}
+                  <div className="flex items-center bg-zinc-800 border border-zinc-700 rounded">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => updateTextBlock(selectedText.id, { fontSize: Math.max(12, selectedText.fontSize - 2) })}>
+                      <Minus className="w-3 h-3" />
+                    </Button>
+                    <span className="text-white text-xs w-5 text-center">{selectedText.fontSize}</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => updateTextBlock(selectedText.id, { fontSize: Math.min(72, selectedText.fontSize + 2) })}>
+                      <Plus className="w-3 h-3" />
+                    </Button>
                   </div>
                   
-                  <div className="flex gap-2 items-center">
-                    <div className="flex bg-zinc-800 border border-zinc-700 rounded-md">
-                      {[
-                        { align: "left" as const, icon: AlignLeft },
-                        { align: "center" as const, icon: AlignCenter },
-                        { align: "right" as const, icon: AlignRight },
-                      ].map(({ align, icon: Icon }) => (
-                        <Button
-                          key={align}
-                          variant="ghost"
-                          size="icon"
-                          className={`h-8 w-8 ${selectedText.textAlign === align ? "bg-purple-500/20 text-purple-400" : ""}`}
-                          onClick={() => updateTextBlock(selectedText.id, { textAlign: align })}
-                        >
-                          <Icon className="w-4 h-4" />
-                        </Button>
-                      ))}
-                    </div>
-                    
+                  {/* Alinhamento */}
+                  <div className="flex bg-zinc-800 border border-zinc-700 rounded">
+                    {[
+                      { align: "left" as const, icon: AlignLeft },
+                      { align: "center" as const, icon: AlignCenter },
+                      { align: "right" as const, icon: AlignRight },
+                    ].map(({ align, icon: Icon }) => (
+                      <Button
+                        key={align}
+                        variant="ghost"
+                        size="icon"
+                        className={`h-6 w-6 ${selectedText.textAlign === align ? "bg-purple-500/20 text-purple-400" : ""}`}
+                        onClick={() => updateTextBlock(selectedText.id, { textAlign: align })}
+                      >
+                        <Icon className="w-3 h-3" />
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* Bold, Italic, Underline */}
+                  <div className="flex bg-zinc-800 border border-zinc-700 rounded">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={`h-8 w-8 bg-zinc-800 border border-zinc-700 ${selectedText.fontWeight === "bold" ? "bg-purple-500/20 text-purple-400" : ""}`}
+                      className={`h-6 w-6 ${selectedText.fontWeight === "bold" ? "bg-purple-500/20 text-purple-400" : ""}`}
                       onClick={() => updateTextBlock(selectedText.id, { fontWeight: selectedText.fontWeight === "bold" ? "normal" : "bold" })}
                     >
-                      <Bold className="w-4 h-4" />
+                      <Bold className="w-3 h-3" />
                     </Button>
-                    
-                    <Button variant="ghost" size="icon" className="h-8 w-8 bg-zinc-800 border border-zinc-700" onClick={addTextBlock}>
-                      <Plus className="w-4 h-4" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`h-6 w-6 ${selectedText.fontStyle === "italic" ? "bg-purple-500/20 text-purple-400" : ""}`}
+                      onClick={() => updateTextBlock(selectedText.id, { fontStyle: selectedText.fontStyle === "italic" ? "normal" : "italic" })}
+                    >
+                      <Italic className="w-3 h-3" />
                     </Button>
-                    
-                    {textBlocks.length > 1 && (
-                      <Button variant="ghost" size="icon" className="h-8 w-8 bg-zinc-800 border border-zinc-700 text-red-400" onClick={() => removeTextBlock(selectedText.id)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`h-6 w-6 ${selectedText.textDecoration === "underline" ? "bg-purple-500/20 text-purple-400" : ""}`}
+                      onClick={() => updateTextBlock(selectedText.id, { textDecoration: selectedText.textDecoration === "underline" ? "none" : "underline" })}
+                    >
+                      <Underline className="w-3 h-3" />
+                    </Button>
                   </div>
                   
-                  <div className="flex gap-1.5 flex-wrap">
-                    {COLOR_PRESETS.map(color => (
+                  {/* Cores */}
+                  <div className="flex gap-1">
+                    {COLOR_PRESETS.slice(0, 8).map(color => (
                       <button
                         key={color}
-                        className={`w-7 h-7 rounded-full border-2 ${selectedText.color === color ? "border-purple-500" : "border-zinc-600"}`}
+                        className={`w-5 h-5 rounded-full border ${selectedText.color === color ? "border-purple-500 border-2" : "border-zinc-600"}`}
                         style={{ backgroundColor: color }}
                         onClick={() => updateTextBlock(selectedText.id, { color })}
                       />
                     ))}
                   </div>
+                  
+                  {/* Adicionar/Remover texto */}
+                  <Button variant="ghost" size="icon" className="h-6 w-6 bg-zinc-800 border border-zinc-700" onClick={addTextBlock}>
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                  
+                  {textBlocks.length > 1 && (
+                    <Button variant="ghost" size="icon" className="h-6 w-6 bg-zinc-800 border border-zinc-700 text-red-400" onClick={() => removeTextBlock(selectedText.id)}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
                 </div>
               )}
               
@@ -1200,23 +1231,13 @@ export default function SlideEditorCanva({
           {/* DOWNLOAD */}
           {activeTool === "download" && (
             <div className="space-y-3">
-              <p className="text-zinc-400 text-sm">Este slide:</p>
+              <p className="text-zinc-400 text-sm">Baixar este slide:</p>
               <div className="flex gap-2">
                 <Button className="flex-1" disabled={downloading} onClick={() => handleInternalDownload(true)}>
-                  {downloading ? "..." : "Com Texto"}
+                  {downloading ? "Baixando..." : "Com Texto"}
                 </Button>
                 <Button variant="outline" className="flex-1" disabled={downloading} onClick={() => handleInternalDownload(false)}>
-                  {downloading ? "..." : "Sem Texto"}
-                </Button>
-              </div>
-              
-              <p className="text-zinc-400 text-sm mt-2">Todos os slides:</p>
-              <div className="flex gap-2">
-                <Button className="flex-1" onClick={() => onDownload("all-with")}>
-                  Todos com Texto
-                </Button>
-                <Button variant="outline" className="flex-1" onClick={() => onDownload("all-without")}>
-                  Todos sem Texto
+                  {downloading ? "Baixando..." : "Sem Texto"}
                 </Button>
               </div>
             </div>

@@ -120,9 +120,14 @@ export default function ContentEdit() {
     
     const processDownload = async () => {
       try {
+        console.log("[Download Lote] Processando slide", currentSlideIndex, "de", slides.length);
+        console.log("[Download Lote] currentSlide:", currentSlide);
+        console.log("[Download Lote] imageUrl:", currentSlide.imageUrl);
+        
         // Pegar a configuração salva do slide ou usar valores padrão
         const slideAny = currentSlide as any;
         const savedConfig = slideAny?.style?.editorConfig as SlideConfig | undefined;
+        console.log("[Download Lote] savedConfig:", savedConfig);
         
         // Valores padrão se não houver configuração salva
         const defaultConfig: SlideConfig = {
@@ -138,6 +143,8 @@ export default function ContentEdit() {
             color: "#FFFFFF",
             fontFamily: "Inter",
             fontWeight: "bold",
+            fontStyle: "normal",
+            textDecoration: "none",
             textAlign: "center" as const,
             shadowEnabled: true,
             shadowColor: "#000000",
