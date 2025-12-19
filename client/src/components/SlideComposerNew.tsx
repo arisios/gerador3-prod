@@ -503,6 +503,7 @@ export default function SlideComposerNew({
           }
           
           // Quebrar texto em linhas
+          // textWidth já foi declarado acima
           const words = block.text.split(" ");
           const lines: string[] = [];
           let currentLine = words[0] || "";
