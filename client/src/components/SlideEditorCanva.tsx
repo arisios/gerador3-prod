@@ -172,6 +172,22 @@ export default function SlideEditorCanva({
     setHasChanges(true);
   }, [imageObject, textBlocks, backgroundColor]);
   
+  // Bloquear scroll do body durante arrasto (igual SlideComposerNew)
+  useEffect(() => {
+    if (isDragging) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [isDragging]);
+  
   // Funções de texto
   const addTextBlock = () => {
     const newBlock: TextBlock = {
