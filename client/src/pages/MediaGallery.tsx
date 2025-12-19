@@ -434,6 +434,20 @@ export default function MediaGallery() {
 
             <DialogFooter className="flex-col sm:flex-row gap-2">
               <Button
+                variant="default"
+                onClick={() => {
+                  if (selectedMedia) {
+                    navigator.clipboard.writeText(selectedMedia.url);
+                    toast.success("URL copiada! Cole no campo de imagem do seu conteúdo.");
+                    setSelectedMedia(null);
+                  }
+                }}
+                className="gap-2 bg-primary"
+              >
+                <Check className="h-4 w-4" />
+                Usar esta imagem
+              </Button>
+              <Button
                 variant="outline"
                 onClick={() => selectedMedia && handleCopyUrl(selectedMedia.url)}
                 className="gap-2"

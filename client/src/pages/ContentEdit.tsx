@@ -911,10 +911,11 @@ export default function ContentEdit() {
                       if (file) handleUploadImage(file);
                     }}
                   />
-                  <Button variant="outline" className="w-full" asChild>
-                    <span>
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload
+                  <Button variant="default" className="w-full bg-green-600 hover:bg-green-700 text-white" asChild>
+                    <span className="flex items-center justify-center gap-2">
+                      <Upload className="w-4 h-4" />
+                      Upload Grátis
+                      <span className="text-xs bg-green-500/30 px-1.5 py-0.5 rounded">0 créditos</span>
                     </span>
                   </Button>
                 </label>

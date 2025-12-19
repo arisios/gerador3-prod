@@ -137,7 +137,7 @@ export function VideoGeneratorSelector({
 
   return (
     <>
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button
           variant="outline"

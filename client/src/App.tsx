@@ -26,6 +26,8 @@ import Trends from "./pages/Trends";
 import Virals from "./pages/Virals";
 import Credits from "./pages/Credits";
 import MediaGallery from "./pages/MediaGallery";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 
 function Router() {
   return (
@@ -50,6 +52,8 @@ function Router() {
       <Route path="/virals" component={Virals} />
       <Route path="/credits" component={Credits} />
       <Route path="/media" component={MediaGallery} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/privacy" component={Privacy} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

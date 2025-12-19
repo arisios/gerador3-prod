@@ -639,3 +639,12 @@
 - [x] Indicador de créditos por tipo de vídeo
 - [ ] Salvar vídeos gerados na galeria de mídia
 - [x] Permitir download de vídeos gerados
+
+
+## Termos de Uso e Upload (19/12/2024)
+- [x] Página de Termos de Uso (/terms)
+- [x] Página de Política de Privacidade (/privacy)
+- [ ] Links no rodapé para Termos e Privacidade
+- [x] Melhorar destaque do upload nas telas de criação
+- [x] Botão "Usar esta imagem" na galeria
+- [x] Indicador visual "Upload = 0 créditos" mais proeminente

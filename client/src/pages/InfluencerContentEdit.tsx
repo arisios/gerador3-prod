@@ -11,7 +11,7 @@ import SlideComposer, { SlideStyle } from "@/components/SlideComposer";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { VideoGeneratorSelectorWithCredits } from "@/components/VideoGeneratorSelectorWithCredits";
 import { downloadCarouselSlide, downloadSingleImage, downloadAllSlidesWithText, downloadAllSlidesWithoutText } from "@/lib/downloadSlide";
-import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Video } from "lucide-react";
+import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Video, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const DEFAULT_STYLE: SlideStyle = {
@@ -91,6 +91,34 @@ export default function InfluencerContentEdit() {
       setGeneratingAll(false);
     },
   });
+
+  const uploadImage = trpc.upload.image.useMutation();
+
+  const handleUploadImage = async (file: File) => {
+    if (!currentSlide) return;
+    
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target?.result as string;
+        const result = await uploadImage.mutateAsync({
+          base64,
+          filename: file.name,
+          contentType: file.type,
+        });
+        
+        await updateSlide.mutateAsync({
+          id: currentSlide.id,
+          imageUrl: result.url,
+        });
+        
+        toast.success("Imagem enviada com sucesso!");
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error("Erro ao enviar imagem");
+    }
+  };
 
   const slides = content?.slides || [];
   const currentSlide = slides[currentSlideIndex];
@@ -438,14 +466,35 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
         </div>
 
         {/* Actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" disabled={!hasReferenceImage}>
-                <Plus className="w-4 h-4 mr-2" />
-                Gerar Imagem
-              </Button>
-            </SheetTrigger>
+        <div className="space-y-3">
+          {/* Botão de Upload Destacado */}
+          <label className="block">
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleUploadImage(file);
+              }}
+            />
+            <Button variant="default" className="w-full bg-green-600 hover:bg-green-700 text-white" asChild>
+              <span className="flex items-center justify-center gap-2">
+                <Upload className="w-4 h-4" />
+                Upload Grátis
+                <span className="text-xs bg-green-500/30 px-1.5 py-0.5 rounded">0 créditos</span>
+              </span>
+            </Button>
+          </label>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" disabled={!hasReferenceImage}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Gerar Imagem
+                </Button>
+              </SheetTrigger>
             <SheetContent>
               <SheetHeader>
                 <SheetTitle>Gerar Imagem</SheetTitle>
@@ -474,10 +523,11 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
               </div>
             </SheetContent>
           </Sheet>
-          <Button onClick={() => setShowComposer(!showComposer)}>
-            <Edit2 className="w-4 h-4 mr-2" />
-            {showComposer ? "Fechar Editor" : "Editar Visual"}
-          </Button>
+            <Button onClick={() => setShowComposer(!showComposer)}>
+              <Edit2 className="w-4 h-4 mr-2" />
+              {showComposer ? "Fechar Editor" : "Editar Visual"}
+            </Button>
+          </div>
         </div>
 
         {/* Botão de Gerar Vídeo */}
