@@ -648,3 +648,11 @@
 - [x] Melhorar destaque do upload nas telas de criação
 - [x] Botão "Usar esta imagem" na galeria
 - [x] Indicador visual "Upload = 0 créditos" mais proeminente
+
+
+## Captura de Logo em Projetos por Link (19/12/2024)
+- [x] Verificar análise de link atual
+- [x] Capturar logo do site na análise de link (Clearbit + Google Favicon)
+- [x] Salvar logo no projeto (campo logoUrl)
+- [x] Exibir logo nos slides gerados (rodapé direito por padrão)
+- [ ] Permitir usuário escolher posição da logo

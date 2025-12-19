@@ -57,6 +57,9 @@ interface SlideConfig {
   imageObject: ImageObject;
   textBlocks: TextBlock[];
   backgroundColor: string;
+  logoUrl?: string;
+  logoPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  logoSize?: number; // porcentagem da largura (5-20)
 }
 
 // Exportar tipos para uso externo
@@ -211,6 +214,52 @@ export async function downloadSlideAsImage(
       ctx.shadowColor = "transparent";
       ctx.shadowBlur = 0;
     }
+  }
+  
+  // Logo (se configurada)
+  if (config.logoUrl) {
+    await new Promise<void>((resolve) => {
+      const logoImg = new window.Image();
+      logoImg.crossOrigin = "anonymous";
+      logoImg.onload = () => {
+        const logoSize = (config.logoSize || 10) / 100 * 1080;
+        const padding = 30;
+        
+        // Calcular posição baseada na configuração
+        let logoX = padding;
+        let logoY = padding;
+        
+        switch (config.logoPosition || "bottom-right") {
+          case "top-left":
+            logoX = padding;
+            logoY = padding;
+            break;
+          case "top-right":
+            logoX = 1080 - logoSize - padding;
+            logoY = padding;
+            break;
+          case "bottom-left":
+            logoX = padding;
+            logoY = 1350 - logoSize - padding;
+            break;
+          case "bottom-right":
+          default:
+            logoX = 1080 - logoSize - padding;
+            logoY = 1350 - logoSize - padding;
+            break;
+        }
+        
+        // Manter proporção da logo
+        const logoRatio = logoImg.naturalWidth / logoImg.naturalHeight;
+        const logoWidth = logoSize;
+        const logoHeight = logoSize / logoRatio;
+        
+        ctx.drawImage(logoImg, logoX, logoY, logoWidth, logoHeight);
+        resolve();
+      };
+      logoImg.onerror = () => resolve();
+      logoImg.src = `/api/image-proxy?url=${encodeURIComponent(config.logoUrl || '')}`;
+    });
   }
   
   // Download

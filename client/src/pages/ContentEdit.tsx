@@ -583,7 +583,12 @@ export default function ContentEdit() {
             slideIndex={currentSlideIndex}
             totalSlides={slides.length}
             slideId={currentSlide.id}
-            savedConfig={(currentSlide as any).style?.editorConfig || null}
+            savedConfig={{
+              ...((currentSlide as any).style?.editorConfig || {}),
+              logoUrl: project?.logoUrl || undefined,
+              logoPosition: "bottom-right" as const,
+              logoSize: 10
+            }}
             onSave={async (config) => {
               await updateSlide.mutateAsync({
                 id: currentSlide.id,
