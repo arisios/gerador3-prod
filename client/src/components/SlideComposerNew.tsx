@@ -465,8 +465,10 @@ export default function SlideComposerNew({
             );
           }
           
-          // Configurar fonte
-          const scale = canvas.width / 360;
+          // Configurar fonte - usar mesma escala do preview
+          // Preview tem ~360px de largura, canvas tem 1080px
+          const previewWidth = 360;
+          const scale = canvas.width / previewWidth;
           const fontSize = block.fontSize * scale;
           ctx.font = `${block.fontWeight} ${fontSize}px ${block.fontFamily}, sans-serif`;
           ctx.fillStyle = block.color;
