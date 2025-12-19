@@ -378,3 +378,19 @@
 - [x] Renomear botão para "Editar Visual"
 - [ ] Testar em dispositivo real
 - [ ] Salvar posições no banco de dados
+
+
+## Bugs Reportados - Editor Novo (19/12/2024) - URGENTE
+- [ ] Download continua sem imagem (só fundo roxo + texto) - CORRIGIR URGENTE
+- [ ] Layout ruim no mobile: botões de download ocupam espaço dos controles
+- [ ] Reorganizar: controles de edição logo abaixo da imagem
+- [ ] Mover botões de download para header ou menu separado
+
+
+## Download Corrigido - Imagem 100% (19/12/2024)
+- [x] Download agora mostra imagem cobrindo 100% do canvas (igual ao Gerador 2)
+- [x] Texto fica por cima da imagem com sombra para legibilidade
+- [x] Layout do editor reorganizado: botões de download no topo, controles abaixo do preview
+- [x] Múltiplos blocos de texto suportados
+- [x] Drag-and-drop para mover texto
+- [x] Todas as opções de edição de texto (tamanho, cor, sombra, contorno, glow, etc.)
