@@ -25,6 +25,8 @@ export const projects = mysqlTable("projects", {
   analysis: json("analysis"),
   // Kit de Marca
   logoUrl: text("logoUrl"),
+  logoPosition: mysqlEnum("logoPosition", ["top-left", "top-right", "bottom-left", "bottom-right"]).default("bottom-right"),
+  logoSize: int("logoSize").default(10), // porcentagem da largura (5-20)
   colorPaletteId: varchar("colorPaletteId", { length: 50 }),
   customColors: json("customColors"),
   defaultTemplateId: varchar("defaultTemplateId", { length: 50 }),

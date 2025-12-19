@@ -655,4 +655,8 @@
 - [x] Capturar logo do site na análise de link (Clearbit + Google Favicon)
 - [x] Salvar logo no projeto (campo logoUrl)
 - [x] Exibir logo nos slides gerados (rodapé direito por padrão)
-- [ ] Permitir usuário escolher posição da logo
+- [x] Permitir usuário escolher posição da logo
+  - [x] Campo logoPosition e logoSize no schema do projeto
+  - [x] Interface de seleção de posição (4 opções) + tamanho
+  - [x] Integrar posição no download dos slides
+  - [x] Tab Config no ProjectDetail com LogoPositionSelector

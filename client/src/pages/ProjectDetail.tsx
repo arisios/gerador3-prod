@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
 import { TemplateSelector, AccentColorSelector } from "@/components/SlidePreview";
+import { LogoPositionSelector } from "@/components/LogoPositionSelector";
 import { 
   ArrowLeft, Plus, Image, Video, Layers, Loader2, 
   ChevronRight, Trash2, Users, Zap, Target, AlertCircle,
@@ -50,6 +51,10 @@ export default function ProjectDetail() {
   const [visualTemplate, setVisualTemplate] = useState("lifestyle-editorial");
   const [accentColor, setAccentColor] = useState("neon-green");
   const [showVisualTemplates, setShowVisualTemplates] = useState(false);
+  
+  // Estados para configuração da logo
+  const [logoPosition, setLogoPosition] = useState<"top-left" | "top-right" | "bottom-left" | "bottom-right">("bottom-right");
+  const [logoSize, setLogoSize] = useState(10);
 
   const { data: project, isLoading } = trpc.projects.get.useQuery({ id: projectId });
   const { data: contents } = trpc.content.list.useQuery({ projectId }, { enabled: !!projectId });
@@ -82,6 +87,24 @@ export default function ProjectDetail() {
       setLocation("/dashboard");
     },
   });
+
+  const updateBrandKit = trpc.projects.updateBrandKit.useMutation({
+    onSuccess: () => {
+      toast.success("Configurações da logo salvas!");
+      utils.projects.get.invalidate({ id: projectId });
+    },
+    onError: (error) => {
+      toast.error("Erro ao salvar: " + error.message);
+    },
+  });
+
+  const saveLogoSettings = () => {
+    updateBrandKit.mutate({
+      id: projectId,
+      logoPosition,
+      logoSize,
+    });
+  };
 
   const templates = currentContentType === "carousel" ? carouselTemplates :
                     currentContentType === "image" ? imageTemplates : videoTemplates;
@@ -258,6 +281,7 @@ export default function ProjectDetail() {
             <TabsTrigger value="contents" className="flex-1">Conteúdos</TabsTrigger>
             <TabsTrigger value="pains" className="flex-1">Dores</TabsTrigger>
             <TabsTrigger value="clients" className="flex-1">Clientes</TabsTrigger>
+            <TabsTrigger value="settings" className="flex-1">Config</TabsTrigger>
           </TabsList>
 
           {/* Contents Tab */}
@@ -404,6 +428,41 @@ export default function ProjectDetail() {
                 <p>Nenhum cliente ideal mapeado</p>
               </div>
             )}
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-4 mt-4">
+            <Card>
+              <CardContent className="p-4 space-y-4">
+                <h3 className="font-semibold">Configurações da Logo</h3>
+                {project.logoUrl ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <img src={project.logoUrl} alt="Logo" className="w-16 h-16 object-contain bg-muted rounded" />
+                      <div>
+                        <p className="text-sm font-medium">Logo do Projeto</p>
+                        <p className="text-xs text-muted-foreground">Aparece nos slides ao fazer download</p>
+                      </div>
+                    </div>
+                    <LogoPositionSelector
+                      logoUrl={project.logoUrl}
+                      position={(project.logoPosition as "top-left" | "top-right" | "bottom-left" | "bottom-right") || "bottom-right"}
+                      size={project.logoSize || 10}
+                      onPositionChange={(pos) => setLogoPosition(pos)}
+                      onSizeChange={(size) => setLogoSize(size)}
+                      onSave={() => saveLogoSettings()}
+                      isSaving={updateBrandKit.isPending}
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Nenhuma logo detectada</p>
+                    <p className="text-xs mt-1">A logo é capturada automaticamente ao criar o projeto por link</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>

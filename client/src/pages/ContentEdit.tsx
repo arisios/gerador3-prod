@@ -586,8 +586,8 @@ export default function ContentEdit() {
             savedConfig={{
               ...((currentSlide as any).style?.editorConfig || {}),
               logoUrl: project?.logoUrl || undefined,
-              logoPosition: "bottom-right" as const,
-              logoSize: 10
+              logoPosition: (project?.logoPosition as "top-left" | "top-right" | "bottom-left" | "bottom-right") || "bottom-right",
+              logoSize: project?.logoSize || 10
             }}
             onSave={async (config) => {
               await updateSlide.mutateAsync({

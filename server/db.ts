@@ -104,6 +104,8 @@ export async function updateProjectBrandKit(id: number, data: {
   colorPaletteId?: string;
   customColors?: { background?: string; text?: string; accent?: string };
   defaultTemplateId?: string;
+  logoPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  logoSize?: number;
 }): Promise<void> {
   const db = await getDb();
   if (!db) return;
@@ -112,6 +114,8 @@ export async function updateProjectBrandKit(id: number, data: {
   if (data.colorPaletteId !== undefined) updateData.colorPaletteId = data.colorPaletteId;
   if (data.customColors !== undefined) updateData.customColors = data.customColors;
   if (data.defaultTemplateId !== undefined) updateData.defaultTemplateId = data.defaultTemplateId;
+  if (data.logoPosition !== undefined) updateData.logoPosition = data.logoPosition;
+  if (data.logoSize !== undefined) updateData.logoSize = data.logoSize;
   if (Object.keys(updateData).length > 0) {
     await db.update(projects).set(updateData).where(eq(projects.id, id));
   }

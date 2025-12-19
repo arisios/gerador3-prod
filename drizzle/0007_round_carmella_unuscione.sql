@@ -1,0 +1,2 @@
+ALTER TABLE `projects` ADD `logoPosition` enum('top-left','top-right','bottom-left','bottom-right') DEFAULT 'bottom-right';--> statement-breakpoint
+ALTER TABLE `projects` ADD `logoSize` int DEFAULT 10;

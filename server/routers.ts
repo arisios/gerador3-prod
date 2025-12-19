@@ -393,6 +393,8 @@ export const appRouter = router({
           accent: z.string().optional(),
         }).optional(),
         defaultTemplateId: z.string().optional(),
+        logoPosition: z.enum(["top-left", "top-right", "bottom-left", "bottom-right"]).optional(),
+        logoSize: z.number().min(5).max(20).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const project = await db.getProjectById(input.id);
@@ -404,6 +406,8 @@ export const appRouter = router({
           colorPaletteId: input.colorPaletteId,
           customColors: input.customColors,
           defaultTemplateId: input.defaultTemplateId,
+          logoPosition: input.logoPosition,
+          logoSize: input.logoSize,
         });
         return { success: true };
       }),
