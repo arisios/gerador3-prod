@@ -496,3 +496,9 @@
 
 - [x] BUG: Painel de controles tampando o texto quando abre (não dá pra ver o que está editando) - CORRIGIDO: painel agora fica embaixo
 - [x] BUG: Imagem ficou deitada (horizontal) ao invés de vertical 1080x1350 - CORRIGIDO: aspect ratio ajustado
+
+
+## Download como Print do Preview (19/12/2024)
+- [ ] Implementar download usando html2canvas para capturar o preview
+- [ ] Escalar a imagem capturada para 1080x1350
+- [ ] Garantir que download seja exatamente igual ao preview

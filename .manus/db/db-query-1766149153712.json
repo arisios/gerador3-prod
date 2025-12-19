@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, contentId, style FROM slides LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT id, contentId, style FROM slides LIMIT 3;",
+  "rows": [
+    {
+      "id": "1",
+      "contentId": "2",
+      "style": "{\"backgroundColor\": \"#000000\", \"borderColor\": \"#FFFFFF\", \"borderEnabled\": false, \"borderWidth\": 2, \"fontFamily\": \"Inter\", \"fontSize\": 19, \"glowColor\": \"#A855F7\", \"glowEnabled\": false, \"glowIntensity\": 10, \"letterSpacing\": 0, \"lineHeight\": 1.1, \"overlayOpacity\": 50, \"padding\": 23, \"positionY\": 80, \"shadowBlur\": 3, \"shadowColor\": \"#000000\", \"shadowEnabled\": true, \"shadowOffsetX\": 2, \"shadowOffsetY\": -2, \"showText\": true, \"textAlign\": \"center\", \"textColor\": \"#FFFFFF\"}"
+    },
+    {
+      "id": "2",
+      "contentId": "2",
+      "style": "NULL"
+    },
+    {
+      "id": "3",
+      "contentId": "2",
+      "style": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcontentId\tstyle\n1\t2\t{\"backgroundColor\": \"#000000\", \"borderColor\": \"#FFFFFF\", \"borderEnabled\": false, \"borderWidth\": 2, \"fontFamily\": \"Inter\", \"fontSize\": 19, \"glowColor\": \"#A855F7\", \"glowEnabled\": false, \"glowIntensity\": 10, \"letterSpacing\": 0, \"lineHeight\": 1.1, \"overlayOpacity\": 50, \"padding\": 23, \"positionY\": 80, \"shadowBlur\": 3, \"shadowColor\": \"#000000\", \"shadowEnabled\": true, \"shadowOffsetX\": 2, \"shadowOffsetY\": -2, \"showText\": true, \"textAlign\": \"center\", \"textColor\": \"#FFFFFF\"}\n2\t2\tNULL\n3\t2\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

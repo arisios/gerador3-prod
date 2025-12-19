@@ -57,6 +57,156 @@ interface SlideConfig {
   backgroundColor: string;
 }
 
+// Exportar tipos para uso externo
+export type { SlideConfig, TextBlock, ImageObject };
+
+// Função auxiliar para quebrar texto em linhas (simula CSS word-wrap)
+const wrapTextForCanvas = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let currentLine = "";
+  
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    const metrics = ctx.measureText(testLine);
+    
+    if (metrics.width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  }
+  
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+  
+  return lines;
+};
+
+// Função exportada para download de slide (pode ser usada externamente)
+export async function downloadSlideAsImage(
+  imageUrl: string | undefined,
+  config: SlideConfig,
+  slideIndex: number,
+  withText: boolean
+): Promise<void> {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1080;
+  canvas.height = 1350;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas não suportado");
+  
+  const { imageObject, textBlocks, backgroundColor } = config;
+  
+  // Fundo
+  ctx.fillStyle = backgroundColor;
+  ctx.fillRect(0, 0, 1080, 1350);
+  
+  // Imagem
+  if (imageUrl) {
+    await new Promise<void>((resolve, reject) => {
+      const img = new window.Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const x = (imageObject.x / 100) * 1080;
+        const y = (imageObject.y / 100) * 1350;
+        const w = (imageObject.width / 100) * 1080;
+        const h = (imageObject.height / 100) * 1350;
+        
+        // object-fit: cover
+        const imgRatio = img.naturalWidth / img.naturalHeight;
+        const boxRatio = w / h;
+        
+        let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+        
+        if (imgRatio > boxRatio) {
+          sw = img.naturalHeight * boxRatio;
+          sx = (img.naturalWidth - sw) / 2;
+        } else {
+          sh = img.naturalWidth / boxRatio;
+          sy = (img.naturalHeight - sh) / 2;
+        }
+        
+        ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+        resolve();
+      };
+      img.onerror = () => reject(new Error("Erro ao carregar imagem"));
+      img.src = `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
+    });
+  }
+  
+  // Textos
+  if (withText) {
+    for (const block of textBlocks) {
+      const x = (block.x / 100) * 1080;
+      const y = (block.y / 100) * 1350;
+      const w = (block.width / 100) * 1080;
+      const fontSize = block.fontSize * 3;
+      
+      ctx.font = `${block.fontWeight} ${fontSize}px ${block.fontFamily}`;
+      ctx.textAlign = block.textAlign;
+      ctx.textBaseline = "top";
+      
+      const lineHeight = fontSize * block.lineHeight;
+      const textX = block.textAlign === "center" ? x + w / 2 : block.textAlign === "right" ? x + w : x;
+      
+      const lines = wrapTextForCanvas(ctx, block.text, w);
+      
+      if (block.bgEnabled) {
+        const totalHeight = lines.length * lineHeight;
+        const padding = block.bgPadding * 3;
+        ctx.fillStyle = block.bgColor;
+        ctx.fillRect(x - padding, y - padding, w + padding * 2, totalHeight + padding * 2);
+      }
+      
+      lines.forEach((line, i) => {
+        const lineY = y + i * lineHeight;
+        
+        if (block.glowEnabled) {
+          ctx.shadowColor = block.glowColor;
+          ctx.shadowBlur = block.glowIntensity * 3;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.fillStyle = block.glowColor;
+          ctx.fillText(line, textX, lineY);
+        }
+        
+        if (block.shadowEnabled) {
+          ctx.shadowColor = block.shadowColor;
+          ctx.shadowBlur = block.shadowBlur * 3;
+          ctx.shadowOffsetX = block.shadowOffsetX * 3;
+          ctx.shadowOffsetY = block.shadowOffsetY * 3;
+        } else {
+          ctx.shadowColor = "transparent";
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+        }
+        
+        if (block.strokeEnabled) {
+          ctx.strokeStyle = block.strokeColor;
+          ctx.lineWidth = block.strokeWidth * 3;
+          ctx.strokeText(line, textX, lineY);
+        }
+        
+        ctx.fillStyle = block.color;
+        ctx.fillText(line, textX, lineY);
+      });
+      
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+    }
+  }
+  
+  // Download
+  const link = document.createElement("a");
+  link.download = `slide_${slideIndex}_${withText ? "com_texto" : "sem_texto"}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+
 interface SlideEditorCanvaProps {
   imageUrl?: string;
   initialText?: string;
@@ -258,7 +408,8 @@ export default function SlideEditorCanva({
     setDragTarget(null);
   };
   
-  // Download interno
+  // Download interno usando Canvas nativo
+  // A chave para igualar preview e download é usar a MESMA lógica de posicionamento
   const handleInternalDownload = async (withText: boolean) => {
     setDownloading(true);
     try {
@@ -272,17 +423,35 @@ export default function SlideEditorCanva({
       ctx.fillStyle = backgroundColor;
       ctx.fillRect(0, 0, 1080, 1350);
       
-      // Imagem
+      // Imagem - usando a MESMA lógica de posicionamento do preview (porcentagens)
       if (imageUrl) {
         await new Promise<void>((resolve, reject) => {
           const img = new window.Image();
           img.crossOrigin = "anonymous";
           img.onload = () => {
+            // Converter porcentagens para pixels (igual ao CSS do preview)
             const x = (imageObject.x / 100) * 1080;
             const y = (imageObject.y / 100) * 1350;
             const w = (imageObject.width / 100) * 1080;
             const h = (imageObject.height / 100) * 1350;
-            ctx.drawImage(img, x, y, w, h);
+            
+            // Desenhar imagem com object-fit: cover (igual ao CSS)
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const boxRatio = w / h;
+            
+            let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+            
+            if (imgRatio > boxRatio) {
+              // Imagem mais larga - cortar laterais
+              sw = img.naturalHeight * boxRatio;
+              sx = (img.naturalWidth - sw) / 2;
+            } else {
+              // Imagem mais alta - cortar topo/base
+              sh = img.naturalWidth / boxRatio;
+              sy = (img.naturalHeight - sh) / 2;
+            }
+            
+            ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
             resolve();
           };
           img.onerror = () => reject(new Error("Erro ao carregar imagem"));
@@ -290,45 +459,36 @@ export default function SlideEditorCanva({
         });
       }
       
-      // Textos
+      // Textos - usando a MESMA lógica de posicionamento do preview
       if (withText) {
         for (const block of textBlocks) {
+          // Converter porcentagens para pixels
           const x = (block.x / 100) * 1080;
           const y = (block.y / 100) * 1350;
           const w = (block.width / 100) * 1080;
-          const fontSize = block.fontSize * 3;
+          const fontSize = block.fontSize * 3; // Escalar para 1080px
           
           ctx.font = `${block.fontWeight} ${fontSize}px ${block.fontFamily}`;
           ctx.textAlign = block.textAlign;
           ctx.textBaseline = "top";
           
-          // Quebra de linha
-          const words = block.text.split(" ");
-          const lines: string[] = [];
-          let currentLine = "";
-          
-          for (const word of words) {
-            const testLine = currentLine ? `${currentLine} ${word}` : word;
-            const metrics = ctx.measureText(testLine);
-            if (metrics.width > w && currentLine) {
-              lines.push(currentLine);
-              currentLine = word;
-            } else {
-              currentLine = testLine;
-            }
-          }
-          if (currentLine) lines.push(currentLine);
-          
+          // IMPORTANTE: Usar a mesma lógica de quebra de linha do CSS
+          // O CSS usa word-wrap: break-word, então vamos simular isso
           const lineHeight = fontSize * block.lineHeight;
           const textX = block.textAlign === "center" ? x + w / 2 : block.textAlign === "right" ? x + w : x;
+          
+          // Quebrar texto em linhas usando a largura do container
+          const lines = wrapText(ctx, block.text, w);
           
           // Fundo do texto
           if (block.bgEnabled) {
             const totalHeight = lines.length * lineHeight;
+            const padding = block.bgPadding * 3;
             ctx.fillStyle = block.bgColor;
-            ctx.fillRect(x - block.bgPadding, y - block.bgPadding, w + block.bgPadding * 2, totalHeight + block.bgPadding * 2);
+            ctx.fillRect(x - padding, y - padding, w + padding * 2, totalHeight + padding * 2);
           }
           
+          // Desenhar cada linha
           lines.forEach((line, i) => {
             const lineY = y + i * lineHeight;
             
@@ -364,7 +524,6 @@ export default function SlideEditorCanva({
             
             // Texto principal
             ctx.fillStyle = block.color;
-            ctx.letterSpacing = `${block.letterSpacing}px`;
             ctx.fillText(line, textX, lineY);
           });
           
@@ -387,6 +546,31 @@ export default function SlideEditorCanva({
     } finally {
       setDownloading(false);
     }
+  };
+  
+  // Função auxiliar para quebrar texto em linhas (simula CSS word-wrap)
+  const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
+    const words = text.split(" ");
+    const lines: string[] = [];
+    let currentLine = "";
+    
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const metrics = ctx.measureText(testLine);
+      
+      if (metrics.width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+    
+    return lines;
   };
   
   // Salvar
@@ -438,8 +622,19 @@ export default function SlideEditorCanva({
             variant="ghost" 
             size="icon" 
             className="h-8 w-8"
-            onClick={() => onNavigate("prev")}
-            disabled={slideIndex === 0}
+            onClick={async () => {
+              // Salvar automaticamente se houver mudanças
+              if (hasChanges) {
+                try {
+                  await onSave({ imageObject, textBlocks, backgroundColor });
+                  setHasChanges(false);
+                } catch (error) {
+                  console.error("Erro ao salvar:", error);
+                }
+              }
+              onNavigate("prev");
+            }}
+            disabled={slideIndex === 0 || saving}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
@@ -450,8 +645,19 @@ export default function SlideEditorCanva({
             variant="ghost" 
             size="icon" 
             className="h-8 w-8"
-            onClick={() => onNavigate("next")}
-            disabled={slideIndex === totalSlides - 1}
+            onClick={async () => {
+              // Salvar automaticamente se houver mudanças
+              if (hasChanges) {
+                try {
+                  await onSave({ imageObject, textBlocks, backgroundColor });
+                  setHasChanges(false);
+                } catch (error) {
+                  console.error("Erro ao salvar:", error);
+                }
+              }
+              onNavigate("next");
+            }}
+            disabled={slideIndex === totalSlides - 1 || saving}
           >
             <ChevronRight className="w-5 h-5" />
           </Button>
@@ -566,6 +772,7 @@ export default function SlideEditorCanva({
           {textBlocks.map(block => (
             <div
               key={block.id}
+              data-text-block="true"
               className={`absolute ${editingTextId === block.id ? "" : "cursor-move"} ${selectedElement === block.id ? "ring-2 ring-purple-500" : ""}`}
               style={{
                 left: `${block.x}%`,

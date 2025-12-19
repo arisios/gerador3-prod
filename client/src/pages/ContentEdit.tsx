@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { trpc } from "@/lib/trpc";
 import { SlideRenderer, SlidePreview, TemplateSelector, downloadSlide } from "@/components/SlideRenderer";
 // Editor estilo Canva mobile
-import SlideEditorCanva from "@/components/SlideEditorCanva";
+import SlideEditorCanva, { downloadSlideAsImage, type SlideConfig } from "@/components/SlideEditorCanva";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { designTemplates, colorPalettes, type DesignTemplate } from "../../../shared/designTemplates";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Images, Palette, Layout, Wand2, Upload } from "lucide-react";
@@ -30,6 +30,10 @@ export default function ContentEdit() {
   const [designSheetOpen, setDesignSheetOpen] = useState(false);
   // showComposer removido - usando apenas showNewComposer
   const [showNewComposer, setShowNewComposer] = useState(false);
+  
+  // Estados para download em lote
+  const [downloadingAll, setDownloadingAll] = useState(false);
+  const [downloadWithText, setDownloadWithText] = useState(true);
 
   const { data: content, isLoading } = trpc.content.get.useQuery({ id: contentId });
   const { data: project } = trpc.projects.get.useQuery(
@@ -109,6 +113,82 @@ export default function ContentEdit() {
       setSelectedPaletteId(slideAny.style.colorPaletteId);
     }
   }, [currentSlide]);
+
+  // useEffect para download em lote - reage quando o slide muda
+  useEffect(() => {
+    if (!downloadingAll || !currentSlide) return;
+    
+    const processDownload = async () => {
+      try {
+        // Pegar a configuração salva do slide ou usar valores padrão
+        const slideAny = currentSlide as any;
+        const savedConfig = slideAny?.style?.editorConfig as SlideConfig | undefined;
+        
+        // Valores padrão se não houver configuração salva
+        const defaultConfig: SlideConfig = {
+          imageObject: { x: 0, y: 0, width: 100, height: 60 },
+          textBlocks: currentSlide.text ? [{
+            id: "default",
+            text: currentSlide.text,
+            x: 5,
+            y: 62,
+            width: 90,
+            height: 35,
+            fontSize: 24,
+            color: "#FFFFFF",
+            fontFamily: "Inter",
+            fontWeight: "bold",
+            textAlign: "center" as const,
+            shadowEnabled: true,
+            shadowColor: "#000000",
+            shadowBlur: 4,
+            shadowOffsetX: 2,
+            shadowOffsetY: 2,
+            strokeEnabled: false,
+            strokeColor: "#000000",
+            strokeWidth: 2,
+            glowEnabled: false,
+            glowColor: "#FFFFFF",
+            glowIntensity: 10,
+            letterSpacing: 0,
+            lineHeight: 1.2,
+            bgEnabled: false,
+            bgColor: "rgba(0,0,0,0.5)",
+            bgPadding: 8,
+          }] : [],
+          backgroundColor: slideAny?.style?.backgroundColor || "#1a1a2e",
+        };
+        
+        const config = savedConfig || defaultConfig;
+        
+        // Fazer o download usando a função do editor Canva
+        await downloadSlideAsImage(
+          currentSlide.imageUrl || undefined,
+          config,
+          currentSlideIndex,
+          downloadWithText
+        );
+        
+        // Pequeno delay entre downloads
+        await new Promise(r => setTimeout(r, 500));
+        
+        // Passar para o próximo slide ou finalizar
+        if (currentSlideIndex < slides.length - 1) {
+          setCurrentSlideIndex(currentSlideIndex + 1);
+        } else {
+          // Chegou no último slide, finalizar
+          setDownloadingAll(false);
+          toast.success("Todos os slides baixados!");
+        }
+      } catch (error) {
+        console.error("Erro no download:", error);
+        toast.error("Erro ao baixar slide " + (currentSlideIndex + 1));
+        setDownloadingAll(false);
+      }
+    };
+    
+    processDownload();
+  }, [downloadingAll, currentSlideIndex, currentSlide, downloadWithText, slides.length]);
 
   const handleGenerateImage = async () => {
     if (!currentSlide) return;
@@ -511,17 +591,16 @@ export default function ContentEdit() {
             }}
             onDownload={async (type) => {
               if (type === "current-with" || type === "current-without") {
-                // Download do slide atual
-                await handleDownloadRendered();
+                // Download do slide atual - não faz nada aqui pois o botão interno já cuida
+                return;
               } else {
-                // Download de todos
+                // Download de todos - usar o sistema com useEffect
+                const withText = type === "all-with";
+                setDownloadWithText(withText);
                 toast.info("Baixando todos os slides...");
-                for (let i = 0; i < slides.length; i++) {
-                  setCurrentSlideIndex(i);
-                  await new Promise(r => setTimeout(r, 500));
-                  await handleDownloadRendered();
-                }
-                toast.success("Todos os slides baixados!");
+                // Ir para o primeiro slide e ativar o modo de download
+                setCurrentSlideIndex(0);
+                setDownloadingAll(true);
               }
             }}
           />

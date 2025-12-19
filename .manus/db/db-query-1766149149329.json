@@ -1,0 +1,58 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'slides';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'slides';",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "contentId"
+    },
+    {
+      "COLUMN_NAME": "order"
+    },
+    {
+      "COLUMN_NAME": "text"
+    },
+    {
+      "COLUMN_NAME": "imageUrl"
+    },
+    {
+      "COLUMN_NAME": "imagePrompt"
+    },
+    {
+      "COLUMN_NAME": "imageBank"
+    },
+    {
+      "COLUMN_NAME": "selectedImageIndex"
+    },
+    {
+      "COLUMN_NAME": "visualTemplate"
+    },
+    {
+      "COLUMN_NAME": "style"
+    },
+    {
+      "COLUMN_NAME": "createdAt"
+    },
+    {
+      "COLUMN_NAME": "updatedAt"
+    },
+    {
+      "COLUMN_NAME": "designTemplateId"
+    },
+    {
+      "COLUMN_NAME": "colorPaletteId"
+    },
+    {
+      "COLUMN_NAME": "customColors"
+    },
+    {
+      "COLUMN_NAME": "renderedImageUrl"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\ncontentId\norder\ntext\nimageUrl\nimagePrompt\nimageBank\nselectedImageIndex\nvisualTemplate\nstyle\ncreatedAt\nupdatedAt\ndesignTemplateId\ncolorPaletteId\ncustomColors\nrenderedImageUrl\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}
