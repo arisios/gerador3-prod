@@ -407,27 +407,11 @@ export default function SlideComposerNew({
       if (imageUrl) {
         try {
           const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
-          console.log("Carregando imagem via proxy:", proxyUrl);
-          
           const img = await new Promise<HTMLImageElement>((resolve, reject) => {
             const image = new Image();
             image.crossOrigin = "anonymous";
-            
-            // Timeout de 30 segundos
-            const timeout = setTimeout(() => {
-              reject(new Error("Timeout ao carregar imagem"));
-            }, 30000);
-            
-            image.onload = () => {
-              clearTimeout(timeout);
-              console.log("Imagem carregada com sucesso:", image.width, "x", image.height);
-              resolve(image);
-            };
-            image.onerror = (e) => {
-              clearTimeout(timeout);
-              console.error("Erro ao carregar imagem:", e);
-              reject(new Error("Falha ao carregar imagem"));
-            };
+            image.onload = () => resolve(image);
+            image.onerror = reject;
             image.src = proxyUrl;
           });
           
@@ -436,8 +420,6 @@ export default function SlideComposerNew({
           const imgY = (imageObject.y / 100) * canvas.height;
           const imgWidth = (imageObject.width / 100) * canvas.width;
           const imgHeight = (imageObject.height / 100) * canvas.height;
-          
-          console.log("Desenhando imagem em:", { imgX, imgY, imgWidth, imgHeight });
           
           // Desenhar imagem com cover dentro do frame
           const imgRatio = img.width / img.height;
@@ -456,13 +438,9 @@ export default function SlideComposerNew({
           }
           
           ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, imgX, imgY, imgWidth, imgHeight);
-          console.log("Imagem desenhada com sucesso!");
         } catch (imgError) {
-          console.error("Erro ao carregar imagem para download:", imgError);
-          toast.error("Erro ao carregar imagem. Tente novamente.");
+          console.warn("Erro ao carregar imagem:", imgError);
         }
-      } else {
-        console.log("Nenhuma imageUrl fornecida");
       }
       
       // 3. Desenhar textos como OBJETOS
@@ -487,8 +465,10 @@ export default function SlideComposerNew({
             );
           }
           
-          // Configurar fonte
-          const scale = canvas.width / 360;
+          // Configurar fonte - usar mesma escala do preview
+          // Preview tem ~360px de largura, canvas tem 1080px
+          const previewWidth = 360;
+          const scale = canvas.width / previewWidth;
           const fontSize = block.fontSize * scale;
           ctx.font = `${block.fontWeight} ${fontSize}px ${block.fontFamily}, sans-serif`;
           ctx.fillStyle = block.color;
