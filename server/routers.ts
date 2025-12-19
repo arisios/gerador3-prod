@@ -520,31 +520,9 @@ export const appRouter = router({
           })));
         }
 
-        // Tentar extrair logo do site
-        let extractedLogo = null;
-        let logoUrl = null;
-        try {
-          const { extractLogoFromUrl } = await import("./logoExtractor");
-          const logoResult = await extractLogoFromUrl(input.sourceUrl, input.sourceType);
-          
-          if (logoResult.logoUrl) {
-            logoUrl = logoResult.logoUrl;
-            extractedLogo = {
-              detected: true,
-              url: logoResult.logoUrl,
-              source: logoResult.source,
-              sourceType: input.sourceType
-            };
-            
-            // Salvar logo no projeto
-            await db.updateProject(projectId, { logoUrl: logoResult.logoUrl });
-          }
-        } catch (e) {
-          // Ignora erro de extração de logo
-          console.error("Erro ao extrair logo:", e);
-        }
+        // Logo será configurada manualmente pelo usuário na aba Config do projeto
 
-        return { projectId, businessAnalysis: analysisData.businessAnalysis, potentialClients: analysisData.potentialClients, extractedLogo, logoUrl };
+        return { projectId, businessAnalysis: analysisData.businessAnalysis, potentialClients: analysisData.potentialClients };
       }),
 
     selectClientsAndGeneratePains: protectedProcedure

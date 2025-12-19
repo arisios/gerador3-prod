@@ -55,6 +55,7 @@ export default function ProjectDetail() {
   // Estados para configuração da logo
   const [logoPosition, setLogoPosition] = useState<"top-left" | "top-right" | "bottom-left" | "bottom-right">("bottom-right");
   const [logoSize, setLogoSize] = useState(10);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   const { data: project, isLoading } = trpc.projects.get.useQuery({ id: projectId });
   const { data: contents } = trpc.content.list.useQuery({ projectId }, { enabled: !!projectId });
@@ -99,11 +100,65 @@ export default function ProjectDetail() {
   });
 
   const saveLogoSettings = () => {
+    // Usar any para contornar problema de tipos do tRPC
     updateBrandKit.mutate({
       id: projectId,
+      logoUrl: project?.logoUrl || undefined,
       logoPosition,
       logoSize,
-    });
+    } as any);
+  };
+
+  const uploadLogo = trpc.upload.image.useMutation();
+
+  const handleLogoUpload = async (file: File) => {
+    setIsUploadingLogo(true);
+    try {
+      // Converter arquivo para base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(",")[1]); // Remove o prefixo data:image/...
+        };
+      });
+      reader.readAsDataURL(file);
+      const base64 = await base64Promise;
+
+      // Fazer upload
+      const result = await uploadLogo.mutateAsync({
+        base64,
+        filename: `logo-${projectId}-${Date.now()}.${file.name.split(".").pop()}`,
+        contentType: file.type,
+      });
+
+      // Atualizar projeto com a nova logo
+      await updateBrandKit.mutateAsync({
+        id: projectId,
+        logoUrl: result.url,
+        logoPosition,
+        logoSize,
+      } as any);
+
+      toast.success("Logo enviada com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao enviar logo");
+      console.error(error);
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  const handleLogoRemove = async () => {
+    try {
+      await updateBrandKit.mutateAsync({
+        id: projectId,
+        logoUrl: "",
+      });
+      toast.success("Logo removida");
+    } catch (error) {
+      toast.error("Erro ao remover logo");
+    }
   };
 
   const templates = currentContentType === "carousel" ? carouselTemplates :
@@ -435,32 +490,18 @@ export default function ProjectDetail() {
             <Card>
               <CardContent className="p-4 space-y-4">
                 <h3 className="font-semibold">Configurações da Logo</h3>
-                {project.logoUrl ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <img src={project.logoUrl} alt="Logo" className="w-16 h-16 object-contain bg-muted rounded" />
-                      <div>
-                        <p className="text-sm font-medium">Logo do Projeto</p>
-                        <p className="text-xs text-muted-foreground">Aparece nos slides ao fazer download</p>
-                      </div>
-                    </div>
-                    <LogoPositionSelector
-                      logoUrl={project.logoUrl}
-                      position={(project.logoPosition as "top-left" | "top-right" | "bottom-left" | "bottom-right") || "bottom-right"}
-                      size={project.logoSize || 10}
-                      onPositionChange={(pos) => setLogoPosition(pos)}
-                      onSizeChange={(size) => setLogoSize(size)}
-                      onSave={() => saveLogoSettings()}
-                      isSaving={updateBrandKit.isPending}
-                    />
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Nenhuma logo detectada</p>
-                    <p className="text-xs mt-1">A logo é capturada automaticamente ao criar o projeto por link</p>
-                  </div>
-                )}
+                <LogoPositionSelector
+                  logoUrl={project.logoUrl || undefined}
+                  position={(project.logoPosition as "top-left" | "top-right" | "bottom-left" | "bottom-right") || "bottom-right"}
+                  size={project.logoSize || 10}
+                  onLogoUpload={handleLogoUpload}
+                  onLogoRemove={handleLogoRemove}
+                  onPositionChange={(pos) => setLogoPosition(pos)}
+                  onSizeChange={(size) => setLogoSize(size)}
+                  onSave={() => saveLogoSettings()}
+                  isSaving={updateBrandKit.isPending}
+                  isUploading={isUploadingLogo}
+                />
               </CardContent>
             </Card>
           </TabsContent>

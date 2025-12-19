@@ -660,3 +660,21 @@
   - [x] Interface de seleção de posição (4 opções) + tamanho
   - [x] Integrar posição no download dos slides
   - [x] Tab Config no ProjectDetail com LogoPositionSelector
+
+
+## Upload Manual de Logo (19/12/2024)
+- [ ] Remover detecção automática de logo na análise de link
+- [ ] Adicionar botão de upload de logo na aba Config do projeto
+- [ ] Integrar upload com sistema de armazenamento S3
+- [ ] Manter opções de posição e tamanho da logo
+- [ ] Preview da logo após upload
+
+
+## Upload Manual de Logo - CONCLUÍDO (19/12/2024)
+- [x] Remover detecção automática de logo na análise de link
+- [x] Adicionar botão de upload de logo na aba Config
+- [x] Integrar upload com sistema de armazenamento S3
+- [x] Permitir remover logo
+- [x] Logo é opcional (não obrigatória)
+- [x] Escolher posição da logo (4 opções)
+- [x] Escolher tamanho da logo (5% a 20%)
