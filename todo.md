@@ -433,9 +433,3 @@
 - [x] Bloqueio de scroll ao arrastar elementos
 - [x] URL do proxy corrigida: /api/image-proxy
 - [x] Download funcionando com imagem como objeto (60% topo, 40% texto)
-
-
-## Bugs Reportados - Editor (19/12/2024) - Sessão 2
-- [ ] Tamanho da fonte inconsistente no download: segunda linha fica maior que as outras
-- [ ] Handles não redimensionam o conteúdo (fonte/imagem), só a área/moldura
-- [ ] Handles da imagem estão fora da área visível do preview
