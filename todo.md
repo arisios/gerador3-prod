@@ -476,3 +476,18 @@
 - [x] Download funcionando com imagem + texto
 - [x] Proxy de imagem para evitar CORS
 - [ ] Baixar Todos (usa configurações salvas de cada slide)
+
+
+## Melhorias Editor Canva Mobile (19/12/2024)
+- [ ] Botões Texto/Imagem/Cor acima da imagem (não na frente)
+- [ ] Painel de controles sempre embaixo da imagem
+- [ ] Adicionar controles completos de texto:
+  - [ ] Borda/contorno (cor, espessura)
+  - [ ] Sombra (cor, blur, offset)
+  - [ ] Glow (cor, intensidade)
+  - [ ] Espaçamento entre letras
+  - [ ] Altura da linha
+- [ ] Remover handles de redimensionar (quadradinhos brancos)
+- [ ] Usar controles de tamanho no painel em vez de handles
+
+- [x] Duplo toque no texto para editar diretamente (abre campo de input)
