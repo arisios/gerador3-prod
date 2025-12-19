@@ -480,37 +480,7 @@ export default function ContentEdit() {
             </Button>
             <span className="ml-2 font-medium truncate">{content.title || "Conteúdo"}</span>
           </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Baixar
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Opções de Download</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={handleDownloadRendered}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Baixar Slide Atual (com template)
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={handleDownloadAll}
-                >
-                  <Images className="w-4 h-4 mr-2" />
-                  Baixar Todos os Slides
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+{/* Botão Baixar removido - usar botões "Com Texto" e "Sem Texto" no editor visual */}
         </div>
       </header>
 

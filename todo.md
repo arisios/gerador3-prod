@@ -376,8 +376,11 @@
   - [x] Peso (normal, bold)
 - [x] Remover editor antigo (SlideComposer)
 - [x] Renomear botão para "Editar Visual"
-- [ ] Testar em dispositivo real
-- [ ] Salvar posições no banco de dados
+- [ ] Testar em dispositivo rea- [ ] Salvar posições no banco
+
+## Correção do Botão Baixar (19/12/2024)
+- [x] Remover botão "Baixar" do header roxo (usa sistema antigo sem imagem)
+- [x] Manter apenas os botões "Com Texto" e "Sem Texto" dentro do editor visualnco de dados
 
 
 ## Bugs Reportados - Editor Novo (19/12/2024) - URGENTE
