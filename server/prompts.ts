@@ -209,15 +209,29 @@ Use a linguagem que esses clientes usariam para descrever seus problemas.
 
 // ===== PROMPT DE CLIENTES IDEAIS =====
 export const generateIdealClientsPrompt = (analysis: string) => `
-Com base na análise do negócio abaixo, gere 10 perfis de clientes ideais detalhados.
+Com base na análise do negócio abaixo, gere 10 perfis de GRUPOS de clientes ideais.
 
 Análise: ${analysis}
 
-Para cada cliente ideal, retorne um JSON array com:
+IMPORTANTE: NÃO use nomes fictícios como "Maria", "João", "Ana". Use DESCRIÇÕES DE GRUPO.
+
+Exemplos CORRETOS:
+- "Mães que buscam praticidade na cozinha"
+- "Profissionais de saúde com rotina intensa"
+- "Empreendedores iniciantes em marketing digital"
+- "Pessoas com restrições alimentares"
+- "Jovens adultos começando a morar sozinhos"
+
+Exemplos INCORRETOS (NÃO USE):
+- "Ana, a Otimizadora Doméstica"
+- "Lucas, o Fitness Focado"
+- "Maria Empreendedora"
+
+Para cada grupo de cliente ideal, retorne um JSON array com:
 [
   {
-    "name": "Nome descritivo do perfil (ex: 'Maria Empreendedora')",
-    "description": "Descrição breve do perfil",
+    "name": "Descrição do grupo (ex: 'Mães que buscam praticidade na cozinha')",
+    "description": "Descrição detalhada do perfil e suas características",
     "demographics": {
       "age": "faixa etária",
       "gender": "gênero predominante",
@@ -235,7 +249,7 @@ Para cada cliente ideal, retorne um JSON array com:
   }
 ]
 
-Gere exatamente 10 perfis diversos e realistas.
+Gere exatamente 10 grupos de clientes diversos e realistas. NUNCA use nomes próprios.
 `;
 
 // ===== PROMPT DE DORES =====

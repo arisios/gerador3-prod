@@ -1071,11 +1071,15 @@ Retorne JSON com:
 
         const slides = await db.getSlidesByContent(input.contentId);
         const results: { slideId: number; imageUrl: string | null; error?: string }[] = [];
+        
+        // Armazenar a primeira imagem gerada para usar como referência de consistência
+        let firstGeneratedImageUrl: string | null = null;
 
-        for (const slide of slides) {
+        for (let i = 0; i < slides.length; i++) {
+          const slide = slides[i];
           try {
             const basePrompt = slide.imagePrompt || `Professional Instagram image for: ${slide.text || "lifestyle content"}`;
-            const fullPrompt = `${basePrompt}
+            let fullPrompt = `${basePrompt}
 
 === REGRAS OBRIGATÓRIAS ===
 1. A imagem DEVE ser uma FOTOGRAFIA REAL, não ilustração, arte digital ou desenho
@@ -1085,22 +1089,59 @@ Retorne JSON com:
 5. Foque apenas em elementos visuais: pessoas, objetos, cenários, texturas
 6. Qualidade profissional de fotografia, iluminação natural`;
             
-            const result = await generateImage({
-              prompt: fullPrompt,
-            });
-
-            if (result.url) {
-              const currentBank = (slide.imageBank as string[]) || [];
-              const newBank = [...currentBank, result.url];
+            // Se já temos uma imagem de referência (slide 1), usar para consistência
+            // Isso mantém a mesma pessoa/personagem em todos os slides
+            if (i > 0 && firstGeneratedImageUrl) {
+              fullPrompt += `\n\n=== CONSISTÊNCIA DE PERSONAGEM ===
+MANTENHA A MESMA PESSOA/PERSONAGEM da imagem de referência.
+Use a mesma aparência física, estilo e características visuais.
+Apenas mude o contexto/cenário conforme o texto do slide.`;
               
-              await db.updateSlide(slide.id, {
-                imageBank: newBank,
-                imageUrl: result.url,
+              const result = await generateImage({
+                prompt: fullPrompt,
+                originalImages: [{
+                  url: firstGeneratedImageUrl,
+                  mimeType: "image/jpeg"
+                }]
               });
 
-              results.push({ slideId: slide.id, imageUrl: result.url });
+              if (result.url) {
+                const currentBank = (slide.imageBank as string[]) || [];
+                const newBank = [...currentBank, result.url];
+                
+                await db.updateSlide(slide.id, {
+                  imageBank: newBank,
+                  imageUrl: result.url,
+                });
+
+                results.push({ slideId: slide.id, imageUrl: result.url });
+              } else {
+                results.push({ slideId: slide.id, imageUrl: null, error: "Falha ao gerar" });
+              }
             } else {
-              results.push({ slideId: slide.id, imageUrl: null, error: "Falha ao gerar" });
+              // Primeiro slide: gerar normalmente e salvar como referência
+              const result = await generateImage({
+                prompt: fullPrompt,
+              });
+
+              if (result.url) {
+                // Salvar a primeira imagem como referência para consistência
+                if (i === 0) {
+                  firstGeneratedImageUrl = result.url;
+                }
+                
+                const currentBank = (slide.imageBank as string[]) || [];
+                const newBank = [...currentBank, result.url];
+                
+                await db.updateSlide(slide.id, {
+                  imageBank: newBank,
+                  imageUrl: result.url,
+                });
+
+                results.push({ slideId: slide.id, imageUrl: result.url });
+              } else {
+                results.push({ slideId: slide.id, imageUrl: null, error: "Falha ao gerar" });
+              }
             }
           } catch (error) {
             results.push({ slideId: slide.id, imageUrl: null, error: String(error) });

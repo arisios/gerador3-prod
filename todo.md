@@ -714,3 +714,9 @@
   - [x] Filtro de dores por cliente ideal
   - [x] Mostrar quantidade de dores por cliente no seletor
 - [x] Escrever testes unitários para as novas rotas (14 testes passando)
+
+
+## Correções Solicitadas (20/12/2024)
+- [x] Template padrão Full + Texto Central para todos os slides
+- [x] Consistência de personagem: usar imagem gerada do slide 1 como referência para slides seguintes
+- [x] Clientes ideais como grupos sem nomes fictícios (ex: "Mães que buscam eficiência" em vez de "Ana, a Otimizadora")
