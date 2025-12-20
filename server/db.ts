@@ -161,11 +161,40 @@ export async function getSelectedIdealClientsByProject(projectId: number): Promi
   return db.select().from(idealClients).where(and(eq(idealClients.projectId, projectId), eq(idealClients.isSelected, true)));
 }
 
-// ===== PAINS FUNCTIONS =====
-export async function createPains(projectId: number, painsList: Omit<Pain, "id" | "projectId" | "createdAt">[]): Promise<void> {
+export async function createIdealClient(projectId: number, data: { name: string; description?: string; demographics?: unknown; psychographics?: unknown }): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(idealClients).values({
+    projectId,
+    name: data.name,
+    description: data.description || null,
+    demographics: data.demographics || null,
+    psychographics: data.psychographics || null,
+    isSelected: true,
+  });
+  return result[0].insertId;
+}
+
+export async function deleteIdealClient(id: number): Promise<void> {
   const db = await getDb();
   if (!db) return;
-  const values = painsList.map(p => ({ ...p, projectId }));
+  // Também deletar dores vinculadas a este cliente
+  await db.delete(pains).where(eq(pains.idealClientId, id));
+  await db.delete(idealClients).where(eq(idealClients.id, id));
+}
+
+export async function getIdealClientById(id: number): Promise<IdealClient | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(idealClients).where(eq(idealClients.id, id));
+  return result[0] || null;
+}
+
+// ===== PAINS FUNCTIONS =====
+export async function createPains(projectId: number, painsList: { level: "primary" | "secondary" | "unexplored"; pain: string; description?: string; idealClientId?: number | null }[]): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const values = painsList.map(p => ({ ...p, projectId, idealClientId: p.idealClientId || null }));
   await db.insert(pains).values(values);
 }
 
@@ -173,6 +202,25 @@ export async function getPainsByProject(projectId: number): Promise<Pain[]> {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(pains).where(eq(pains.projectId, projectId));
+}
+
+export async function getPainsByIdealClient(idealClientId: number): Promise<Pain[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(pains).where(eq(pains.idealClientId, idealClientId));
+}
+
+export async function createPainsForClient(projectId: number, idealClientId: number, painsList: { level: "primary" | "secondary" | "unexplored"; pain: string; description?: string }[]): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const values = painsList.map(p => ({ ...p, projectId, idealClientId }));
+  await db.insert(pains).values(values);
+}
+
+export async function deletePainsByIdealClient(idealClientId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(pains).where(eq(pains.idealClientId, idealClientId));
 }
 
 export async function deletePainsByProject(projectId: number): Promise<void> {

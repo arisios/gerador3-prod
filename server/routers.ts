@@ -654,6 +654,182 @@ export const appRouter = router({
         await db.updateIdealClient(input.clientId, { isSelected: input.isSelected });
         return { success: true };
       }),
+
+    // Adicionar cliente ideal manualmente
+    addIdealClient: protectedProcedure
+      .input(z.object({
+        projectId: z.number(),
+        name: z.string().min(1),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await db.getProjectById(input.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        const clientId = await db.createIdealClient(input.projectId, {
+          name: input.name,
+          description: input.description,
+        });
+        return { success: true, clientId };
+      }),
+
+    // Deletar cliente ideal
+    deleteIdealClient: protectedProcedure
+      .input(z.object({ clientId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteIdealClient(input.clientId);
+        return { success: true };
+      }),
+
+    // Listar clientes ideais do projeto
+    listIdealClients: protectedProcedure
+      .input(z.object({ projectId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const project = await db.getProjectById(input.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        return db.getIdealClientsByProject(input.projectId);
+      }),
+
+    // Obter cliente ideal com suas dores
+    getIdealClientWithPains: protectedProcedure
+      .input(z.object({ clientId: z.number() }))
+      .query(async ({ input }) => {
+        const client = await db.getIdealClientById(input.clientId);
+        if (!client) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        const pains = await db.getPainsByIdealClient(input.clientId);
+        return { ...client, pains };
+      }),
+
+    // Gerar dores para um cliente específico
+    generatePainsForClient: protectedProcedure
+      .input(z.object({
+        projectId: z.number(),
+        clientId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await db.getProjectById(input.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        
+        const client = await db.getIdealClientById(input.clientId);
+        if (!client) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Cliente ideal não encontrado" });
+        }
+
+        // Deletar dores anteriores deste cliente
+        await db.deletePainsByIdealClient(input.clientId);
+
+        const analysis = project.analysis || {};
+        const painsPrompt = `
+Analise o negócio e gere dores ESPECÍFICAS para este cliente ideal:
+
+Negócio: ${JSON.stringify(analysis)}
+
+Cliente Ideal: ${client.name}
+Descrição: ${client.description || "Não especificada"}
+
+Gere dores MUITO ESPECÍFICAS para este perfil de cliente. Pense nas frustrações, medos, desejos e obstáculos que ESTE cliente específico enfrenta.
+
+Retorne JSON com:
+- primary: 5 dores principais (mais evidentes e urgentes)
+- secondary: 5 dores secundárias (importantes mas menos óbvias)
+- unexplored: 3 dores inexploradas (oportunidades de conteúdo único)
+`;
+
+        const painsResponse = await invokeLLM({
+          messages: [
+            { role: "system", content: "Você é um especialista em copywriting e psicologia do consumidor. Gere dores ESPECÍFICAS e PROFUNDAS para o cliente ideal fornecido." },
+            { role: "user", content: painsPrompt }
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "client_pains",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  primary: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        pain: { type: "string" },
+                        description: { type: "string" }
+                      },
+                      required: ["pain", "description"],
+                      additionalProperties: false
+                    }
+                  },
+                  secondary: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        pain: { type: "string" },
+                        description: { type: "string" }
+                      },
+                      required: ["pain", "description"],
+                      additionalProperties: false
+                    }
+                  },
+                  unexplored: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        pain: { type: "string" },
+                        description: { type: "string" }
+                      },
+                      required: ["pain", "description"],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ["primary", "secondary", "unexplored"],
+                additionalProperties: false
+              }
+            }
+          }
+        });
+
+        const painsText = painsResponse.choices[0]?.message?.content || "{}";
+        let painsData;
+        try {
+          painsData = JSON.parse(typeof painsText === 'string' ? painsText : JSON.stringify(painsText));
+        } catch {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Falha ao gerar dores" });
+        }
+
+        const allPains: { level: "primary" | "secondary" | "unexplored"; pain: string; description: string }[] = [];
+        if (painsData.primary) {
+          painsData.primary.forEach((p: { pain: string; description: string }) => {
+            allPains.push({ level: "primary", pain: p.pain, description: p.description });
+          });
+        }
+        if (painsData.secondary) {
+          painsData.secondary.forEach((p: { pain: string; description: string }) => {
+            allPains.push({ level: "secondary", pain: p.pain, description: p.description });
+          });
+        }
+        if (painsData.unexplored) {
+          painsData.unexplored.forEach((p: { pain: string; description: string }) => {
+            allPains.push({ level: "unexplored", pain: p.pain, description: p.description });
+          });
+        }
+
+        if (allPains.length > 0) {
+          await db.createPainsForClient(input.projectId, input.clientId, allPains);
+        }
+
+        return { success: true, painsCount: allPains.length, pains: painsData };
+      }),
   }),
 
   // ===== CONTENT =====

@@ -1,0 +1,1 @@
+ALTER TABLE `pains` ADD `idealClientId` int;

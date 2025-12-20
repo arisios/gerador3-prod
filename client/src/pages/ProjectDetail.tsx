@@ -8,13 +8,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
 import { TemplateSelector, AccentColorSelector } from "@/components/SlidePreview";
 import { LogoPositionSelector } from "@/components/LogoPositionSelector";
 import { 
   ArrowLeft, Plus, Image, Video, Layers, Loader2, 
   ChevronRight, Trash2, Users, Zap, Target, AlertCircle,
-  TrendingUp, Flame, X, Check
+  TrendingUp, Flame, X, Check, UserPlus, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -56,6 +59,13 @@ export default function ProjectDetail() {
   const [logoPosition, setLogoPosition] = useState<"top-left" | "top-right" | "bottom-left" | "bottom-right">("bottom-right");
   const [logoSize, setLogoSize] = useState(10);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+
+  // Estados para gerenciamento de clientes ideais
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientDescription, setNewClientDescription] = useState("");
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [expandedClientId, setExpandedClientId] = useState<number | null>(null);
 
   const { data: project, isLoading } = trpc.projects.get.useQuery({ id: projectId });
   const { data: contents } = trpc.content.list.useQuery({ projectId }, { enabled: !!projectId });
@@ -99,8 +109,47 @@ export default function ProjectDetail() {
     },
   });
 
+  // Mutations para clientes ideais
+  const addIdealClient = (trpc.projects as any).addIdealClient.useMutation({
+    onSuccess: () => {
+      toast.success("Cliente ideal adicionado!");
+      utils.projects.get.invalidate({ id: projectId });
+      setShowAddClientModal(false);
+      setNewClientName("");
+      setNewClientDescription("");
+    },
+    onError: (error: { message: string }) => {
+      toast.error("Erro ao adicionar: " + error.message);
+    },
+  });
+
+  const deleteIdealClient = (trpc.projects as any).deleteIdealClient.useMutation({
+    onSuccess: () => {
+      toast.success("Cliente ideal removido");
+      utils.projects.get.invalidate({ id: projectId });
+    },
+    onError: (error: { message: string }) => {
+      toast.error("Erro ao remover: " + error.message);
+    },
+  });
+
+  const generatePainsForClient = (trpc.projects as any).generatePainsForClient.useMutation({
+    onSuccess: (data: { painsCount: number }) => {
+      toast.success(`${data.painsCount} dores geradas para este cliente!`);
+      utils.projects.get.invalidate({ id: projectId });
+    },
+    onError: (error: { message: string }) => {
+      toast.error("Erro ao gerar dores: " + error.message);
+    },
+  });
+
+  const updateIdealClientSelection = trpc.projects.updateIdealClientSelection.useMutation({
+    onSuccess: () => {
+      utils.projects.get.invalidate({ id: projectId });
+    },
+  });
+
   const saveLogoSettings = () => {
-    // Usar any para contornar problema de tipos do tRPC
     updateBrandKit.mutate({
       id: projectId,
       logoUrl: project?.logoUrl || undefined,
@@ -114,25 +163,22 @@ export default function ProjectDetail() {
   const handleLogoUpload = async (file: File) => {
     setIsUploadingLogo(true);
     try {
-      // Converter arquivo para base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve) => {
         reader.onload = () => {
           const result = reader.result as string;
-          resolve(result.split(",")[1]); // Remove o prefixo data:image/...
+          resolve(result.split(",")[1]);
         };
       });
       reader.readAsDataURL(file);
       const base64 = await base64Promise;
 
-      // Fazer upload
       const result = await uploadLogo.mutateAsync({
         base64,
         filename: `logo-${projectId}-${Date.now()}.${file.name.split(".").pop()}`,
         contentType: file.type,
       });
 
-      // Atualizar projeto com a nova logo
       await updateBrandKit.mutateAsync({
         id: projectId,
         logoUrl: result.url,
@@ -161,12 +207,45 @@ export default function ProjectDetail() {
     }
   };
 
+  const handleAddClient = () => {
+    if (!newClientName.trim()) {
+      toast.error("Digite o nome do cliente ideal");
+      return;
+    }
+    addIdealClient.mutate({
+      projectId,
+      name: newClientName.trim(),
+      description: newClientDescription.trim() || undefined,
+    });
+  };
+
+  const handleGeneratePainsForClient = (clientId: number) => {
+    generatePainsForClient.mutate({
+      projectId,
+      clientId,
+    });
+  };
+
+  const handleToggleClientSelection = (clientId: number, isSelected: boolean) => {
+    updateIdealClientSelection.mutate({
+      clientId,
+      isSelected: !isSelected,
+    });
+  };
+
   const templates = currentContentType === "carousel" ? carouselTemplates :
                     currentContentType === "image" ? imageTemplates : videoTemplates;
 
   // Obter lista de fontes baseado no tipo selecionado
+  // Agora filtra dores pelo cliente selecionado
   const getSources = () => {
     if (contentSource === "pains") {
+      // Se tem cliente selecionado, mostrar apenas dores desse cliente
+      if (selectedClientId) {
+        return project?.pains?.filter(p => p.idealClientId === selectedClientId)
+          .map(p => ({ id: p.id, name: p.pain, level: p.level })) || [];
+      }
+      // Senão, mostrar todas as dores
       return project?.pains?.map(p => ({ id: p.id, name: p.pain, level: p.level })) || [];
     } else if (contentSource === "trends") {
       return trends?.map(t => ({ id: t.id, name: t.name, level: t.classification })) || [];
@@ -222,7 +301,6 @@ export default function ProjectDetail() {
       return;
     }
 
-    // Gerar cada seleção
     for (const selection of selections) {
       let painText: string | undefined;
       
@@ -260,6 +338,11 @@ export default function ProjectDetail() {
     }
   };
 
+  // Obter dores de um cliente específico
+  const getClientPains = (clientId: number) => {
+    return project?.pains?.filter(p => p.idealClientId === clientId) || [];
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -289,53 +372,40 @@ export default function ProjectDetail() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container flex items-center justify-between h-14 px-4">
-          <div className="flex items-center">
-            <Button variant="ghost" size="icon" onClick={() => setLocation("/dashboard")}>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/projects")}>
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <span className="ml-2 font-medium truncate max-w-[200px]">{project.name}</span>
+            <div>
+              <h1 className="font-bold truncate max-w-[200px]">{project.name}</h1>
+              <p className="text-xs text-muted-foreground">{project.sourceType}</p>
+            </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-destructive"
-            onClick={() => {
-              if (confirm("Excluir projeto?")) {
-                deleteProject.mutate({ id: projectId });
-              }
-            }}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="destructive" size="sm" onClick={() => deleteProject.mutate({ id: projectId })}>
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </header>
 
-      <main className="container px-4 py-6 space-y-6">
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            className="h-auto py-4 flex-col gap-2" 
-            onClick={() => setShowGenerator(true)}
-          >
-            <Zap className="w-6 h-6" />
-            <span>Gerar Conteúdo</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-auto py-4 flex-col gap-2"
-            onClick={() => setLocation("/influencers")}
-          >
-            <Users className="w-6 h-6" />
-            <span>Influenciadores</span>
-          </Button>
-        </div>
+      <main className="container px-4 py-4 space-y-4">
+        {/* Generate Button */}
+        <Button 
+          className="w-full" 
+          size="lg" 
+          onClick={() => setShowGenerator(true)}
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Gerar Conteúdo
+        </Button>
 
         {/* Tabs */}
         <Tabs defaultValue="contents">
           <TabsList className="w-full">
             <TabsTrigger value="contents" className="flex-1">Conteúdos</TabsTrigger>
-            <TabsTrigger value="pains" className="flex-1">Dores</TabsTrigger>
             <TabsTrigger value="clients" className="flex-1">Clientes</TabsTrigger>
+            <TabsTrigger value="pains" className="flex-1">Dores</TabsTrigger>
             <TabsTrigger value="settings" className="flex-1">Config</TabsTrigger>
           </TabsList>
 
@@ -371,12 +441,188 @@ export default function ProjectDetail() {
             )}
           </TabsContent>
 
-          {/* Pains Tab */}
+          {/* Clients Tab - NOVO FLUXO COPPE */}
+          <TabsContent value="clients" className="space-y-4 mt-4">
+            {/* Botão Adicionar Cliente */}
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => setShowAddClientModal(true)}
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Adicionar Cliente Ideal
+            </Button>
+
+            {project.idealClients && project.idealClients.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{project.idealClients.filter(c => c.isSelected).length} selecionado(s)</span>
+                  <span>{project.idealClients.length} total</span>
+                </div>
+                
+                {project.idealClients.map((client) => {
+                  const clientPains = getClientPains(client.id);
+                  const isExpanded = expandedClientId === client.id;
+                  
+                  return (
+                    <Card 
+                      key={client.id} 
+                      className={`transition-all ${
+                        client.isSelected 
+                          ? "bg-primary/5 border-primary/30" 
+                          : "bg-card/50 opacity-60"
+                      }`}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <Checkbox
+                                checked={client.isSelected ?? false}
+                                onCheckedChange={() => handleToggleClientSelection(client.id, client.isSelected ?? false)}
+                              />
+                              <span className="font-medium">{client.name}</span>
+                              {client.isSelected && (
+                                <Badge variant="secondary" className="text-xs">
+                                  <Check className="w-3 h-3 mr-1" />
+                                  Ativo
+                                </Badge>
+                              )}
+                            </div>
+                            {client.description && (
+                              <div className="text-sm text-muted-foreground mt-1 ml-6">
+                                {client.description}
+                              </div>
+                            )}
+                            
+                            {/* Contador de dores */}
+                            <div className="flex items-center gap-2 mt-2 ml-6">
+                              <Badge variant="outline" className="text-xs">
+                                {clientPains.length} dores
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs"
+                                onClick={() => setExpandedClientId(isExpanded ? null : client.id)}
+                              >
+                                {isExpanded ? "Ocultar" : "Ver dores"}
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleGeneratePainsForClient(client.id)}
+                              disabled={generatePainsForClient.isPending}
+                              title="Gerar dores para este cliente"
+                            >
+                              {generatePainsForClient.isPending ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Sparkles className="w-4 h-4" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteIdealClient.mutate({ clientId: client.id })}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Lista de dores expandida */}
+                        {isExpanded && (
+                          <div className="mt-4 ml-6 space-y-2 border-l-2 border-primary/20 pl-4">
+                            {clientPains.length > 0 ? (
+                              clientPains.map((pain) => (
+                                <div key={pain.id} className="text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <Badge 
+                                      variant="outline" 
+                                      className={`text-xs ${
+                                        pain.level === "primary" ? "border-red-500/50 text-red-500" :
+                                        pain.level === "secondary" ? "border-orange-500/50 text-orange-500" :
+                                        "border-green-500/50 text-green-500"
+                                      }`}
+                                    >
+                                      {pain.level === "primary" ? "Principal" :
+                                       pain.level === "secondary" ? "Secundária" : "Inexplorada"}
+                                    </Badge>
+                                    <span>{pain.pain}</span>
+                                  </div>
+                                  {pain.description && (
+                                    <p className="text-xs text-muted-foreground mt-1 ml-16">
+                                      {pain.description}
+                                    </p>
+                                  )}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4" />
+                                Nenhuma dor gerada. Clique em <Sparkles className="w-4 h-4 inline" /> para gerar.
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="mb-2">Nenhum cliente ideal mapeado</p>
+                <p className="text-sm mb-4">
+                  Adicione clientes ideais para gerar dores específicas para cada perfil
+                </p>
+                <Button variant="outline" onClick={() => setShowAddClientModal(true)}>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Adicionar Cliente Ideal
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Pains Tab - Agora mostra todas as dores agrupadas */}
           <TabsContent value="pains" className="space-y-4 mt-4">
             {project.pains && project.pains.length > 0 ? (
               <>
+                {/* Filtro por cliente */}
+                <div className="space-y-2">
+                  <Label>Filtrar por Cliente Ideal</Label>
+                  <Select 
+                    value={selectedClientId?.toString() || "all"} 
+                    onValueChange={(v) => setSelectedClientId(v === "all" ? null : parseInt(v))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos os clientes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os clientes</SelectItem>
+                      {project.idealClients?.map((client) => (
+                        <SelectItem key={client.id} value={client.id.toString()}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {["primary", "secondary", "unexplored"].map((level) => {
-                  const levelPains = project.pains?.filter(p => p.level === level) || [];
+                  const levelPains = project.pains?.filter(p => {
+                    const matchLevel = p.level === level;
+                    const matchClient = !selectedClientId || p.idealClientId === selectedClientId;
+                    return matchLevel && matchClient;
+                  }) || [];
+                  
                   if (levelPains.length === 0) return null;
                   
                   const levelConfig = {
@@ -384,19 +630,19 @@ export default function ProjectDetail() {
                       title: "Dores Principais", 
                       description: "Problemas óbvios e urgentes que o cliente já sabe que tem",
                       color: "bg-red-500/10 border-red-500/30 text-red-500",
-                      icon: "\uD83D\uDD25"
+                      icon: "🔥"
                     },
                     secondary: { 
                       title: "Dores Secundárias", 
                       description: "Problemas relacionados mas menos urgentes",
                       color: "bg-orange-500/10 border-orange-500/30 text-orange-500",
-                      icon: "\u26A0\uFE0F"
+                      icon: "⚠️"
                     },
                     unexplored: { 
                       title: "Dores Inexploradas", 
                       description: "Oportunidades! Pouco conteúdo sobre isso nas redes",
                       color: "bg-green-500/10 border-green-500/30 text-green-500",
-                      icon: "\uD83D\uDCA1"
+                      icon: "💡"
                     }
                   }[level];
                   
@@ -412,18 +658,27 @@ export default function ProjectDetail() {
                         </div>
                       </div>
                       <div className="space-y-2 pl-2">
-                        {levelPains.map((pain) => (
-                          <Card key={pain.id} className="bg-card/50 hover:bg-card transition-colors">
-                            <CardContent className="p-3">
-                              <div className="font-medium text-sm">{pain.pain}</div>
-                              {pain.description && (
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {pain.description}
-                                </div>
-                              )}
-                            </CardContent>
-                          </Card>
-                        ))}
+                        {levelPains.map((pain) => {
+                          const client = project.idealClients?.find(c => c.id === pain.idealClientId);
+                          return (
+                            <Card key={pain.id} className="bg-card/50 hover:bg-card transition-colors">
+                              <CardContent className="p-3">
+                                <div className="font-medium text-sm">{pain.pain}</div>
+                                {pain.description && (
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    {pain.description}
+                                  </div>
+                                )}
+                                {client && (
+                                  <Badge variant="outline" className="text-xs mt-2">
+                                    <Users className="w-3 h-3 mr-1" />
+                                    {client.name}
+                                  </Badge>
+                                )}
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -432,55 +687,10 @@ export default function ProjectDetail() {
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhuma dor mapeada</p>
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Clients Tab */}
-          <TabsContent value="clients" className="space-y-4 mt-4">
-            {project.idealClients && project.idealClients.length > 0 ? (
-              <>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{project.idealClients.filter(c => c.isSelected).length} selecionado(s)</span>
-                  <span>{project.idealClients.length} total</span>
-                </div>
-                {project.idealClients.map((client) => (
-                  <Card 
-                    key={client.id} 
-                    className={`transition-all ${
-                      client.isSelected 
-                        ? "bg-primary/5 border-primary/30" 
-                        : "bg-card/50 opacity-60"
-                    }`}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{client.name}</span>
-                            {client.isSelected && (
-                              <Badge variant="secondary" className="text-xs">
-                                <Check className="w-3 h-3 mr-1" />
-                                Selecionado
-                              </Badge>
-                            )}
-                          </div>
-                          {client.description && (
-                            <div className="text-sm text-muted-foreground mt-1">
-                              {client.description}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhum cliente ideal mapeado</p>
+                <p className="mb-2">Nenhuma dor mapeada</p>
+                <p className="text-sm">
+                  Adicione clientes ideais e gere dores específicas para cada um
+                </p>
               </div>
             )}
           </TabsContent>
@@ -507,6 +717,50 @@ export default function ProjectDetail() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Modal Adicionar Cliente Ideal */}
+      <Dialog open={showAddClientModal} onOpenChange={setShowAddClientModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Cliente Ideal</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Nome do Cliente Ideal *</Label>
+              <Input
+                placeholder="Ex: Mãe empreendedora, Estudante de medicina..."
+                value={newClientName}
+                onChange={(e) => setNewClientName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Descrição (opcional)</Label>
+              <Textarea
+                placeholder="Descreva características, comportamentos, desejos..."
+                value={newClientDescription}
+                onChange={(e) => setNewClientDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddClientModal(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleAddClient}
+              disabled={addIdealClient.isPending || !newClientName.trim()}
+            >
+              {addIdealClient.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <UserPlus className="w-4 h-4 mr-2" />
+              )}
+              Adicionar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Generator Modal */}
       {showGenerator && (
@@ -551,6 +805,32 @@ export default function ProjectDetail() {
                 </div>
               </div>
 
+              {/* Filtro por Cliente (apenas para Dores) */}
+              {contentSource === "pains" && project.idealClients && project.idealClients.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Filtrar Dores por Cliente Ideal</Label>
+                  <Select 
+                    value={selectedClientId?.toString() || "all"} 
+                    onValueChange={(v) => {
+                      setSelectedClientId(v === "all" ? null : parseInt(v));
+                      setSelectedSourceIds([]);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos os clientes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os clientes</SelectItem>
+                      {project.idealClients.map((client) => (
+                        <SelectItem key={client.id} value={client.id.toString()}>
+                          {client.name} ({getClientPains(client.id).length} dores)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               {/* Lista de Fontes com Checkbox */}
               <div className="space-y-2">
                 <Label>
@@ -582,7 +862,11 @@ export default function ProjectDetail() {
                     ))
                   ) : (
                     <div className="text-center py-4 text-muted-foreground text-sm">
-                      {contentSource === "pains" && "Nenhuma dor mapeada"}
+                      {contentSource === "pains" && (
+                        selectedClientId 
+                          ? "Nenhuma dor para este cliente. Gere dores na aba Clientes."
+                          : "Nenhuma dor mapeada. Adicione clientes e gere dores."
+                      )}
                       {contentSource === "trends" && "Nenhuma trend coletada. Vá em Trends para coletar."}
                       {contentSource === "virals" && "Nenhum viral coletado. Vá em Virais para coletar."}
                     </div>
@@ -651,8 +935,8 @@ export default function ProjectDetail() {
                     <Button
                       key={q}
                       variant={currentQuantity === q ? "default" : "outline"}
+                      size="sm"
                       onClick={() => setCurrentQuantity(q)}
-                      className="flex-1"
                     >
                       {q}
                     </Button>
@@ -660,45 +944,7 @@ export default function ProjectDetail() {
                 </div>
               </div>
 
-              {/* Template Visual (BrandsDecoded Style) */}
-              <div className="space-y-3 pt-4 border-t">
-                <div className="flex items-center justify-between">
-                  <Label>Template Visual</Label>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => setShowVisualTemplates(!showVisualTemplates)}
-                  >
-                    {showVisualTemplates ? "Fechar" : "Escolher Estilo"}
-                  </Button>
-                </div>
-                
-                {showVisualTemplates && (
-                  <div className="space-y-4">
-                    <TemplateSelector
-                      selectedId={visualTemplate}
-                      onSelect={setVisualTemplate}
-                      text={selectedSourceIds.length > 0 
-                        ? sources.find(s => s.id === selectedSourceIds[0])?.name || ""
-                        : ""
-                      }
-                      onAutoSelect={(templateId, colorId) => {
-                        setVisualTemplate(templateId);
-                        setAccentColor(colorId);
-                      }}
-                    />
-                    <div className="space-y-2">
-                      <Label className="text-xs">Cor de Destaque</Label>
-                      <AccentColorSelector
-                        selectedId={accentColor}
-                        onSelect={setAccentColor}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Botão Adicionar */}
+              {/* Botão Adicionar à Lista */}
               <Button 
                 variant="outline" 
                 className="w-full"
@@ -712,23 +958,22 @@ export default function ProjectDetail() {
               {/* Lista de Seleções */}
               {selections.length > 0 && (
                 <div className="space-y-2">
-                  <Label>Lista de Conteúdos ({totalContents} total)</Label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                  <Label>Lista de Geração ({totalContents} conteúdos)</Label>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
                     {selections.map((selection) => (
                       <div 
                         key={selection.id}
-                        className="flex items-center justify-between p-2 bg-muted rounded-lg"
+                        className="flex items-center justify-between p-2 bg-muted rounded-lg text-sm"
                       >
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">{selection.sourceName}</div>
+                          <div className="font-medium truncate">{selection.sourceName}</div>
                           <div className="text-xs text-muted-foreground">
                             {selection.templateName} × {selection.quantity}
                           </div>
                         </div>
                         <Button
                           variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
+                          size="sm"
                           onClick={() => handleRemoveSelection(selection.id)}
                         >
                           <X className="w-4 h-4" />
@@ -739,9 +984,9 @@ export default function ProjectDetail() {
                 </div>
               )}
 
-              {/* Configurações Globais */}
-              <div className="space-y-4 pt-4 border-t">
-                <h3 className="font-medium">Configurações Globais</h3>
+              {/* Opções Avançadas */}
+              <div className="space-y-4 border-t pt-4">
+                <Label className="text-muted-foreground">Opções Avançadas</Label>
                 
                 {/* Objetivo */}
                 <div className="space-y-2">

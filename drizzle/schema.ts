@@ -50,6 +50,7 @@ export const idealClients = mysqlTable("idealClients", {
 export const pains = mysqlTable("pains", {
   id: int("id").autoincrement().primaryKey(),
   projectId: int("projectId").notNull(),
+  idealClientId: int("idealClientId"), // Vincula dor ao cliente ideal específico
   level: mysqlEnum("level", ["primary", "secondary", "unexplored"]).notNull(),
   pain: text("pain").notNull(),
   description: text("description"),

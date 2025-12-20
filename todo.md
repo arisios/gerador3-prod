@@ -678,3 +678,39 @@
 - [x] Logo é opcional (não obrigatória)
 - [x] Escolher posição da logo (4 opções)
 - [x] Escolher tamanho da logo (5% a 20%)
+
+
+## Novo Fluxo de Clientes Ideais (20/12/2024)
+- [ ] Criar tabela idealClients vinculada ao projeto
+- [ ] Salvar clientes ideais detectados pela IA no projeto
+- [ ] Interface para adicionar clientes ideais manualmente
+- [ ] Interface para listar/editar/excluir clientes ideais
+- [ ] Selecionar UM cliente para gerar dores específicas
+- [ ] Geração de dores por cliente específico (não todas de uma vez)
+- [ ] Dores vinculadas ao cliente ideal que as gerou
+- [ ] Fluxo: Projeto → Clientes → Escolhe cliente → Gera dores → Cria conteúdo
+
+
+## Novo Fluxo COPPE - Clientes Ideais (20/12/2024)
+- [x] Adicionar rotas de backend para gerenciamento de clientes ideais
+  - [x] addIdealClient: adicionar cliente ideal manualmente
+  - [x] deleteIdealClient: remover cliente ideal
+  - [x] listIdealClients: listar clientes do projeto
+  - [x] getIdealClientWithPains: obter cliente com suas dores
+  - [x] generatePainsForClient: gerar dores específicas para um cliente
+- [x] Atualizar interface do ProjectDetail
+  - [x] Aba "Clientes" com lista de clientes ideais
+  - [x] Botão "Adicionar Cliente Ideal" com modal
+  - [x] Checkbox para ativar/desativar cliente
+  - [x] Botão para gerar dores específicas por cliente
+  - [x] Botão para deletar cliente
+  - [x] Expandir/colapsar dores de cada cliente
+  - [x] Badge mostrando quantidade de dores por cliente
+- [x] Atualizar aba "Dores" do ProjectDetail
+  - [x] Filtro por cliente ideal
+  - [x] Mostrar qual cliente cada dor pertence
+  - [x] Manter agrupamento por nível (principal, secundária, inexplorada)
+- [x] Atualizar modal de geração de conteúdo
+  - [x] Filtro de dores por cliente ideal
+  - [x] Mostrar quantidade de dores por cliente no seletor
+- [x] Escrever testes unitários para as novas rotas (14 testes passando)
