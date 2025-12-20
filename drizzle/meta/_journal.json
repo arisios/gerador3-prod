@@ -64,6 +64,13 @@
       "when": 1766226344551,
       "tag": "0008_faulty_dexter_bennett",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1766235182107,
+      "tag": "0009_narrow_maverick",
+      "breakpoints": true
     }
   ]
 }

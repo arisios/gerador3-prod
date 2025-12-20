@@ -71,6 +71,8 @@ export const contents = mysqlTable("contents", {
   formula: varchar("formula", { length: 20 }),
   objective: mysqlEnum("objective", ["sale", "authority", "growth"]).default("authority"),
   person: mysqlEnum("person", ["first", "second", "third"]).default("second"),
+  platform: mysqlEnum("platform", ["instagram", "tiktok"]).default("instagram"),
+  voiceTone: varchar("voiceTone", { length: 50 }).default("casual"),
   clickbait: boolean("clickbait").default(false),
   status: mysqlEnum("status", ["draft", "generating", "ready", "published"]).default("draft"),
   batchId: varchar("batchId", { length: 36 }),

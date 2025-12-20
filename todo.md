@@ -720,3 +720,21 @@
 - [x] Template padrão Full + Texto Central para todos os slides
 - [x] Consistência de personagem: usar imagem gerada do slide 1 como referência para slides seguintes
 - [x] Clientes ideais como grupos sem nomes fictícios (ex: "Mães que buscam eficiência" em vez de "Ana, a Otimizadora")
+
+
+## Melhoria de Copywriting Profissional (20/12/2024)
+- [ ] Criar tipos de linguagem/tom de voz (casual, profissional, inspiracional, provocativo, educativo, storytelling, humorístico)
+- [ ] Diferenciar geração por plataforma (TikTok: textos curtos 50-60 chars, Instagram: textos elaborados 100-120 chars)
+- [ ] Reescrever prompt de geração de conteúdo com copy profissional integrando: dor, template, objetivo, tom de voz, plataforma
+- [ ] Atualizar interface para selecionar plataforma e tom de voz
+- [ ] Aplicar melhorias em todos os pontos de geração de texto do sistema
+
+
+## Melhoria de Copywriting Profissional (20/12/2024)
+- [x] Criar tipos de linguagem/tom de voz (casual, profissional, inspiracional, provocativo, educativo, storytelling, humorístico, urgente)
+- [x] Diferenciar copy para TikTok (textos curtos, máx 60 caracteres) vs Instagram (textos elaborados, máx 120 caracteres)
+- [x] Reescrever prompt de geração de conteúdo com copy profissional
+- [x] Integrar dores, objetivos e templates no prompt de copy
+- [x] Adicionar seletores de plataforma e tom de voz na interface de geração
+- [x] Aplicar melhorias em todos os pontos de geração de texto
+- [x] Atualizar schema do banco para suportar platform e voiceTone

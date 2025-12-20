@@ -116,3 +116,165 @@ export const trendCategories = [
   "Moda", "Beleza", "Fitness", "Humor", "Lifestyle", "Tech", "Música", "Dança",
   "Comida", "Viagem", "Educação", "Negócios", "Entretenimento", "Esportes"
 ];
+
+// ===== PLATAFORMAS =====
+export const platforms = [
+  { 
+    id: "instagram", 
+    name: "Instagram", 
+    description: "Textos mais elaborados, storytelling, até 120 caracteres por slide",
+    maxCharsPerSlide: 120,
+    minSlides: 5,
+    maxSlides: 10,
+    style: "Narrativo, envolvente, com espaço para desenvolver ideias"
+  },
+  { 
+    id: "tiktok", 
+    name: "TikTok", 
+    description: "Textos curtos e diretos, máximo 60 caracteres por slide",
+    maxCharsPerSlide: 60,
+    minSlides: 3,
+    maxSlides: 5,
+    style: "Rápido, direto, impactante, linguagem jovem"
+  },
+];
+
+// ===== TONS DE VOZ / LINGUAGEM =====
+export const voiceTones = [
+  { 
+    id: "casual", 
+    name: "Conversa entre Amigos", 
+    description: "Linguagem descontraída, como se estivesse conversando com um amigo",
+    characteristics: [
+      "Use contrações e gírias atuais",
+      "Seja informal mas respeitoso",
+      "Use emojis com moderação",
+      "Faça perguntas retóricas",
+      "Use expressões como 'sabe?', 'tipo assim', 'olha só'"
+    ],
+    examples: [
+      "Cara, você não vai acreditar no que eu descobri...",
+      "Sabe aquele problema que te irrita? Então...",
+      "Bora lá, vou te mostrar como resolver isso"
+    ]
+  },
+  { 
+    id: "professional", 
+    name: "Profissional/Corporativo", 
+    description: "Linguagem formal, técnica e autoritária",
+    characteristics: [
+      "Use termos técnicos do nicho",
+      "Seja objetivo e preciso",
+      "Evite gírias e informalidades",
+      "Use dados e evidências",
+      "Mantenha tom de especialista"
+    ],
+    examples: [
+      "Estudos comprovam que 87% dos profissionais...",
+      "A metodologia consiste em três pilares fundamentais",
+      "Resultados mensuráveis em até 30 dias"
+    ]
+  },
+  { 
+    id: "inspirational", 
+    name: "Inspiracional/Motivacional", 
+    description: "Linguagem emotiva, empoderador e transformadora",
+    characteristics: [
+      "Use palavras de poder e transformação",
+      "Conecte com sonhos e aspirações",
+      "Seja encorajador e positivo",
+      "Use metáforas e analogias",
+      "Crie senso de possibilidade"
+    ],
+    examples: [
+      "Você nasceu para brilhar, não para se esconder",
+      "Cada dia é uma nova chance de recomeçar",
+      "Sua história de sucesso começa agora"
+    ]
+  },
+  { 
+    id: "provocative", 
+    name: "Provocativo/Polêmico", 
+    description: "Linguagem desafiadora, controversa e que gera debate",
+    characteristics: [
+      "Desafie crenças comuns",
+      "Use afirmações fortes",
+      "Provoque reflexão",
+      "Seja ousado mas respeitoso",
+      "Crie polarização controlada"
+    ],
+    examples: [
+      "Tudo que te ensinaram sobre isso está errado",
+      "A verdade incômoda que ninguém quer admitir",
+      "Pare de fazer isso. Agora."
+    ]
+  },
+  { 
+    id: "educational", 
+    name: "Educativo/Didático", 
+    description: "Linguagem explicativa, passo a passo, fácil de entender",
+    characteristics: [
+      "Explique conceitos de forma simples",
+      "Use exemplos práticos",
+      "Organize em passos claros",
+      "Antecipe dúvidas",
+      "Use analogias do dia a dia"
+    ],
+    examples: [
+      "Passo 1: Identifique o problema principal",
+      "Funciona assim: imagine que você...",
+      "Em resumo: faça X, depois Y, e por fim Z"
+    ]
+  },
+  { 
+    id: "storytelling", 
+    name: "Storytelling/Narrativo", 
+    description: "Linguagem de história, com personagens e arco narrativo",
+    characteristics: [
+      "Crie personagens relacionáveis",
+      "Use estrutura de início, meio e fim",
+      "Inclua conflito e resolução",
+      "Use detalhes sensoriais",
+      "Crie suspense e curiosidade"
+    ],
+    examples: [
+      "Era uma terça-feira comum quando tudo mudou...",
+      "Ela olhou para o espelho e não se reconheceu",
+      "Foi aí que eu entendi: precisava mudar"
+    ]
+  },
+  { 
+    id: "humorous", 
+    name: "Humorístico", 
+    description: "Linguagem leve, com piadas e situações engraçadas",
+    characteristics: [
+      "Use ironia e sarcasmo leve",
+      "Faça referências pop",
+      "Use exageros cômicos",
+      "Seja auto-depreciativo quando apropriado",
+      "Crie situações absurdas mas relacionáveis"
+    ],
+    examples: [
+      "Eu tentando seguir dieta: *compra salada* *come pizza*",
+      "Meu banco: 'Você está gastando muito'. Eu: 'E você está julgando muito'",
+      "POV: você prometeu acordar cedo mas o travesseiro tinha outros planos"
+    ]
+  },
+  { 
+    id: "urgent", 
+    name: "Urgente/Escassez", 
+    description: "Linguagem que cria senso de urgência e ação imediata",
+    characteristics: [
+      "Use palavras de tempo limitado",
+      "Crie FOMO (medo de perder)",
+      "Seja direto e imperativo",
+      "Destaque consequências de não agir",
+      "Use números específicos"
+    ],
+    examples: [
+      "Últimas 24 horas para garantir",
+      "Apenas 7 vagas restantes",
+      "Se você não agir agora, vai continuar..."
+    ]
+  },
+];

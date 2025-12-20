@@ -289,49 +289,137 @@ Retorne um JSON com:
 - Dores inexploradas: problemas que o público nem sabe que tem
 `;
 
-// ===== PROMPT DE GERAÇÃO DE CONTEÚDO =====
+// ===== PROMPT DE GERAÇÃO DE CONTEÚDO PROFISSIONAL =====
 export const generateContentPrompt = (params: {
   template: string;
   templateStructure: string[];
   pain: string;
+  painDescription?: string;
   niche: string;
   objective: string;
   person: string;
+  platform: string;
+  voiceTone: string;
+  voiceToneDetails?: {
+    characteristics: string[];
+    examples: string[];
+  };
   clickbait: boolean;
   hookType?: string;
   formula?: string;
-}) => `
-Gere conteúdo para um carrossel de Instagram seguindo as especificações:
+  businessContext?: string;
+  idealClient?: string;
+}) => {
+  // Configurações por plataforma
+  const platformConfig = params.platform === "tiktok" 
+    ? { maxChars: 60, minSlides: 3, maxSlides: 5, style: "Rápido, direto, impactante, linguagem jovem e atual" }
+    : { maxChars: 120, minSlides: 5, maxSlides: 10, style: "Narrativo, envolvente, com espaço para desenvolver ideias" };
 
+  // Diretrizes por objetivo
+  const objectiveGuidelines = {
+    sale: `
+- Use gatilhos mentais de ESCASSEZ e URGÊNCIA
+- Destaque BENEFÍCIOS concretos, não características
+- Inclua PROVA SOCIAL quando possível
+- Crie DESEJO antes de apresentar a solução
+- O CTA deve ser CLARO e DIRETO para ação
+- Use números específicos ("97% dos clientes", "em 7 dias")
+- Antecipe e quebre objeções`,
+    authority: `
+- Demonstre EXPERTISE e conhecimento profundo
+- Use DADOS e EVIDÊNCIAS para sustentar afirmações
+- Compartilhe INSIGHTS exclusivos que poucos sabem
+- Posicione-se como REFERÊNCIA no assunto
+- Eduque enquanto impressiona
+- Use termos técnicos do nicho (mas explique se necessário)
+- O CTA deve convidar para APROFUNDAR o conhecimento`,
+    growth: `
+- Crie conteúdo COMPARTILHÁVEL e relacionável
+- Use HUMOR ou EMOÇÃO para gerar identificação
+- Faça o leitor pensar "isso sou EU"
+- Provoque COMENTÁRIOS e MARCAÇÕES
+- Use formatos virais e trends atuais
+- O CTA deve incentivar ENGAJAMENTO (salvar, compartilhar, comentar)
+- Crie curiosidade para o próximo conteúdo`
+  };
+
+  return `Você é um COPYWRITER PROFISSIONAL especializado em conteúdo para redes sociais.
+Sua missão é criar textos que CONVERTEM, ENGAJAM e VENDEM.
+
+===== CONTEXTO DO CONTEÚDO =====
+Plataforma: ${params.platform === "tiktok" ? "TikTok" : "Instagram"}
+Estilo da plataforma: ${platformConfig.style}
+Nicho: ${params.niche}
+${params.businessContext ? `Contexto do negócio: ${params.businessContext}` : ""}
+${params.idealClient ? `Cliente ideal: ${params.idealClient}` : ""}
+
+===== DOR/TEMA CENTRAL =====
+Dor: ${params.pain}
+${params.painDescription ? `Descrição: ${params.painDescription}` : ""}
+
+Esta dor é o CENTRO de todo o conteúdo. Cada slide deve:
+- Tocar nessa dor de forma ESPECÍFICA
+- Usar a LINGUAGEM que o público usa para descrever esse problema
+- Mostrar que você ENTENDE profundamente o que eles sentem
+
+===== ESTRUTURA DO CARROSSEL =====
 Template: ${params.template}
 Estrutura: ${params.templateStructure.join(" → ")}
-Dor/Tema: ${params.pain}
-Nicho: ${params.niche}
-Objetivo: ${params.objective === "sale" ? "Venda" : params.objective === "authority" ? "Autoridade" : "Crescimento"}
-Pessoa gramatical: ${params.person === "first" ? "1ª pessoa (eu, meu)" : params.person === "second" ? "2ª pessoa (você, seu)" : "3ª pessoa (ele, nosso)"}
-Clickbait: ${params.clickbait ? "Sim, use títulos chamativos" : "Não, seja direto"}
-${params.hookType ? `Tipo de Hook: ${params.hookType}` : ""}
-${params.formula ? `Fórmula de Copy: ${params.formula}` : ""}
+Número de slides: ${platformConfig.minSlides} a ${platformConfig.maxSlides}
 
-Retorne um JSON com:
+Siga EXATAMENTE esta estrutura. Cada slide tem um propósito específico.
+
+===== OBJETIVO DO CONTEÚDO =====
+Objetivo: ${params.objective === "sale" ? "VENDA" : params.objective === "authority" ? "AUTORIDADE" : "CRESCIMENTO"}
+
+Diretrizes para este objetivo:
+${objectiveGuidelines[params.objective as keyof typeof objectiveGuidelines] || objectiveGuidelines.authority}
+
+===== TOM DE VOZ =====
+Tom: ${params.voiceTone}
+${params.voiceToneDetails ? `
+Características:
+${params.voiceToneDetails.characteristics.map(c => `- ${c}`).join('\n')}
+
+Exemplos de frases neste tom:
+${params.voiceToneDetails.examples.map(e => `"${e}"`).join('\n')}
+` : ""}
+
+MANTENHA este tom CONSISTENTEMENTE em todos os slides.
+
+===== PESSOA GRAMATICAL =====
+${params.person === "first" ? "1ª pessoa (eu, meu, minha) - Fale como se fosse VOCÊ contando sua experiência" : params.person === "second" ? "2ª pessoa (você, seu, sua) - Fale DIRETAMENTE com o leitor" : "3ª pessoa (ele, ela, nosso) - Fale de forma mais institucional"}
+
+===== TÉCNICAS DE COPY =====
+${params.hookType ? `Tipo de Hook: ${params.hookType} - O primeiro slide DEVE usar este estilo de gancho` : ""}
+${params.formula ? `Fórmula de Copy: ${params.formula} - Aplique esta fórmula na estrutura geral` : ""}
+Clickbait: ${params.clickbait ? "SIM - Use títulos chamativos, provocações, promessas ousadas" : "NÃO - Seja direto e honesto, sem exageros"}
+
+===== REGRAS OBRIGATÓRIAS =====
+1. MÁXIMO ${platformConfig.maxChars} CARACTERES por slide (OBRIGATÓRIO)
+2. Cada slide deve ser IMPACTANTE e fazer o leitor querer ver o próximo
+3. O PRIMEIRO slide é o HOOK - deve PARAR o scroll imediatamente
+4. O ÚLTIMO slide é o CTA - deve ter uma ação CLARA
+5. Use QUEBRAS de padrão para manter atenção
+6. Evite clichês e frases genéricas
+7. Seja ESPECÍFICO, não genérico
+
+===== FORMATO DE RESPOSTA =====
+Retorne APENAS um JSON válido:
 {
-  "title": "título do conteúdo",
-  "description": "descrição para legenda",
-  "hook": "frase de gancho inicial",
+  "title": "título interno do conteúdo",
+  "description": "legenda completa para o post (pode ser longa, com emojis e hashtags)",
+  "hook": "a frase de gancho do primeiro slide",
   "slides": [
-    {"order": 1, "text": "texto do slide 1 (máx 100 caracteres)"},
+    {"order": 1, "text": "texto do slide 1 - O HOOK"},
     {"order": 2, "text": "texto do slide 2"},
     ...
   ]
 }
 
-Regras:
-- Cada slide deve ter no máximo 100 caracteres
-- O texto deve ser impactante e direto
-- Use a pessoa gramatical especificada consistentemente
-- O primeiro slide é o hook/capa
-- O último slide é o CTA
+Lembre-se: Você é um copywriter PROFISSIONAL. Cada palavra conta. Cada slide deve ser IRRESISTÍVEL.
 `;
+};
 
 // ===== PROMPT DE GERAÇÃO DE IMAGEM =====
 export const generateImagePrompt = (params: {

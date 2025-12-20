@@ -74,8 +74,9 @@ export default function MediaGallery() {
       // @ts-ignore
       utils.media.count.invalidate();
     },
-    onError: (error: Error) => {
-      toast.error(`Erro ao enviar: ${error.message}`);
+    onError: (error: unknown) => {
+      const err = error as { message?: string };
+      toast.error(`Erro ao enviar: ${err.message || 'Erro desconhecido'}`);
     },
   });
 
@@ -90,8 +91,9 @@ export default function MediaGallery() {
       utils.media.count.invalidate();
       setSelectedMedia(null);
     },
-    onError: (error: Error) => {
-      toast.error(`Erro ao excluir: ${error.message}`);
+    onError: (error: unknown) => {
+      const err = error as { message?: string };
+      toast.error(`Erro ao excluir: ${err.message || 'Erro desconhecido'}`);
     },
   });
 

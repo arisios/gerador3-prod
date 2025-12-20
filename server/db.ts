@@ -494,6 +494,8 @@ export async function getRecentContents(userId: number, limit = 10): Promise<Con
     objective: contents.objective,
     person: contents.person,
     clickbait: contents.clickbait,
+    platform: contents.platform,
+    voiceTone: contents.voiceTone,
     status: contents.status,
     batchId: contents.batchId,
     createdAt: contents.createdAt,

@@ -8,7 +8,7 @@ import { invokeLLM } from "./_core/llm";
 import { generateImage } from "./_core/imageGeneration";
 import * as db from "./db";
 import * as prompts from "./prompts";
-import { carouselTemplates, imageTemplates, videoTemplates, softSellTemplates, hookTypes, copyFormulas } from "@shared/templates";
+import { carouselTemplates, imageTemplates, videoTemplates, softSellTemplates, hookTypes, copyFormulas, voiceTones, platforms } from "@shared/templates";
 import { visualTemplates, accentColors, stylePresets } from "@shared/visualTemplates";
 import { designTemplates, colorPalettes } from "@shared/designTemplates";
 import { nanoid } from "nanoid";
@@ -863,11 +863,15 @@ Retorne JSON com:
         quantity: z.number().min(1).max(10).default(1),
         painId: z.number().optional(),
         pain: z.string().optional(),
+        painDescription: z.string().optional(),
         objective: z.enum(["sale", "authority", "growth"]).default("authority"),
         person: z.enum(["first", "second", "third"]).default("second"),
+        platform: z.enum(["instagram", "tiktok"]).default("instagram"),
+        voiceTone: z.string().default("casual"),
         clickbait: z.boolean().default(false),
         hookType: z.string().optional(),
         formula: z.string().optional(),
+        idealClientId: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const project = await db.getProjectById(input.projectId);
@@ -875,13 +879,24 @@ Retorne JSON com:
           throw new TRPCError({ code: "NOT_FOUND" });
         }
 
-        const analysis = project.analysis as { niche?: string } | null;
+        const analysis = project.analysis as { niche?: string; businessName?: string; mainProduct?: string } | null;
         const niche = analysis?.niche || "geral";
+        const businessContext = analysis ? `${analysis.businessName || ''} - ${analysis.mainProduct || ''}` : undefined;
         const batchId = nanoid();
 
         const templateInfo = carouselTemplates.find(t => t.id === input.template) ||
                            imageTemplates.find(t => t.id === input.template) ||
                            videoTemplates.find(t => t.id === input.template);
+
+        // Buscar detalhes do tom de voz
+        const voiceToneInfo = voiceTones.find(v => v.id === input.voiceTone);
+        
+        // Buscar cliente ideal se especificado
+        let idealClientName: string | undefined;
+        if (input.idealClientId) {
+          const idealClient = await db.getIdealClientById(input.idealClientId);
+          idealClientName = idealClient?.name;
+        }
 
         const contentIds: number[] = [];
 
@@ -890,12 +905,21 @@ Retorne JSON com:
             template: input.template,
             templateStructure: (templateInfo as { structure?: string[] })?.structure || [],
             pain: input.pain || "dor genérica",
+            painDescription: input.painDescription,
             niche,
             objective: input.objective,
             person: input.person,
+            platform: input.platform,
+            voiceTone: input.voiceTone,
+            voiceToneDetails: voiceToneInfo ? {
+              characteristics: voiceToneInfo.characteristics,
+              examples: voiceToneInfo.examples,
+            } : undefined,
             clickbait: input.clickbait,
             hookType: input.hookType,
             formula: input.formula,
+            businessContext,
+            idealClient: idealClientName,
           });
 
           const response = await invokeLLM({
@@ -1906,13 +1930,19 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
         }
         
         // Consumir créditos
-        const newBalance = await db.consumeCredits(
+        const result = await db.useCredits(
           ctx.user.id, 
           input.amount, 
-          input.description || `Geração de ${input.type} via ${input.provider}`
+          input.description || `Geração de ${input.type} via ${input.provider}`,
+          input.provider,
+          input.type
         );
         
-        return { success: true, newBalance, consumed: input.amount };
+        if (!result.success) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: result.error || "Falha ao consumir créditos" });
+        }
+        
+        return { success: true, newBalance: result.newBalance, consumed: input.amount };
       }),
 
     // Adicionar créditos bônus (admin only)

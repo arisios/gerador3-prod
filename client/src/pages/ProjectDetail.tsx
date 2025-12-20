@@ -44,6 +44,8 @@ export default function ProjectDetail() {
   const [selections, setSelections] = useState<ContentSelection[]>([]);
   const [objective, setObjective] = useState<"sale" | "authority" | "growth">("authority");
   const [person, setPerson] = useState<"first" | "second" | "third">("second");
+  const [platform, setPlatform] = useState<"instagram" | "tiktok">("instagram");
+  const [voiceTone, setVoiceTone] = useState("casual");
   const [clickbait, setClickbait] = useState(false);
 
   // Seleção atual
@@ -324,6 +326,8 @@ export default function ProjectDetail() {
         pain: painText,
         objective,
         person,
+        platform,
+        voiceTone,
         clickbait,
       });
     }
@@ -988,6 +992,50 @@ export default function ProjectDetail() {
               <div className="space-y-4 border-t pt-4">
                 <Label className="text-muted-foreground">Opções Avançadas</Label>
                 
+                {/* Plataforma */}
+                <div className="space-y-2">
+                  <Label>Plataforma</Label>
+                  <Select value={platform} onValueChange={(v) => setPlatform(v as typeof platform)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="instagram">
+                        <div className="flex flex-col">
+                          <span>Instagram</span>
+                          <span className="text-xs text-muted-foreground">Textos elaborados, até 120 caracteres</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="tiktok">
+                        <div className="flex flex-col">
+                          <span>TikTok</span>
+                          <span className="text-xs text-muted-foreground">Textos curtos, até 60 caracteres</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Tom de Voz */}
+                <div className="space-y-2">
+                  <Label>Tom de Voz</Label>
+                  <Select value={voiceTone} onValueChange={setVoiceTone}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="casual">Conversa entre Amigos</SelectItem>
+                      <SelectItem value="professional">Profissional/Corporativo</SelectItem>
+                      <SelectItem value="inspirational">Inspiracional/Motivacional</SelectItem>
+                      <SelectItem value="provocative">Provocativo/Polêmico</SelectItem>
+                      <SelectItem value="educational">Educativo/Didático</SelectItem>
+                      <SelectItem value="storytelling">Storytelling/Narrativo</SelectItem>
+                      <SelectItem value="humorous">Humorístico</SelectItem>
+                      <SelectItem value="urgent">Urgente/Escassez</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Objetivo */}
                 <div className="space-y-2">
                   <Label>Objetivo</Label>
