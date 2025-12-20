@@ -964,13 +964,18 @@ Retorne JSON com:
           });
 
           if (contentData.slides && Array.isArray(contentData.slides)) {
-            const slidesData = contentData.slides.map((s: { order: number; text: string }, idx: number) => ({
-              order: s.order || idx + 1,
-              text: s.text,
-              visualTemplate: visualTemplates[0]?.id || "lifestyle-editorial",
-              designTemplateId: 'fullbleed-center', // Template padrão: Full + Texto Central
-              colorPaletteId: 'dark-purple', // Cor padrão: Roxo Escuro
-            }));
+            const slidesData = contentData.slides.map((s: { order: number; text: string }, idx: number) => {
+              // Gerar prompt de imagem baseado no texto do slide
+              const imagePrompt = `Fotografia profissional para Instagram. Contexto: ${s.text}. Nicho: ${niche}. REGRAS: Imagem REAL sem texto, sem letras, sem números. Qualidade editorial, iluminação natural, formato 4:5.`;
+              return {
+                order: s.order || idx + 1,
+                text: s.text,
+                imagePrompt, // Prompt padrão para a imagem
+                visualTemplate: visualTemplates[0]?.id || "lifestyle-editorial",
+                designTemplateId: 'fullbleed-center', // Template padrão: Full + Texto Central
+                colorPaletteId: 'dark-purple', // Cor padrão: Roxo Escuro
+              };
+            });
             await db.createSlides(contentId, slidesData);
           }
 
@@ -1116,10 +1121,12 @@ Retorne JSON com:
             // Se já temos uma imagem de referência (slide 1), usar para consistência
             // Isso mantém a mesma pessoa/personagem em todos os slides
             if (i > 0 && firstGeneratedImageUrl) {
-              fullPrompt += `\n\n=== CONSISTÊNCIA DE PERSONAGEM ===
-MANTENHA A MESMA PESSOA/PERSONAGEM da imagem de referência.
-Use a mesma aparência física, estilo e características visuais.
-Apenas mude o contexto/cenário conforme o texto do slide.`;
+              fullPrompt += `\n\n=== CONSISTÊNCIA DE PERSONAGEM - OBRIGATÓRIO ===
+VOCÊ DEVE manter EXATAMENTE a mesma pessoa da imagem de referência.
+Copie fielmente: rosto, cabelo, tom de pele, tipo físico, idade aparente.
+A pessoa deve ser IDENTIFICÁVEL como a mesma em todas as imagens.
+Mude apenas o contexto/cenário/roupa conforme o texto do slide.
+ISTO É CRÍTICO: a consistência visual do personagem é essencial.`;
               
               const result = await generateImage({
                 prompt: fullPrompt,

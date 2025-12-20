@@ -57,18 +57,19 @@ interface SlideComposerNewProps {
   slideIndex?: number;
 }
 
-// Valores padrão
+// Valores padrão - Template Full + Texto Central
 const DEFAULT_IMAGE: ImageObject = {
   x: 0,
   y: 0,
   width: 100,
-  height: 60,
+  height: 100, // Full bleed - imagem ocupa 100% da altura
 };
 
+// Template Full + Texto Central - texto centralizado sobre a imagem
 const DEFAULT_TEXT_BLOCK: Omit<TextBlock, "id"> = {
   text: "Seu texto aqui",
   x: 5,
-  y: 65,
+  y: 35, // Centralizado verticalmente (35% do topo)
   width: 90,
   height: 30,
   fontSize: 28,

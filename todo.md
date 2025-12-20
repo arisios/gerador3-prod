@@ -738,3 +738,9 @@
 - [x] Adicionar seletores de plataforma e tom de voz na interface de geração
 - [x] Aplicar melhorias em todos os pontos de geração de texto
 - [x] Atualizar schema do banco para suportar platform e voiceTone
+
+
+## Bugs Reportados (20/12/2024 - 10:05)
+- [x] Editor visual (SlideComposerNew) não usa template Full + Texto Central como padrão - CORRIGIDO: imagem 100% altura, texto centralizado em y=35%
+- [x] Inconsistência de personagem: imagens do carrossel mostram pessoas diferentes - CORRIGIDO: prompt reforçado para manter mesma pessoa
+- [x] Prompt não aparece no modal de imagem - CORRIGIDO: gera prompt padrão baseado no texto do slide + salva prompt na criação

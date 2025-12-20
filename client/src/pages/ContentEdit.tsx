@@ -97,8 +97,14 @@ export default function ContentEdit() {
     if (currentSlide?.text) {
       setSlideText(currentSlide.text);
     }
+    // Sempre atualizar o prompt - usar o prompt salvo ou gerar um padrão baseado no texto
     if (currentSlide?.imagePrompt) {
       setTempPrompt(currentSlide.imagePrompt);
+    } else if (currentSlide?.text) {
+      // Gerar prompt padrão baseado no texto do slide
+      setTempPrompt(`Fotografia profissional para Instagram. Contexto: ${currentSlide.text}. REGRAS: Imagem REAL sem texto, sem letras, sem números. Qualidade editorial, iluminação natural, formato 4:5.`);
+    } else {
+      setTempPrompt("");
     }
     // Carregar template salvo do slide - priorizar designTemplateId, depois visualTemplate
     const slideAny = currentSlide as any;
