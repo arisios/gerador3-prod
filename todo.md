@@ -771,3 +771,8 @@
 
 ## Aumentar Logo 5x (20/12/2024)
 - [x] Aumentar logo no header de w-14 para w-20 (2.5x maior, 80px)
+
+
+## Logo 120x120px (20/12/2024)
+- [x] Copiar nova logo sem fundo para o projeto
+- [x] Aumentar logo para 120x120px
