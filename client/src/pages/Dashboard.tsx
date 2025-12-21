@@ -33,8 +33,8 @@ export default function Dashboard() {
       <header className="bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Gerador 3" className="w-8 h-8" />
-            <span className="font-bold">Gerador 3</span>
+            <img src="/logo.jpg" alt="Creative Loop" className="w-8 h-8 rounded-md" />
+            <span className="font-bold gradient-text">Creative Loop</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground hidden sm:block">

@@ -20,7 +20,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse">
-          <img src="/logo.png" alt="Gerador 3" className="w-16 h-16" />
+          <img src="/logo.jpg" alt="Creative Loop" className="w-16 h-16 rounded-lg" />
         </div>
       </div>
     );
@@ -36,8 +36,8 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Gerador 3" className="w-8 h-8" />
-            <span className="font-bold text-lg">Gerador 3</span>
+            <img src="/logo.jpg" alt="Creative Loop" className="w-8 h-8 rounded-md" />
+            <span className="font-bold text-lg gradient-text">Creative Loop</span>
           </div>
           <Button asChild>
             <a href={getLoginUrl()}>Entrar</a>
@@ -113,7 +113,7 @@ export default function Home() {
             Pronto para criar conteúdo viral?
           </h2>
           <p className="text-muted-foreground mb-8">
-            Junte-se a milhares de criadores que já usam o Gerador 3.
+            Junte-se a milhares de criadores que já usam o Creative Loop.
           </p>
           <Button size="lg" asChild>
             <a href={getLoginUrl()}>Criar Conta Grátis</a>
@@ -124,7 +124,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="container text-center text-sm text-muted-foreground">
-          © 2024 Gerador 3. Todos os direitos reservados.
+          © 2024 Creative Loop. Todos os direitos reservados.
         </div>
       </footer>
     </div>

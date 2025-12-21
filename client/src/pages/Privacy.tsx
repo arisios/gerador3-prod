@@ -22,7 +22,7 @@ export default function Privacy() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <Card>
           <CardHeader>
-            <CardTitle>Política de Privacidade do Gerador 3</CardTitle>
+            <CardTitle>Política de Privacidade do Creative Loop</CardTitle>
             <p className="text-sm text-muted-foreground">Última atualização: 19 de dezembro de 2024</p>
           </CardHeader>
           <CardContent className="prose prose-invert max-w-none space-y-6">
@@ -30,7 +30,7 @@ export default function Privacy() {
             <section>
               <h2 className="text-lg font-semibold mb-3">1. Introdução</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Esta Política de Privacidade descreve como o Gerador 3 coleta, usa, armazena e protege 
+                Esta Política de Privacidade descreve como o Creative Loop coleta, usa, armazena e protege 
                 suas informações pessoais. Ao usar nosso serviço, você concorda com a coleta e uso de 
                 informações de acordo com esta política.
               </p>
@@ -133,7 +133,7 @@ export default function Privacy() {
             <section>
               <h2 className="text-lg font-semibold mb-3">10. Menores de Idade</h2>
               <p className="text-muted-foreground leading-relaxed">
-                O Gerador 3 não é destinado a menores de 18 anos. Não coletamos intencionalmente informações 
+                O Creative Loop não é destinado a menores de 18 anos. Não coletamos intencionalmente informações 
                 de menores. Se tomarmos conhecimento de que coletamos dados de um menor, tomaremos medidas 
                 para excluir essas informações.
               </p>

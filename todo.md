@@ -744,3 +744,13 @@
 - [x] Editor visual (SlideComposerNew) não usa template Full + Texto Central como padrão - CORRIGIDO: imagem 100% altura, texto centralizado em y=35%
 - [x] Inconsistência de personagem: imagens do carrossel mostram pessoas diferentes - CORRIGIDO: prompt reforçado para manter mesma pessoa
 - [x] Prompt não aparece no modal de imagem - CORRIGIDO: gera prompt padrão baseado no texto do slide + salva prompt na criação
+
+
+## Rebrand - Creative Loop (20/12/2024)
+- [x] Copiar nova logo para o projeto
+- [x] Atualizar nome do projeto para "Creative Loop"
+- [x] Criar paleta de cores baseada na logo (azul ciano → roxo → rosa)
+- [x] Atualizar variáveis CSS com as novas cores
+- [x] Integrar logo no header
+- [x] Atualizar favicon
+- [x] Atualizar título e metadados do site

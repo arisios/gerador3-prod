@@ -54,39 +54,40 @@
   --radius: 0.625rem;
 }
 
+/* Creative Loop - Paleta de cores baseada na logo (azul ciano → roxo → rosa) */
 .dark {
-  --background: oklch(0.12 0.02 285);
-  --foreground: oklch(0.98 0.005 285);
-  --card: oklch(0.16 0.025 285);
-  --card-foreground: oklch(0.98 0.005 285);
-  --popover: oklch(0.16 0.025 285);
-  --popover-foreground: oklch(0.98 0.005 285);
-  --primary: oklch(0.65 0.22 285);
-  --primary-foreground: oklch(0.98 0.005 285);
-  --secondary: oklch(0.22 0.035 285);
-  --secondary-foreground: oklch(0.98 0.005 285);
-  --muted: oklch(0.22 0.025 285);
-  --muted-foreground: oklch(0.6 0.02 285);
-  --accent: oklch(0.65 0.22 285);
-  --accent-foreground: oklch(0.98 0.005 285);
+  --background: oklch(0.12 0.02 250); /* Fundo escuro com toque azulado */
+  --foreground: oklch(0.98 0.005 250);
+  --card: oklch(0.16 0.025 250);
+  --card-foreground: oklch(0.98 0.005 250);
+  --popover: oklch(0.16 0.025 250);
+  --popover-foreground: oklch(0.98 0.005 250);
+  --primary: oklch(0.7 0.18 210); /* Azul ciano da logo */
+  --primary-foreground: oklch(0.98 0.005 250);
+  --secondary: oklch(0.22 0.035 250);
+  --secondary-foreground: oklch(0.98 0.005 250);
+  --muted: oklch(0.22 0.025 250);
+  --muted-foreground: oklch(0.6 0.02 250);
+  --accent: oklch(0.65 0.2 330); /* Rosa da logo */
+  --accent-foreground: oklch(0.98 0.005 250);
   --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.98 0.005 285);
-  --border: oklch(0.28 0.035 285);
-  --input: oklch(0.28 0.035 285);
-  --ring: oklch(0.65 0.22 285);
-  --chart-1: oklch(0.65 0.22 285);
-  --chart-2: oklch(0.6 0.18 180);
-  --chart-3: oklch(0.7 0.15 85);
-  --chart-4: oklch(0.65 0.2 25);
-  --chart-5: oklch(0.6 0.2 330);
-  --sidebar: oklch(0.1 0.018 285);
-  --sidebar-foreground: oklch(0.98 0.005 285);
-  --sidebar-primary: oklch(0.65 0.22 285);
-  --sidebar-primary-foreground: oklch(0.98 0.005 285);
-  --sidebar-accent: oklch(0.22 0.035 285);
-  --sidebar-accent-foreground: oklch(0.98 0.005 285);
-  --sidebar-border: oklch(0.22 0.025 285);
-  --sidebar-ring: oklch(0.65 0.22 285);
+  --destructive-foreground: oklch(0.98 0.005 250);
+  --border: oklch(0.28 0.035 250);
+  --input: oklch(0.28 0.035 250);
+  --ring: oklch(0.7 0.18 210); /* Azul ciano */
+  --chart-1: oklch(0.7 0.18 210); /* Azul ciano */
+  --chart-2: oklch(0.65 0.22 285); /* Roxo */
+  --chart-3: oklch(0.65 0.2 330); /* Rosa */
+  --chart-4: oklch(0.6 0.18 180); /* Verde */
+  --chart-5: oklch(0.7 0.15 85); /* Amarelo */
+  --sidebar: oklch(0.1 0.018 250);
+  --sidebar-foreground: oklch(0.98 0.005 250);
+  --sidebar-primary: oklch(0.7 0.18 210); /* Azul ciano */
+  --sidebar-primary-foreground: oklch(0.98 0.005 250);
+  --sidebar-accent: oklch(0.22 0.035 250);
+  --sidebar-accent-foreground: oklch(0.98 0.005 250);
+  --sidebar-border: oklch(0.22 0.025 250);
+  --sidebar-ring: oklch(0.7 0.18 210); /* Azul ciano */
 }
 
 @layer base {
@@ -148,14 +149,17 @@
   @apply bg-card/80 backdrop-blur-xl;
 }
 
-/* Gradient primary */
+/* Creative Loop - Gradient primary (azul ciano → roxo → rosa) */
 .gradient-primary {
-  @apply bg-gradient-to-r from-purple-600 to-purple-500;
+  background: linear-gradient(135deg, #00D4FF 0%, #A855F7 50%, #FF10F0 100%);
 }
 
-/* Gradient text */
+/* Creative Loop - Gradient text */
 .gradient-text {
-  @apply bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent;
+  background: linear-gradient(135deg, #00D4FF 0%, #A855F7 50%, #FF10F0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* Scrollbar hide */
