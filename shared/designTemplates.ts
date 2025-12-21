@@ -419,8 +419,8 @@ export const designTemplates: DesignTemplate[] = [
       alignment: 'center',
       fontSize: '3xl',
       fontWeight: 'black',
-      maxWidth: '80%',
-      padding: '32px',
+      maxWidth: '85%',
+      padding: '48px',
       textShadow: true,
       lineHeight: 'tight'
     },

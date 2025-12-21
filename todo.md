@@ -790,3 +790,8 @@
 ## Ícone PWA (21/12/2024)
 - [x] Atualizar ícone do app para usar apenas o símbolo (sem texto, sem fundo branco)
 - [x] Gerar ícones PWA em múltiplos tamanhos (192x192, 512x512)
+
+
+## Bugs de Layout (21/12/2024)
+- [x] Texto comprimido nas margens do preview (aumentado maxWidth de 80% para 85% e padding de 32px para 48px)
+- [x] Editor abre com configuração errada (60% imagem) em vez de Full (100% imagem) - CORRIGIDO: DEFAULT_IMAGE height de 60 para 100, DEFAULT_TEXT y de 65 para 35
