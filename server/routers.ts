@@ -2112,6 +2112,131 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
     }),
   }),
 
+  // ===== TOPICS & NEWS (ASSUNTOS) =====
+  topics: router({
+    // Listar assuntos de um projeto
+    list: protectedProcedure
+      .input(z.object({ projectId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const project = await db.getProjectById(input.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        return db.getTopicsByProject(input.projectId);
+      }),
+
+    // Buscar notícias sobre um assunto
+    search: protectedProcedure
+      .input(z.object({ 
+        projectId: z.number(),
+        query: z.string(),
+        limit: z.number().min(1).max(10).default(5),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await db.getProjectById(input.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        // Importar função de busca de notícias
+        const { searchNews } = await import("./newsSearch");
+        
+        // Buscar notícias
+        const articles = await searchNews(input.query, input.limit);
+        
+        // Criar tópico
+        const topicId = await db.createTopic(input.projectId, input.query);
+        
+        // Salvar notícias
+        if (articles.length > 0) {
+          await db.createNews(topicId, articles.map(a => ({
+            title: a.title,
+            description: a.description,
+            url: a.url,
+            source: a.source,
+            publishedAt: a.publishedAt,
+            imageUrl: a.imageUrl,
+            isSelected: false,
+          })));
+        }
+        
+        return { topicId, count: articles.length };
+      }),
+
+    // Obter notícias de um assunto
+    getNews: protectedProcedure
+      .input(z.object({ topicId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const topic = await db.getTopicById(input.topicId);
+        if (!topic) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        
+        const project = await db.getProjectById(topic.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        
+        const newsList = await db.getNewsByTopic(input.topicId);
+        return { topic, news: newsList };
+      }),
+
+    // Selecionar/desselecionar notícia
+    toggleNewsSelection: protectedProcedure
+      .input(z.object({ 
+        newsId: z.number(),
+        isSelected: z.boolean(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const newsItem = await db.getNewsById(input.newsId);
+        if (!newsItem) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        
+        const topic = await db.getTopicById(newsItem.topicId);
+        if (!topic) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        
+        const project = await db.getProjectById(topic.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        
+        await db.updateNews(input.newsId, { isSelected: input.isSelected });
+        return { success: true };
+      }),
+
+    // Deletar assunto e suas notícias
+    delete: protectedProcedure
+      .input(z.object({ topicId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const topic = await db.getTopicById(input.topicId);
+        if (!topic) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        
+        const project = await db.getProjectById(topic.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        
+        await db.deleteTopic(input.topicId);
+        return { success: true };
+      }),
+
+    // Obter notícias selecionadas do projeto
+    getSelectedNews: protectedProcedure
+      .input(z.object({ projectId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const project = await db.getProjectById(input.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        return db.getSelectedNewsByProject(input.projectId);
+      }),
+  }),
+
   // ===== PROVIDERS =====
   providers: router({
     // Obter providers de imagem disponíveis

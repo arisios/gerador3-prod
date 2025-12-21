@@ -17,11 +17,11 @@ import { LogoPositionSelector } from "@/components/LogoPositionSelector";
 import { 
   ArrowLeft, Plus, Image, Video, Layers, Loader2, 
   ChevronRight, Trash2, Users, Zap, Target, AlertCircle,
-  TrendingUp, Flame, X, Check, UserPlus, Sparkles
+  TrendingUp, Flame, X, Check, UserPlus, Sparkles, Newspaper
 } from "lucide-react";
 import { toast } from "sonner";
 
-type ContentSource = "pains" | "trends" | "virals";
+type ContentSource = "pains" | "trends" | "virals" | "news";
 
 interface ContentSelection {
   id: string;
@@ -69,6 +69,12 @@ export default function ProjectDetail() {
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [expandedClientId, setExpandedClientId] = useState<number | null>(null);
 
+  // Estados para gerenciamento de assuntos/notícias
+  const [topicQuery, setTopicQuery] = useState("");
+  const [isSearchingNews, setIsSearchingNews] = useState(false);
+  const [currentTopicId, setCurrentTopicId] = useState<number | null>(null);
+  const [selectedNewsIds, setSelectedNewsIds] = useState<number[]>([]);
+
   const { data: project, isLoading } = trpc.projects.get.useQuery({ id: projectId });
   const { data: contents } = trpc.content.list.useQuery({ projectId }, { enabled: !!projectId });
   const { data: trends } = trpc.trends.list.useQuery({ source: "google" });
@@ -76,6 +82,17 @@ export default function ProjectDetail() {
   const { data: carouselTemplates } = trpc.templates.getCarouselTemplates.useQuery();
   const { data: imageTemplates } = trpc.templates.getImageTemplates.useQuery();
   const { data: videoTemplates } = trpc.templates.getVideoTemplates.useQuery();
+  
+  // Queries para assuntos/notícias
+  const { data: topics } = (trpc as any).topics.list.useQuery({ projectId }, { enabled: !!projectId });
+  const { data: currentTopicNews } = (trpc as any).topics.getNews.useQuery(
+    { topicId: currentTopicId! },
+    { enabled: !!currentTopicId }
+  );
+  const { data: selectedNews } = (trpc as any).topics.getSelectedNews.useQuery(
+    { projectId },
+    { enabled: !!projectId && contentSource === "news" }
+  );
 
   const utils = trpc.useUtils();
 
@@ -235,6 +252,55 @@ export default function ProjectDetail() {
     });
   };
 
+  // Mutations para assuntos/notícias
+  const searchNewsMutation = (trpc as any).topics.search.useMutation({
+    onSuccess: (data: { topicId: number; count: number }) => {
+      toast.success(`${data.count} notícias encontradas!`);
+      setCurrentTopicId(data.topicId);
+      setIsSearchingNews(false);
+      (utils as any).topics.list.invalidate({ projectId });
+    },
+    onError: (error: { message: string }) => {
+      toast.error("Erro ao buscar notícias: " + error.message);
+      setIsSearchingNews(false);
+    },
+  });
+
+  const toggleNewsSelection = (trpc as any).topics.toggleNewsSelection.useMutation({
+    onSuccess: () => {
+      (utils as any).topics.getNews.invalidate({ topicId: currentTopicId });
+      (utils as any).topics.getSelectedNews.invalidate({ projectId });
+    },
+  });
+
+  const deleteTopic = (trpc as any).topics.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Assunto removido");
+      setCurrentTopicId(null);
+      (utils as any).topics.list.invalidate({ projectId });
+    },
+  });
+
+  const handleSearchNews = () => {
+    if (!topicQuery.trim()) {
+      toast.error("Digite um assunto para buscar");
+      return;
+    }
+    setIsSearchingNews(true);
+    searchNewsMutation.mutate({
+      projectId,
+      query: topicQuery.trim(),
+      limit: 5,
+    });
+  };
+
+  const handleToggleNews = (newsId: number, isSelected: boolean) => {
+    toggleNewsSelection.mutate({
+      newsId,
+      isSelected,
+    });
+  };
+
   const templates = currentContentType === "carousel" ? carouselTemplates :
                     currentContentType === "image" ? imageTemplates : videoTemplates;
 
@@ -251,8 +317,18 @@ export default function ProjectDetail() {
       return project?.pains?.map(p => ({ id: p.id, name: p.pain, level: p.level })) || [];
     } else if (contentSource === "trends") {
       return trends?.map(t => ({ id: t.id, name: t.name, level: t.classification })) || [];
-    } else {
+    } else if (contentSource === "virals") {
       return virals?.map(v => ({ id: v.id, name: v.title, level: v.category })) || [];
+    } else {
+      // news: retornar notícias selecionadas de todos os tópicos do projeto
+      if (selectedNews && selectedNews.length > 0) {
+        return selectedNews.map((n: any) => ({
+          id: n.id,
+          name: n.title,
+          level: n.source
+        }));
+      }
+      return [];
     }
   };
 
@@ -271,7 +347,7 @@ export default function ProjectDetail() {
 
     const templateObj = templates?.find(t => t.id === currentTemplate);
     const newSelections: ContentSelection[] = selectedSourceIds.map(sourceId => {
-      const source = sources.find(s => s.id === sourceId);
+      const source = sources.find((s: { id: number; name: string; level?: string }) => s.id === sourceId);
       return {
         id: `${contentSource}-${sourceId}-${currentContentType}-${currentTemplate}-${Date.now()}`,
         sourceType: contentSource,
@@ -312,9 +388,15 @@ export default function ProjectDetail() {
       } else if (selection.sourceType === "trends") {
         const trend = trends?.find(t => t.id === selection.sourceId);
         painText = `Trend: ${trend?.name}`;
-      } else {
+      } else if (selection.sourceType === "virals") {
         const viral = virals?.find(v => v.id === selection.sourceId);
         painText = `Viral: ${viral?.title}`;
+      } else if (selection.sourceType === "news") {
+        // Buscar notícia selecionada
+        const foundNews = selectedNews?.find((n: any) => n.id === selection.sourceId);
+        if (foundNews) {
+          painText = `Notícia: ${foundNews.title}. ${foundNews.description}`;
+        }
       }
 
       await generateContent.mutateAsync({
@@ -329,7 +411,7 @@ export default function ProjectDetail() {
         platform,
         voiceTone,
         clickbait,
-      });
+      } as any);
     }
   };
 
@@ -410,6 +492,7 @@ export default function ProjectDetail() {
             <TabsTrigger value="contents" className="flex-1">Conteúdos</TabsTrigger>
             <TabsTrigger value="clients" className="flex-1">Clientes</TabsTrigger>
             <TabsTrigger value="pains" className="flex-1">Dores</TabsTrigger>
+            <TabsTrigger value="topics" className="flex-1">Assuntos</TabsTrigger>
             <TabsTrigger value="settings" className="flex-1">Config</TabsTrigger>
           </TabsList>
 
@@ -699,6 +782,143 @@ export default function ProjectDetail() {
             )}
           </TabsContent>
 
+          {/* Topics Tab */}
+          <TabsContent value="topics" className="space-y-4 mt-4">
+            {/* Campo de busca */}
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <Label>Buscar Notícias sobre um Assunto</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Ex: Inteligência Artificial, Sustentabilidade, Marketing Digital..."
+                    value={topicQuery}
+                    onChange={(e) => setTopicQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearchNews()}
+                  />
+                  <Button 
+                    onClick={handleSearchNews}
+                    disabled={isSearchingNews || !topicQuery.trim()}
+                  >
+                    {isSearchingNews ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Buscar"
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  A IA buscará 5 notícias recentes sobre o assunto para você escolher
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Resultados da busca */}
+            {currentTopicNews && (
+              <Card>
+                <CardContent className="p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold">Assunto: {currentTopicNews.topic.query}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {currentTopicNews.news.length} notícias encontradas
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setCurrentTopicId(null);
+                        setTopicQuery("");
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {currentTopicNews.news.map((newsItem: any) => (
+                      <Card key={newsItem.id} className="bg-card/50">
+                        <CardContent className="p-3">
+                          <div className="flex items-start gap-3">
+                            <Checkbox
+                              checked={newsItem.isSelected}
+                              onCheckedChange={(checked) => 
+                                handleToggleNews(newsItem.id, !!checked)
+                              }
+                            />
+                            <div className="flex-1 space-y-1">
+                              <h4 className="font-medium text-sm">{newsItem.title}</h4>
+                              <p className="text-xs text-muted-foreground">
+                                {newsItem.description}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <span>{newsItem.source}</span>
+                                <span>•</span>
+                                <span>
+                                  {new Date(newsItem.publishedAt).toLocaleDateString("pt-BR")}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Lista de assuntos salvos */}
+            {topics && topics.length > 0 && (
+              <Card>
+                <CardContent className="p-4 space-y-3">
+                  <h3 className="font-semibold">Assuntos Salvos</h3>
+                  <div className="space-y-2">
+                    {topics.map((topic: any) => (
+                      <Card key={topic.id} className="bg-card/50">
+                        <CardContent className="p-3 flex items-center justify-between">
+                          <div>
+                            <div className="font-medium text-sm">{topic.query}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(topic.createdAt).toLocaleDateString("pt-BR")}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setCurrentTopicId(topic.id)}
+                            >
+                              Ver notícias
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteTopic.mutate({ topicId: topic.id })}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Estado vazio */}
+            {!currentTopicNews && (!topics || topics.length === 0) && !isSearchingNews && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="mb-2">Nenhum assunto pesquisado</p>
+                <p className="text-sm">
+                  Busque notícias sobre qualquer assunto e gere conteúdo baseado nelas
+                </p>
+              </div>
+            )}
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-4 mt-4">
             <Card>
@@ -781,7 +1001,7 @@ export default function ProjectDetail() {
               {/* Fonte do Conteúdo */}
               <div className="space-y-2">
                 <Label>Fonte do Conteúdo</Label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   <Button
                     variant={contentSource === "pains" ? "default" : "outline"}
                     onClick={() => { setContentSource("pains"); setSelectedSourceIds([]); }}
@@ -805,6 +1025,14 @@ export default function ProjectDetail() {
                   >
                     <Flame className="w-5 h-5 mb-1" />
                     <span className="text-xs">Virais</span>
+                  </Button>
+                  <Button
+                    variant={contentSource === "news" ? "default" : "outline"}
+                    onClick={() => { setContentSource("news"); setSelectedSourceIds([]); }}
+                    className="flex-col h-auto py-3"
+                  >
+                    <Newspaper className="w-5 h-5 mb-1" />
+                    <span className="text-xs">Notícias</span>
                   </Button>
                 </div>
               </div>
@@ -838,11 +1066,11 @@ export default function ProjectDetail() {
               {/* Lista de Fontes com Checkbox */}
               <div className="space-y-2">
                 <Label>
-                  Selecione {contentSource === "pains" ? "as Dores" : contentSource === "trends" ? "as Trends" : "os Virais"}
+                  Selecione {contentSource === "pains" ? "as Dores" : contentSource === "trends" ? "as Trends" : contentSource === "virals" ? "os Virais" : "as Notícias"}
                 </Label>
                 <div className="max-h-40 overflow-y-auto space-y-2 border rounded-lg p-2">
                   {sources.length > 0 ? (
-                    sources.map((source) => (
+                    sources.map((source: { id: number; name: string; level?: string }) => (
                       <div
                         key={source.id}
                         className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
@@ -873,6 +1101,7 @@ export default function ProjectDetail() {
                       )}
                       {contentSource === "trends" && "Nenhuma trend coletada. Vá em Trends para coletar."}
                       {contentSource === "virals" && "Nenhum viral coletado. Vá em Virais para coletar."}
+                      {contentSource === "news" && "Nenhuma notícia selecionada. Vá em Assuntos para buscar e selecionar notícias."}
                     </div>
                   )}
                 </div>

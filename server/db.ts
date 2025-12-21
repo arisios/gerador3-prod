@@ -13,7 +13,9 @@ import {
   trends, Trend,
   virals, Viral,
   userSettings, UserSettings,
-  userMedia, UserMedia, InsertUserMedia
+  userMedia, UserMedia, InsertUserMedia,
+  topics, Topic, InsertTopic,
+  news, News, InsertNews
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -752,6 +754,88 @@ export async function searchUserMedia(
     )
     .orderBy(desc(userMedia.createdAt))
     .limit(options?.limit || 50);
+  
+  return result;
+}
+
+// ===== TOPICS & NEWS FUNCTIONS =====
+
+export async function createTopic(projectId: number, query: string): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(topics).values({ projectId, query });
+  return result[0].insertId;
+}
+
+export async function getTopicsByProject(projectId: number): Promise<Topic[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(topics).where(eq(topics.projectId, projectId)).orderBy(desc(topics.createdAt));
+}
+
+export async function getTopicById(id: number): Promise<Topic | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(topics).where(eq(topics.id, id)).limit(1);
+  return result[0];
+}
+
+export async function deleteTopic(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Deletar notícias associadas primeiro
+  await db.delete(news).where(eq(news.topicId, id));
+  // Deletar tópico
+  await db.delete(topics).where(eq(topics.id, id));
+}
+
+export async function createNews(topicId: number, newsList: Omit<News, "id" | "topicId" | "createdAt">[]): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const values = newsList.map(n => ({ ...n, topicId }));
+  await db.insert(news).values(values);
+}
+
+export async function getNewsByTopic(topicId: number): Promise<News[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(news).where(eq(news.topicId, topicId)).orderBy(desc(news.createdAt));
+}
+
+export async function getNewsById(id: number): Promise<News | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(news).where(eq(news.id, id)).limit(1);
+  return result[0];
+}
+
+export async function updateNews(id: number, data: Partial<News>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(news).set(data).where(eq(news.id, id));
+}
+
+export async function getSelectedNewsByProject(projectId: number): Promise<(News & { topicQuery: string })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select({
+    id: news.id,
+    topicId: news.topicId,
+    title: news.title,
+    description: news.description,
+    url: news.url,
+    source: news.source,
+    publishedAt: news.publishedAt,
+    imageUrl: news.imageUrl,
+    isSelected: news.isSelected,
+    createdAt: news.createdAt,
+    topicQuery: topics.query,
+  })
+    .from(news)
+    .innerJoin(topics, eq(news.topicId, topics.id))
+    .where(and(eq(topics.projectId, projectId), eq(news.isSelected, true)))
+    .orderBy(desc(news.createdAt));
   
   return result;
 }

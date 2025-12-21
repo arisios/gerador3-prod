@@ -71,6 +71,13 @@
       "when": 1766235182107,
       "tag": "0009_narrow_maverick",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1766343853851,
+      "tag": "0010_minor_rockslide",
+      "breakpoints": true
     }
   ]
 }

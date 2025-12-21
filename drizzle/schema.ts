@@ -253,6 +253,28 @@ export const userMedia = mysqlTable("userMedia", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+// Topics table - assuntos pesquisados
+export const topics = mysqlTable("topics", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  query: varchar("query", { length: 255 }).notNull(), // assunto pesquisado
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+// News table - notícias encontradas
+export const news = mysqlTable("news", {
+  id: int("id").autoincrement().primaryKey(),
+  topicId: int("topicId").notNull(),
+  title: varchar("title", { length: 500 }).notNull(),
+  description: text("description"),
+  url: text("url"),
+  source: varchar("source", { length: 255 }),
+  publishedAt: varchar("publishedAt", { length: 50 }),
+  imageUrl: text("imageUrl"),
+  isSelected: boolean("isSelected").default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 // User Settings table
 export const userSettings = mysqlTable("userSettings", {
   id: int("id").autoincrement().primaryKey(),
@@ -289,3 +311,7 @@ export type CreditPackage = typeof creditPackages.$inferSelect;
 export type ApiProvider = typeof apiProviders.$inferSelect;
 export type UserMedia = typeof userMedia.$inferSelect;
 export type InsertUserMedia = typeof userMedia.$inferInsert;
+export type Topic = typeof topics.$inferSelect;
+export type InsertTopic = typeof topics.$inferInsert;
+export type News = typeof news.$inferSelect;
+export type InsertNews = typeof news.$inferInsert;

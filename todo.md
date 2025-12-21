@@ -795,3 +795,80 @@
 ## Bugs de Layout (21/12/2024)
 - [x] Texto comprimido nas margens do preview (aumentado maxWidth de 80% para 85% e padding de 32px para 48px)
 - [x] Editor abre com configuração errada (60% imagem) em vez de Full (100% imagem) - CORRIGIDO: DEFAULT_IMAGE height de 60 para 100, DEFAULT_TEXT y de 65 para 35
+
+
+## Nova Funcionalidade: Assuntos/Notícias Atuais (21/12/2024)
+- [ ] Criar schema de banco para assuntos (topics) e notícias (news)
+- [ ] Implementar busca de notícias na internet (API de busca)
+- [ ] Criar rota para buscar notícias por assunto
+- [ ] Criar rota para salvar assunto e notícias no projeto
+- [ ] Criar rota para listar assuntos do projeto
+- [ ] Criar rota para gerar conteúdo baseado em notícia
+- [ ] Criar aba "Assuntos" no ProjectDetail
+- [ ] Adicionar modal de busca de assuntos
+- [ ] Mostrar lista de notícias encontradas (5 principais)
+- [ ] Permitir selecionar múltiplas notícias (checkboxes)
+- [ ] Adicionar opção "Relacionar com meu nicho"
+- [ ] Integrar com fluxo de geração de conteúdo existente
+- [ ] Escrever testes unitários para as novas rotas
+
+
+## Sistema de Assuntos/Notícias Atuais (21/12/2024) ✨ NOVO
+- [x] Schema de banco: tabelas topics e news
+- [x] Buscar notícias na internet sobre um assunto usando IA
+- [x] Salvar assunto com 5 notícias no projeto
+- [x] Selecionar/desselecionar notícias individuais (checkbox)
+- [x] Listar assuntos salvos com suas notícias
+- [x] Expandir/colapsar lista de notícias de cada assunto
+- [x] Deletar assunto e suas notícias
+- [x] Integrar notícias com gerador de conteúdo
+- [x] Botão "Notícias" no modal de geração
+- [x] Listar notícias selecionadas no modal
+- [x] Gerar conteúdo baseado em notícias
+- [x] Aba "Assuntos" no ProjectDetail
+- [x] Interface de busca de notícias
+- [x] Histórico de assuntos buscados
+- [x] Rotas tRPC: searchNews, create, getNews, toggleNewsSelection, delete, getSelectedNews
+
+### Funcionalidades Implementadas
+1. **Busca de Notícias**: Usuário digita um assunto e a IA busca 5 notícias relevantes e atuais
+2. **Seleção de Notícias**: Checkboxes para selecionar quais notícias usar
+3. **Histórico de Assuntos**: Lista de assuntos já buscados com suas notícias
+4. **Integração com Gerador**: Notícias selecionadas aparecem como fonte no modal de geração
+5. **Geração de Conteúdo**: IA cria posts baseados nas notícias selecionadas
+
+### Estrutura de Dados
+```
+topics (assuntos)
+  - id
+  - projectId
+  - topic (texto do assunto)
+  - createdAt
+
+news (notícias)
+  - id
+  - topicId
+  - title
+  - description
+  - source
+  - publishedAt
+  - isSelected (boolean)
+  - createdAt
+```
+
+### Fluxo de Uso
+1. Usuário vai na aba "Assuntos"
+2. Digita um assunto (ex: "Inteligência Artificial no Brasil")
+3. Clica em "Buscar"
+4. IA retorna 5 notícias relevantes
+5. Usuário marca checkboxes das notícias que quer usar
+6. Vai em "Gerar Conteúdo" → "Notícias"
+7. Seleciona as notícias e gera conteúdo
+
+### Testes Realizados (21/12/2024)
+- [x] Busca de notícias funcionando (5 notícias detalhadas)
+- [x] Seleção de notícias funcionando (checkboxes)
+- [x] Notícias aparecem no modal de geração
+- [x] Geração de conteúdo baseado em notícias funcionando
+- [x] Histórico de assuntos funcionando
+- [x] Deletar assunto funcionando
