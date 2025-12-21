@@ -761,3 +761,9 @@
 - [x] Aumentar tamanho da logo no header (w-12 h-12, antes era w-8 h-8)
 - [x] Ajustar cores de fundo para usar gradientes da logo (azul escuro em vez de preto)
 - [x] Criar fundo com gradiente azul→roxo→rosa (aplicado em botões e textos)
+
+
+## Tema Claro e Logo (20/12/2024)
+- [x] Mudar tema para claro (fundo branco em vez de preto)
+- [x] Voltar para logo original (com fundo branco) e aumentar tamanho (w-14 h-14)
+- [x] Adicionar logo como favicon
