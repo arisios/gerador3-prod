@@ -781,3 +781,12 @@
 ## Centralizar Logo (20/12/2024)
 - [x] Mover logo para o centro da página, acima do texto "Olá, Arísio!"
 - [x] Remover logo do header lateral
+
+
+## Bug OAuth (21/12/2024)
+- [ ] Corrigir erro "Falha no retorno de chamada OAuth" ao fazer login
+
+
+## Ícone PWA (21/12/2024)
+- [x] Atualizar ícone do app para usar apenas o símbolo (sem texto, sem fundo branco)
+- [x] Gerar ícones PWA em múltiplos tamanhos (192x192, 512x512)
