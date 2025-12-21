@@ -776,3 +776,8 @@
 ## Logo 120x120px (20/12/2024)
 - [x] Copiar nova logo sem fundo para o projeto
 - [x] Aumentar logo para 120x120px
+
+
+## Centralizar Logo (20/12/2024)
+- [x] Mover logo para o centro da página, acima do texto "Olá, Arísio!"
+- [x] Remover logo do header lateral

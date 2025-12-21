@@ -32,10 +32,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-2">
-            <img src="/logo-new.png" alt="Creative Loop" style={{width: '120px', height: '120px'}} />
-            <span className="font-bold gradient-text">Creative Loop</span>
-          </div>
+          <span className="font-bold gradient-text">Creative Loop</span>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground hidden sm:block">
               {user?.name || user?.email}
@@ -50,6 +47,11 @@ export default function Dashboard() {
       {/* Main Content - Centered */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
         <div className="w-full max-w-md space-y-8">
+          {/* Logo Centralizada */}
+          <div className="flex justify-center">
+            <img src="/logo-new.png" alt="Creative Loop" style={{width: '120px', height: '120px'}} />
+          </div>
+          
           {/* Welcome */}
           <div className="text-center">
             <h1 className="text-2xl font-bold">Olá, {user?.name?.split(" ")[0] || "Criador"}!</h1>
