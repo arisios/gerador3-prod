@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,6 +43,27 @@ export default function ContentEdit() {
   );
   // Slides vem junto com o content
   const slides = content?.slides || [];
+  
+  // Verificar se todos os slides usam template Full (padrão)
+  const allSlidesAreFullTemplate = useMemo(() => {
+    if (!slides || slides.length === 0) return false;
+    
+    // Um slide é considerado "Full" se:
+    // 1. Não tem style.editorConfig (nunca foi editado)
+    // 2. OU tem editorConfig com imageObject em posição padrão (x:0, y:0, width:100, height:100)
+    return slides.every((slide: any) => {
+      const config = slide.style?.editorConfig as SlideConfig | undefined;
+      
+      if (!config) {
+        // Sem config = nunca foi editado = Full
+        return true;
+      }
+      
+      const img = config.imageObject;
+      // Verificar se está na posição Full padrão
+      return img.x === 0 && img.y === 0 && img.width === 100 && img.height === 100;
+    });
+  }, [slides]);
   const utils = trpc.useUtils();
 
   const updateSlide = trpc.slides.update.useMutation({
@@ -622,6 +643,7 @@ export default function ContentEdit() {
                 setDownloadingAll(true);
               }
             }}
+            allSlidesAreFullTemplate={allSlidesAreFullTemplate}
           />
         )}
         

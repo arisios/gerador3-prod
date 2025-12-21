@@ -280,6 +280,7 @@ interface SlideEditorCanvaProps {
   onSave: (config: SlideConfig) => Promise<void>;
   onNavigate: (direction: "prev" | "next") => void;
   onDownload: (type: "current-with" | "current-without" | "all-with" | "all-without") => void;
+  allSlidesAreFullTemplate?: boolean; // Indica se todos os slides usam template Full
 }
 
 // Valores padrão - Template Full + Texto Central
@@ -347,6 +348,7 @@ export default function SlideEditorCanva({
   onSave,
   onNavigate,
   onDownload,
+  allSlidesAreFullTemplate = false,
 }: SlideEditorCanvaProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   
@@ -1289,6 +1291,25 @@ export default function SlideEditorCanva({
                   {downloading ? "Baixando..." : "Sem Texto"}
                 </Button>
               </div>
+              
+              {/* Botões de download em lote - apenas se todos os slides forem Full */}
+              {allSlidesAreFullTemplate && totalSlides > 1 && (
+                <>
+                  <div className="border-t border-zinc-700 my-3" />
+                  <p className="text-zinc-400 text-sm">Baixar todos os slides:</p>
+                  <div className="flex gap-2">
+                    <Button className="flex-1" variant="secondary" onClick={() => onDownload("all-with")}>
+                      Todas com Texto
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={() => onDownload("all-without")}>
+                      Todas sem Texto
+                    </Button>
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    ⚠️ Download em lote disponível apenas para template Full
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>

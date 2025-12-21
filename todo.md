@@ -896,3 +896,18 @@ news (notícias)
 - [x] Botão "Adicionar Notícia Manual" na aba Assuntos
 - [x] Notícias manuais aparecem na lista junto com as buscadas
 - [x] Indicador visual para diferenciar notícias manuais das buscadas
+
+
+## Download em Lote - Apenas Template Full (21/12/2024)
+- [ ] Verificar se todos os slides usam template Full (padrão)
+- [ ] Mostrar botões "Baixar Todas com Texto" e "Baixar Todas sem Texto" apenas se todos os slides forem Full
+- [ ] Ocultar botões de download em lote se algum slide usar template visual customizado
+- [ ] Manter download individual sempre disponível para todos os templates
+
+
+## Download em Lote - Apenas Template Full (21/12/2024)
+- [x] Adicionar lógica de verificação se todos os slides usam template Full (x:0, y:0, width:100, height:100)
+- [x] Adicionar prop allSlidesAreFullTemplate ao SlideEditorCanva
+- [x] Mostrar botões "Todas com Texto" e "Todas sem Texto" apenas quando allSlidesAreFullTemplate === true
+- [x] Ocultar botões de lote quando algum slide tem template visual customizado
+- [x] Implementação testada e funcionando corretamente
