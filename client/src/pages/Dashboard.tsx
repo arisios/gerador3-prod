@@ -33,7 +33,7 @@ export default function Dashboard() {
       <header className="bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.jpg" alt="Creative Loop" className="w-8 h-8 rounded-md" />
+            <img src="/logo-icon.png" alt="Creative Loop" className="w-12 h-12" />
             <span className="font-bold gradient-text">Creative Loop</span>
           </div>
           <div className="flex items-center gap-2">

@@ -754,3 +754,10 @@
 - [x] Integrar logo no header
 - [x] Atualizar favicon
 - [x] Atualizar título e metadados do site
+
+
+## Melhorias Visuais Creative Loop (20/12/2024)
+- [x] Remover fundo da logo (deixar transparente)
+- [x] Aumentar tamanho da logo no header (w-12 h-12, antes era w-8 h-8)
+- [x] Ajustar cores de fundo para usar gradientes da logo (azul escuro em vez de preto)
+- [x] Criar fundo com gradiente azul→roxo→rosa (aplicado em botões e textos)

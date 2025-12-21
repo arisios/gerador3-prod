@@ -56,37 +56,37 @@
 
 /* Creative Loop - Paleta de cores baseada na logo (azul ciano → roxo → rosa) */
 .dark {
-  --background: oklch(0.12 0.02 250); /* Fundo escuro com toque azulado */
+  --background: oklch(0.15 0.04 240); /* Fundo azul escuro (não preto) */
   --foreground: oklch(0.98 0.005 250);
-  --card: oklch(0.16 0.025 250);
+  --card: oklch(0.2 0.05 240); /* Card azul escuro */
   --card-foreground: oklch(0.98 0.005 250);
-  --popover: oklch(0.16 0.025 250);
+  --popover: oklch(0.2 0.05 240);
   --popover-foreground: oklch(0.98 0.005 250);
   --primary: oklch(0.7 0.18 210); /* Azul ciano da logo */
   --primary-foreground: oklch(0.98 0.005 250);
-  --secondary: oklch(0.22 0.035 250);
+  --secondary: oklch(0.3 0.06 240); /* Azul médio */
   --secondary-foreground: oklch(0.98 0.005 250);
-  --muted: oklch(0.22 0.025 250);
-  --muted-foreground: oklch(0.6 0.02 250);
+  --muted: oklch(0.25 0.05 240);
+  --muted-foreground: oklch(0.7 0.03 240);
   --accent: oklch(0.65 0.2 330); /* Rosa da logo */
   --accent-foreground: oklch(0.98 0.005 250);
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0.005 250);
-  --border: oklch(0.28 0.035 250);
-  --input: oklch(0.28 0.035 250);
+  --border: oklch(0.3 0.06 240); /* Borda azul */
+  --input: oklch(0.3 0.06 240);
   --ring: oklch(0.7 0.18 210); /* Azul ciano */
   --chart-1: oklch(0.7 0.18 210); /* Azul ciano */
   --chart-2: oklch(0.65 0.22 285); /* Roxo */
   --chart-3: oklch(0.65 0.2 330); /* Rosa */
   --chart-4: oklch(0.6 0.18 180); /* Verde */
   --chart-5: oklch(0.7 0.15 85); /* Amarelo */
-  --sidebar: oklch(0.1 0.018 250);
+  --sidebar: oklch(0.12 0.04 240); /* Sidebar azul escuro */
   --sidebar-foreground: oklch(0.98 0.005 250);
   --sidebar-primary: oklch(0.7 0.18 210); /* Azul ciano */
   --sidebar-primary-foreground: oklch(0.98 0.005 250);
-  --sidebar-accent: oklch(0.22 0.035 250);
+  --sidebar-accent: oklch(0.3 0.06 240);
   --sidebar-accent-foreground: oklch(0.98 0.005 250);
-  --sidebar-border: oklch(0.22 0.025 250);
+  --sidebar-border: oklch(0.25 0.05 240);
   --sidebar-ring: oklch(0.7 0.18 210); /* Azul ciano */
 }
 
