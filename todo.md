@@ -767,3 +767,7 @@
 - [x] Mudar tema para claro (fundo branco em vez de preto)
 - [x] Voltar para logo original (com fundo branco) e aumentar tamanho (w-14 h-14)
 - [x] Adicionar logo como favicon
+
+
+## Aumentar Logo 5x (20/12/2024)
+- [x] Aumentar logo no header de w-14 para w-20 (2.5x maior, 80px)

@@ -20,7 +20,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse">
-          <img src="/logo.jpg" alt="Creative Loop" className="w-24 h-24 rounded-lg" />
+          <img src="/logo.jpg" alt="Creative Loop" className="w-32 h-32 rounded-lg" />
         </div>
       </div>
     );
@@ -36,7 +36,7 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.jpg" alt="Creative Loop" className="w-14 h-14 rounded-lg" />
+            <img src="/logo.jpg" alt="Creative Loop" className="w-20 h-20 rounded-lg" />
             <span className="font-bold text-lg gradient-text">Creative Loop</span>
           </div>
           <Button asChild>
