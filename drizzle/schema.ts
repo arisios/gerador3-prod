@@ -272,6 +272,7 @@ export const news = mysqlTable("news", {
   publishedAt: varchar("publishedAt", { length: 50 }),
   imageUrl: text("imageUrl"),
   isSelected: boolean("isSelected").default(false),
+  isManual: boolean("isManual").default(false), // indica se foi adicionada manualmente
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

@@ -829,6 +829,7 @@ export async function getSelectedNewsByProject(projectId: number): Promise<(News
     publishedAt: news.publishedAt,
     imageUrl: news.imageUrl,
     isSelected: news.isSelected,
+    isManual: news.isManual,
     createdAt: news.createdAt,
     topicQuery: topics.query,
   })

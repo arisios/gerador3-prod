@@ -74,6 +74,16 @@ export default function ProjectDetail() {
   const [isSearchingNews, setIsSearchingNews] = useState(false);
   const [currentTopicId, setCurrentTopicId] = useState<number | null>(null);
   const [selectedNewsIds, setSelectedNewsIds] = useState<number[]>([]);
+  const [dateFilter, setDateFilter] = useState<"last_week" | "last_month" | "last_3_months" | "all">("last_week");
+  const [sourceFilter, setSourceFilter] = useState("");
+  const [showManualNewsDialog, setShowManualNewsDialog] = useState(false);
+  const [manualNewsForm, setManualNewsForm] = useState({
+    title: "",
+    description: "",
+    source: "",
+    url: "",
+    publishedAt: "",
+  });
 
   const { data: project, isLoading } = trpc.projects.get.useQuery({ id: projectId });
   const { data: contents } = trpc.content.list.useQuery({ projectId }, { enabled: !!projectId });
@@ -281,6 +291,21 @@ export default function ProjectDetail() {
     },
   });
 
+  const addManualNews = (trpc as any).topics.addManualNews.useMutation({
+    onSuccess: () => {
+      toast.success("Notícia adicionada com sucesso");
+      setShowManualNewsDialog(false);
+      setManualNewsForm({ title: "", description: "", source: "", url: "", publishedAt: "" });
+      if (currentTopicId) {
+        (utils as any).topics.getNews.invalidate({ topicId: currentTopicId });
+      }
+      (utils as any).topics.getSelectedNews.invalidate({ projectId });
+    },
+    onError: () => {
+      toast.error("Erro ao adicionar notícia");
+    },
+  });
+
   const handleSearchNews = () => {
     if (!topicQuery.trim()) {
       toast.error("Digite um assunto para buscar");
@@ -291,6 +316,8 @@ export default function ProjectDetail() {
       projectId,
       query: topicQuery.trim(),
       limit: 5,
+      dateFilter,
+      sourceFilter: sourceFilter.trim() || undefined,
     });
   };
 
@@ -298,6 +325,21 @@ export default function ProjectDetail() {
     toggleNewsSelection.mutate({
       newsId,
       isSelected,
+    });
+  };
+
+  const handleAddManualNews = () => {
+    if (!currentTopicId) {
+      toast.error("Selecione um assunto primeiro");
+      return;
+    }
+    if (!manualNewsForm.title.trim() || !manualNewsForm.description.trim() || !manualNewsForm.source.trim()) {
+      toast.error("Preencha os campos obrigatórios");
+      return;
+    }
+    addManualNews.mutate({
+      topicId: currentTopicId,
+      ...manualNewsForm,
     });
   };
 
@@ -794,6 +836,7 @@ export default function ProjectDetail() {
                     value={topicQuery}
                     onChange={(e) => setTopicQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSearchNews()}
+                    className="flex-1"
                   />
                   <Button 
                     onClick={handleSearchNews}
@@ -806,6 +849,34 @@ export default function ProjectDetail() {
                     )}
                   </Button>
                 </div>
+                
+                {/* Filtros */}
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Label className="text-xs text-muted-foreground">Período</Label>
+                    <Select value={dateFilter} onValueChange={(v: any) => setDateFilter(v)}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="last_week">Últimos 7 dias</SelectItem>
+                        <SelectItem value="last_month">Último mês</SelectItem>
+                        <SelectItem value="last_3_months">Últimos 3 meses</SelectItem>
+                        <SelectItem value="all">Qualquer período</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-xs text-muted-foreground">Fonte (opcional)</Label>
+                    <Input
+                      placeholder="Ex: Folha, G1, Exame..."
+                      value={sourceFilter}
+                      onChange={(e) => setSourceFilter(e.target.value)}
+                      className="h-9"
+                    />
+                  </div>
+                </div>
+                
                 <p className="text-xs text-muted-foreground">
                   A IA buscará 5 notícias recentes sobre o assunto para você escolher
                 </p>
@@ -823,21 +894,33 @@ export default function ProjectDetail() {
                         {currentTopicNews.news.length} notícias encontradas
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setCurrentTopicId(null);
-                        setTopicQuery("");
-                      }}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowManualNewsDialog(true)}
+                      >
+                        Adicionar Notícia Manual
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setCurrentTopicId(null);
+                          setTopicQuery("");
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="space-y-3">
                     {currentTopicNews.news.map((newsItem: any) => (
-                      <Card key={newsItem.id} className="bg-card/50">
+                      <Card 
+                        key={newsItem.id} 
+                        className={newsItem.isManual ? "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800" : "bg-card/50"}
+                      >
                         <CardContent className="p-3">
                           <div className="flex items-start gap-3">
                             <Checkbox
@@ -847,7 +930,14 @@ export default function ProjectDetail() {
                               }
                             />
                             <div className="flex-1 space-y-1">
-                              <h4 className="font-medium text-sm">{newsItem.title}</h4>
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-sm">{newsItem.title}</h4>
+                                {newsItem.isManual && (
+                                  <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">
+                                    Manual
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-xs text-muted-foreground">
                                 {newsItem.description}
                               </p>
@@ -1323,6 +1413,72 @@ export default function ProjectDetail() {
           </div>
         </div>
       )}
+
+      {/* Modal de Notícia Manual */}
+      <Dialog open={showManualNewsDialog} onOpenChange={setShowManualNewsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Adicionar Notícia Manualmente</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Título *</Label>
+              <Input
+                placeholder="Título da notícia"
+                value={manualNewsForm.title}
+                onChange={(e) => setManualNewsForm({ ...manualNewsForm, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Descrição *</Label>
+              <Textarea
+                placeholder="Descrição detalhada da notícia"
+                value={manualNewsForm.description}
+                onChange={(e) => setManualNewsForm({ ...manualNewsForm, description: e.target.value })}
+                rows={4}
+              />
+            </div>
+            <div>
+              <Label>Fonte *</Label>
+              <Input
+                placeholder="Ex: Folha de S.Paulo, G1, Exame"
+                value={manualNewsForm.source}
+                onChange={(e) => setManualNewsForm({ ...manualNewsForm, source: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Link/URL (opcional)</Label>
+              <Input
+                placeholder="https://..."
+                value={manualNewsForm.url}
+                onChange={(e) => setManualNewsForm({ ...manualNewsForm, url: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Data de Publicação (opcional)</Label>
+              <Input
+                type="date"
+                value={manualNewsForm.publishedAt}
+                onChange={(e) => setManualNewsForm({ ...manualNewsForm, publishedAt: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Se não informada, usará a data de hoje
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowManualNewsDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleAddManualNews} disabled={addManualNews.isPending}>
+              {addManualNews.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : null}
+              Adicionar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

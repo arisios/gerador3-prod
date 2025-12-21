@@ -1,0 +1,1 @@
+ALTER TABLE `news` ADD `isManual` boolean DEFAULT false;

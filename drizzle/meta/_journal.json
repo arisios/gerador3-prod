@@ -78,6 +78,13 @@
       "when": 1766343853851,
       "tag": "0010_minor_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1766345517231,
+      "tag": "0011_early_raider",
+      "breakpoints": true
     }
   ]
 }

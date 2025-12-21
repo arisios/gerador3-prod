@@ -2131,6 +2131,8 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
         projectId: z.number(),
         query: z.string(),
         limit: z.number().min(1).max(10).default(5),
+        dateFilter: z.enum(["last_week", "last_month", "last_3_months", "all"]).optional(),
+        sourceFilter: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const project = await db.getProjectById(input.projectId);
@@ -2142,7 +2144,7 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
         const { searchNews } = await import("./newsSearch");
         
         // Buscar notícias
-        const articles = await searchNews(input.query, input.limit);
+        const articles = await searchNews(input.query, input.limit, input.dateFilter, input.sourceFilter);
         
         // Criar tópico
         const topicId = await db.createTopic(input.projectId, input.query);
@@ -2157,6 +2159,7 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
             publishedAt: a.publishedAt,
             imageUrl: a.imageUrl,
             isSelected: false,
+            isManual: false,
           })));
         }
         
@@ -2222,6 +2225,42 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
         }
         
         await db.deleteTopic(input.topicId);
+        return { success: true };
+      }),
+
+    // Adicionar notícia manualmente
+    addManualNews: protectedProcedure
+      .input(z.object({
+        topicId: z.number(),
+        title: z.string().min(1),
+        description: z.string().min(1),
+        source: z.string().min(1),
+        url: z.string().optional(),
+        publishedAt: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const topic = await db.getTopicById(input.topicId);
+        if (!topic) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        
+        const project = await db.getProjectById(topic.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        
+        // Criar notícia manual
+        await db.createNews(input.topicId, [{
+          title: input.title,
+          description: input.description,
+          url: input.url || null,
+          source: input.source,
+          publishedAt: input.publishedAt || new Date().toISOString(),
+          imageUrl: null,
+          isSelected: true, // notícias manuais já começam selecionadas
+          isManual: true,
+        }]);
+        
         return { success: true };
       }),
 

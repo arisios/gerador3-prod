@@ -15,12 +15,37 @@ export interface NewsArticle {
 }
 
 /**
+ * Converte filtro de data em texto para o prompt
+ */
+function getDateFilterText(dateFilter?: "last_week" | "last_month" | "last_3_months" | "all"): string {
+  switch (dateFilter) {
+    case "last_week":
+      return "- Ter datas recentes (últimos 7 dias)";
+    case "last_month":
+      return "- Ter datas recentes (último mês)";
+    case "last_3_months":
+      return "- Ter datas recentes (últimos 3 meses)";
+    case "all":
+      return "- Podem ser de qualquer período recente";
+    default:
+      return "- Ter datas recentes (últimos 7 dias)";
+  }
+}
+
+/**
  * Busca notícias recentes sobre um assunto usando IA
  * @param query - Assunto a pesquisar
  * @param limit - Número máximo de resultados (padrão: 5)
+ * @param dateFilter - Filtro de data (last_week, last_month, last_3_months, all)
+ * @param sourceFilter - Filtro de fonte (opcional)
  * @returns Array de notícias encontradas
  */
-export async function searchNews(query: string, limit: number = 5): Promise<NewsArticle[]> {
+export async function searchNews(
+  query: string, 
+  limit: number = 5,
+  dateFilter?: "last_week" | "last_month" | "last_3_months" | "all",
+  sourceFilter?: string
+): Promise<NewsArticle[]> {
   try {
     const prompt = `Você é um assistente que busca notícias recentes e relevantes.
 
@@ -31,7 +56,8 @@ Gere ${limit} notícias REAIS e RECENTES sobre este assunto. As notícias devem:
 - Ter títulos chamativos e relevantes
 - Incluir descrição detalhada do conteúdo
 - Ser de diferentes ângulos sobre o assunto
-- Ter datas recentes (últimos 7 dias)
+${getDateFilterText(dateFilter)}
+${sourceFilter ? `- Ser da fonte: ${sourceFilter}` : ""}
 
 Retorne um JSON com array de notícias:`;
 

@@ -872,3 +872,27 @@ news (notícias)
 - [x] Geração de conteúdo baseado em notícias funcionando
 - [x] Histórico de assuntos funcionando
 - [x] Deletar assunto funcionando
+
+
+## Melhorias no Sistema de Assuntos/Notícias (21/12/2024)
+
+### Filtros de Notícias
+- [x] Adicionar campo dateFilter ao schema de busca (last_week, last_month, last_3_months, all)
+- [x] Adicionar campo sourceFilter ao schema de busca (opcional)
+- [x] Atualizar rota searchNews para aceitar filtros
+- [x] Adicionar interface de filtros na aba Assuntos (dropdowns)
+- [x] Aplicar filtros na busca de notícias
+
+### Notícias Manuais
+- [x] Adicionar campo isManual (boolean) na tabela news
+- [x] Adicionar campo url (string, opcional) na tabela news
+- [x] Criar rota addManualNews para adicionar notícia manual
+- [x] Criar modal "Adicionar Notícia Manual" com campos:
+  - [x] Título (obrigatório)
+  - [x] Descrição (obrigatório)
+  - [x] Fonte (obrigatório)
+  - [x] Link/URL (opcional)
+  - [x] Data de publicação (opcional, padrão: hoje)
+- [x] Botão "Adicionar Notícia Manual" na aba Assuntos
+- [x] Notícias manuais aparecem na lista junto com as buscadas
+- [x] Indicador visual para diferenciar notícias manuais das buscadas
