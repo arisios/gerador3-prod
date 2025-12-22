@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Loader2, Zap, TrendingUp, Flame, Target, Plus, Minus, RefreshCw } from "lucide-react";
+import { ArrowLeft, Loader2, Zap, TrendingUp, Flame, Target, Plus, Minus, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 
 const SOFT_SELL_TEMPLATES = [
@@ -66,6 +66,10 @@ export default function InfluencerContentCreate() {
   const [newProductDescription, setNewProductDescription] = useState("");
   const [newProductApproaches, setNewProductApproaches] = useState("");
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
+  
+  // Estados da aba Assuntos
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   // Atualizar mode quando URL mudar
   useEffect(() => {
@@ -106,6 +110,20 @@ export default function InfluencerContentCreate() {
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao coletar virais");
+    },
+  });
+
+  const searchSubjectsMutation = trpc.subjects.search.useMutation({
+    onSuccess: (data) => {
+      setSearchResults(data.news || []);
+      if (data.count === 0) {
+        toast.info("Nenhuma notícia encontrada");
+      } else {
+        toast.success(`${data.count} notícias encontradas!`);
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao buscar notícias");
     },
   });
 
@@ -543,8 +561,23 @@ export default function InfluencerContentCreate() {
                   <Input 
                     placeholder="Ex: Inteligência Artificial, Carros Elétricos, Nutrição..." 
                     className="flex-1"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && searchQuery.trim()) {
+                        searchSubjectsMutation.mutate({ query: searchQuery });
+                      }
+                    }}
                   />
-                  <Button>
+                  <Button
+                    disabled={searchSubjectsMutation.isPending || !searchQuery.trim()}
+                    onClick={() => searchSubjectsMutation.mutate({ query: searchQuery })}
+                  >
+                    {searchSubjectsMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Search className="w-4 h-4 mr-2" />
+                    )}
                     Buscar
                   </Button>
                 </div>
@@ -553,10 +586,78 @@ export default function InfluencerContentCreate() {
                 </p>
               </div>
 
-              {/* Resultados aparecerão aqui */}
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Digite um assunto e clique em Buscar para encontrar notícias</p>
-              </div>
+              {/* Resultados */}
+              {searchResults.length > 0 ? (
+                <div className="space-y-3">
+                  {searchResults.map((news: any, index: number) => (
+                    <Card 
+                      key={index} 
+                      className={`cursor-pointer transition-all ${isItemSelected(`news-${index}`) ? 'border-primary bg-primary/5' : ''}`}
+                      onClick={() => toggleItem(`news-${index}`, news.title)}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-3">
+                          <Checkbox checked={isItemSelected(`news-${index}`)} />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm">{news.title}</div>
+                            <div className="text-xs text-muted-foreground mt-1">{news.description}</div>
+                            <div className="text-xs text-muted-foreground mt-1">{news.source} • {news.category}</div>
+                          </div>
+                        </div>
+                        
+                        {isItemSelected(`news-${index}`) && (
+                          <div className="mt-3 pt-3 border-t border-border space-y-2" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center gap-2">
+                              <Label className="text-xs">Template:</Label>
+                              <Select 
+                                value={selectedItems.find(i => i.id === `news-${index}`)?.template || "storytelling"} 
+                                onValueChange={(v) => updateItemTemplate(`news-${index}`, v)}
+                              >
+                                <SelectTrigger className="h-8 text-xs flex-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {CAROUSEL_TEMPLATES.map((t) => (
+                                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Label className="text-xs">Quantidade:</Label>
+                              <div className="flex items-center gap-1">
+                                <Button 
+                                  variant="outline" 
+                                  size="icon" 
+                                  className="h-7 w-7"
+                                  onClick={() => updateItemQuantity(`news-${index}`, -1)}
+                                >
+                                  <Minus className="w-3 h-3" />
+                                </Button>
+                                <span className="w-8 text-center text-sm">
+                                  {selectedItems.find(i => i.id === `news-${index}`)?.quantity || 1}
+                                </span>
+                                <Button 
+                                  variant="outline" 
+                                  size="icon" 
+                                  className="h-7 w-7"
+                                  onClick={() => updateItemQuantity(`news-${index}`, 1)}
+                                >
+                                  <Plus className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Digite um assunto e clique em Buscar para encontrar notícias</p>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>

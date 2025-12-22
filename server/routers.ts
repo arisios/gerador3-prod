@@ -2138,6 +2138,69 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
       }),
   }),
 
+  // ===== SUBJECTS (ASSUNTOS/NOTÍCIAS) =====
+  subjects: router({
+    search: protectedProcedure
+      .input(z.object({ query: z.string().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        // Buscar notícias usando IA
+        const response = await invokeLLM({
+          messages: [
+            { 
+              role: "system", 
+              content: `Você é um especialista em encontrar notícias relevantes e atuais do Brasil.
+Gere 10 notícias REALISTAS e ATUAIS sobre o assunto solicitado.
+Para cada notícia, forneça título, descrição resumida, fonte e data de publicação.` 
+            },
+            { role: "user", content: `Busque 10 notícias recentes (dezembro 2024) sobre: ${input.query}` }
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "news_search",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  news: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string", description: "Título da notícia" },
+                        description: { type: "string", description: "Resumo da notícia" },
+                        source: { type: "string", description: "Fonte da notícia (ex: G1, Folha, UOL)" },
+                        publishedAt: { type: "string", description: "Data de publicação (ISO format)" },
+                        category: { type: "string", description: "Categoria: Política, Economia, Tecnologia, Saúde, Esportes, Entretenimento, Ciência" }
+                      },
+                      required: ["title", "description", "source", "publishedAt", "category"],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ["news"],
+                additionalProperties: false
+              }
+            }
+          }
+        });
+
+        let newsData: { news: Array<{ title: string; description: string; source: string; publishedAt: string; category: string }> } = { news: [] };
+        try {
+          const content = response.choices[0]?.message?.content;
+          if (typeof content === 'string') {
+            newsData = JSON.parse(content);
+          }
+        } catch (e) {
+          console.error("Failed to parse news:", e);
+          return { news: [], count: 0 };
+        }
+
+        // Retornar notícias sem salvar no banco (apenas para exibição temporária)
+        return { news: newsData.news || [], count: newsData.news?.length || 0 };
+      }),
+  }),
+
   // ===== SETTINGS =====
   settings: router({
     get: protectedProcedure.query(async ({ ctx }) => {

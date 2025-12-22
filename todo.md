@@ -1224,3 +1224,13 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [ ] Atualizar procedure generateContent para aceitar productId opcional
 - [ ] Passar informações do produto para o LLM junto com trend/viral/assunto
 - [ ] Testar todas as combinações
+
+## Correção Aba Assuntos no Hub de Geração (22/12/2024)
+- [x] Verificar value do TabsTrigger e TabsContent (deve ser "assuntos")
+- [x] Criar router subjects no backend com rota search
+- [x] Implementar busca de notícias usando IA (10 notícias por termo)
+- [x] Adicionar states para searchQuery e searchResults
+- [x] Conectar botão de busca com mutation trpc.subjects.search
+- [x] Implementar listagem de resultados com checkboxes
+- [x] Integrar com sistema de seleção existente (template + quantidade)
+- [x] Testar funcionalidade completa no navegador - FUNCIONANDO 100%
