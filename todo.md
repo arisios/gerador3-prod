@@ -1097,3 +1097,39 @@ news (notícias)
 - [ ] Implementar lógica: máximo 1 do Grupo A + máximo 1 do Grupo B - próxima etapa
 - [ ] Validar regras: bloquear Produto+Dores, Trend+Viral, Trend+Assunto, etc. - próxima etapa
 - [ ] Testar todas as 11 combinações válidas - próxima etapa
+
+## Implementar Funcionalidades Reais do Hub (22/12/2024)
+### Aba Produtos
+- [x] Integrar com backend: listar produtos do influenciador
+- [x] Modal funcional "Novo Produto" com formulário
+- [x] Checkbox para selecionar produtos
+- [x] Salvar produto no banco de dados
+
+### Aba Dores
+- [ ] Campo para digitar nicho
+- [ ] Botão "Gerar Cliente Ideal" a partir do nicho
+- [ ] Botão "Gerar Dores" do cliente ideal
+- [ ] Listar dores geradas
+- [ ] Checkbox para selecionar dores
+
+### Aba Trends
+- [ ] Botão "Atualizar Trends" para buscar novas
+- [ ] Adicionar opção de combinar com Produto/Dor
+
+### Aba Virais
+- [ ] Implementar coleta de virais (igual Trends)
+- [ ] Botão "Atualizar Virais" para buscar novos
+- [ ] Checkbox para selecionar virais
+- [ ] Adicionar opção de combinar com Produto/Dor
+
+### Aba Assuntos
+- [ ] Campo de busca funcional
+- [ ] Botão "Buscar Notícias" que chama API
+- [ ] Listar resultados de notícias
+- [ ] Checkbox para selecionar notícias
+- [ ] Adicionar opção de combinar com Produto/Dor
+
+### Sistema de Combinação
+- [ ] Ao selecionar item do Grupo B, mostrar "Combinar com Produto/Dor?"
+- [ ] Validar regras: máximo 1 de cada grupo
+- [ ] Gerar conteúdo com combinação correta

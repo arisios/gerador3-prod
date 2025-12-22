@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, Loader2, Zap, TrendingUp, Flame, Target, Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
@@ -57,6 +59,13 @@ export default function InfluencerContentCreate() {
   const [product, setProduct] = useState("");
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Estados do modal de novo produto
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [newProductName, setNewProductName] = useState("");
+  const [newProductDescription, setNewProductDescription] = useState("");
+  const [newProductApproaches, setNewProductApproaches] = useState("");
+  const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
 
   // Atualizar mode quando URL mudar
   useEffect(() => {
@@ -70,9 +79,44 @@ export default function InfluencerContentCreate() {
     setMode(newMode as typeof mode);
   }, [location]);
 
+  const utils = trpc.useUtils();
   const { data: influencer } = trpc.influencers.get.useQuery({ id: influencerId });
+  const { data: products } = trpc.influencers.listProducts.useQuery({ influencerId });
   const { data: trends } = trpc.trends.list.useQuery();
   const { data: virals } = trpc.virals.list.useQuery();
+
+  const createProductMutation = trpc.influencers.createProduct.useMutation({
+    onSuccess: () => {
+      toast.success("Produto criado com sucesso!");
+      utils.influencers.listProducts.invalidate({ influencerId });
+      setIsProductModalOpen(false);
+      setNewProductName("");
+      setNewProductDescription("");
+      setNewProductApproaches("");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao criar produto");
+    },
+  });
+
+  const handleCreateProduct = () => {
+    if (!newProductName.trim()) {
+      toast.error("Nome do produto é obrigatório");
+      return;
+    }
+    
+    const approaches = newProductApproaches
+      .split('\n')
+      .map(a => a.trim())
+      .filter(a => a.length > 0);
+
+    createProductMutation.mutate({
+      influencerId,
+      name: newProductName,
+      description: newProductDescription || undefined,
+      suggestedApproaches: approaches.length > 0 ? approaches : undefined,
+    });
+  };
 
   const generateContent = trpc.influencers.generateContent.useMutation({
     onSuccess: (data) => {
@@ -183,16 +227,101 @@ export default function InfluencerContentCreate() {
               <p className="text-sm text-muted-foreground">
                 Selecione produtos para gerar conteúdo
               </p>
-              <Button size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-1" />
-                Novo Produto
-              </Button>
+              <Dialog open={isProductModalOpen} onOpenChange={setIsProductModalOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Novo Produto
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Criar Novo Produto</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="product-name">Nome do Produto *</Label>
+                      <Input
+                        id="product-name"
+                        placeholder="Ex: Curso de Marketing Digital"
+                        value={newProductName}
+                        onChange={(e) => setNewProductName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="product-description">Descrição</Label>
+                      <Textarea
+                        id="product-description"
+                        placeholder="Descreva o produto..."
+                        value={newProductDescription}
+                        onChange={(e) => setNewProductDescription(e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="product-approaches">Abordagens (uma por linha)</Label>
+                      <Textarea
+                        id="product-approaches"
+                        placeholder="Ex:\nTransforme sua carreira\nAprenda do zero\nResultados em 30 dias"
+                        value={newProductApproaches}
+                        onChange={(e) => setNewProductApproaches(e.target.value)}
+                        rows={4}
+                      />
+                      <p className="text-xs text-muted-foreground">Cada linha será uma abordagem diferente</p>
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <Button variant="outline" onClick={() => setIsProductModalOpen(false)}>
+                        Cancelar
+                      </Button>
+                      <Button 
+                        onClick={handleCreateProduct}
+                        disabled={createProductMutation.isPending}
+                      >
+                        {createProductMutation.isPending ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Criando...</>
+                        ) : (
+                          "Criar Produto"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
-            <div className="text-center py-12 text-muted-foreground">
-              <p>Nenhum produto cadastrado para este influenciador</p>
-              <p className="text-sm mt-2">Clique em "Novo Produto" para adicionar</p>
-            </div>
+            {products && products.length > 0 ? (
+              <div className="space-y-2">
+                {products.map((product) => (
+                  <Card key={product.id} className="p-4 hover:bg-accent/50 cursor-pointer">
+                    <div className="flex items-start gap-3">
+                      <Checkbox 
+                        id={`product-${product.id}`}
+                        className="mt-1"
+                        checked={selectedProductIds.includes(product.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedProductIds([...selectedProductIds, product.id]);
+                          } else {
+                            setSelectedProductIds(selectedProductIds.filter(id => id !== product.id));
+                          }
+                        }}
+                      />
+                      <div className="flex-1">
+                        <label htmlFor={`product-${product.id}`} className="cursor-pointer">
+                          <h4 className="font-medium">{product.name}</h4>
+                          <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
+                        </label>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Nenhum produto cadastrado para este influenciador</p>
+                <p className="text-sm mt-2">Clique em "Novo Produto" para adicionar</p>
+              </div>
+            )}
           </TabsContent>
 
           {/* Dores Tab */}
