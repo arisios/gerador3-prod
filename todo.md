@@ -1083,3 +1083,17 @@ news (notícias)
 - [ ] Integrar com backend para buscar notícias (próxima etapa)
 - [ ] Permitir seleção de notícias e geração de conteúdo (próxima etapa)
 - [ ] Testar fluxo completo: Botão Assuntos → Busca → Seleção → Geração
+
+## Reorganizar Hub de Geração - Sistema de Combinação (22/12/2024)
+- [x] Entender sistema: Grupo A (Produtos/Dores) + Grupo B (Trends/Virais/Assuntos)
+- [x] Substituir aba "Soft Sell" por "Produtos"
+- [x] Reorganizar para 5 abas: Produtos, Dores, Trends, Virais, Assuntos
+- [x] Adicionar botão "+ Novo Produto" na aba Produtos
+- [x] Adicionar botão "+ Nova Dor" na aba Dores
+- [x] Botão "Coletar Trends" na aba Trends (já existe)
+- [x] Botão "Coletar Virais" na aba Virais (já existe)
+- [x] Campo de busca na aba Assuntos (já existe)
+- [ ] Diferenciação visual: Grupo A (cor 1) vs Grupo B (cor 2) - próxima etapa
+- [ ] Implementar lógica: máximo 1 do Grupo A + máximo 1 do Grupo B - próxima etapa
+- [ ] Validar regras: bloquear Produto+Dores, Trend+Viral, Trend+Assunto, etc. - próxima etapa
+- [ ] Testar todas as 11 combinações válidas - próxima etapa

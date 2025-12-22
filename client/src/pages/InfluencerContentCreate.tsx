@@ -50,9 +50,9 @@ export default function InfluencerContentCreate() {
     typeParam === 'trend' ? 'trends' :
     typeParam === 'viral' ? 'virals' :
     typeParam === 'subject' ? 'assuntos' :
-    'soft-sell';
+    'produtos';
 
-  const [mode, setMode] = useState<"soft-sell" | "dores" | "trends" | "virals" | "assuntos">(initialMode);
+  const [mode, setMode] = useState<"produtos" | "dores" | "trends" | "virais" | "assuntos">(initialMode);
   const [template, setTemplate] = useState("");
   const [product, setProduct] = useState("");
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
@@ -64,9 +64,9 @@ export default function InfluencerContentCreate() {
     const typeParam = urlParams.get('type');
     const newMode = 
       typeParam === 'trend' ? 'trends' :
-      typeParam === 'viral' ? 'virals' :
+      typeParam === 'viral' ? 'virais' :
       typeParam === 'subject' ? 'assuntos' :
-      'soft-sell';
+      'produtos';
     setMode(newMode as typeof mode);
   }, [location]);
 
@@ -170,49 +170,47 @@ export default function InfluencerContentCreate() {
         {/* Mode Selection */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
           <TabsList className="w-full grid grid-cols-5">
-            <TabsTrigger value="soft-sell" className="text-xs">Soft Sell</TabsTrigger>
+            <TabsTrigger value="produtos" className="text-xs">Produtos</TabsTrigger>
             <TabsTrigger value="dores" className="text-xs">Dores</TabsTrigger>
             <TabsTrigger value="trends" className="text-xs">Trends</TabsTrigger>
             <TabsTrigger value="virais" className="text-xs">Virais</TabsTrigger>
             <TabsTrigger value="assuntos" className="text-xs">Assuntos</TabsTrigger>
           </TabsList>
 
-          {/* Soft Sell Tab */}
-          <TabsContent value="soft-sell" className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label>Template</Label>
-              <Select value={template} onValueChange={setTemplate}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SOFT_SELL_TEMPLATES.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* Produtos Tab */}
+          <TabsContent value="produtos" className="space-y-4 mt-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Selecione produtos para gerar conteúdo
+              </p>
+              <Button size="sm" variant="outline">
+                <Plus className="w-4 h-4 mr-1" />
+                Novo Produto
+              </Button>
             </div>
 
-            <div className="space-y-2">
-              <Label>Produto/Serviço (opcional)</Label>
-              <Input 
-                placeholder="Ex: Curso de Marketing, Suplemento XYZ..." 
-                value={product} 
-                onChange={(e) => setProduct(e.target.value)} 
-              />
-              <p className="text-xs text-muted-foreground">Se vazio, será um conteúdo de autoridade sem venda direta</p>
+            <div className="text-center py-12 text-muted-foreground">
+              <p>Nenhum produto cadastrado para este influenciador</p>
+              <p className="text-sm mt-2">Clique em "Novo Produto" para adicionar</p>
             </div>
           </TabsContent>
 
           {/* Dores Tab */}
           <TabsContent value="dores" className="space-y-4 mt-4">
-            <p className="text-sm text-muted-foreground">
-              <Target className="w-4 h-4 inline mr-1" />
-              Selecione dores do seu projeto para criar conteúdo personalizado
-            </p>
-            <div className="text-center py-8 text-muted-foreground">
-              <p>Para usar dores, vincule este influenciador a um projeto</p>
-              <p className="text-sm">Ou crie conteúdo usando Trends ou Virais</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                <Target className="w-4 h-4 inline mr-1" />
+                Selecione dores do nicho para gerar conteúdo
+              </p>
+              <Button size="sm" variant="outline">
+                <Plus className="w-4 h-4 mr-1" />
+                Nova Dor
+              </Button>
+            </div>
+
+            <div className="text-center py-12 text-muted-foreground">
+              <p>Nenhuma dor cadastrada para este nicho</p>
+              <p className="text-sm mt-2">Clique em "Nova Dor" para adicionar</p>
             </div>
           </TabsContent>
 
@@ -408,7 +406,7 @@ export default function InfluencerContentCreate() {
         </Tabs>
 
         {/* Selected Items Summary */}
-        {selectedItems.length > 0 && mode !== "soft-sell" && (
+        {selectedItems.length > 0 && mode !== "produtos" && mode !== "dores" && (
           <Card className="bg-primary/5 border-primary/20">
             <CardContent className="p-4">
               <div className="font-medium mb-2">
@@ -434,7 +432,7 @@ export default function InfluencerContentCreate() {
           ) : (
             <Zap className="w-4 h-4 mr-2" />
           )}
-          {mode === "soft-sell" 
+          {mode === "produtos" || mode === "dores"
             ? "Gerar Conteúdo" 
             : `Gerar ${selectedItems.reduce((acc, item) => acc + item.quantity, 0)} Conteúdo(s)`
           }
