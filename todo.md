@@ -1252,3 +1252,18 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
   - handleGenerate existe e está implementado (linha 159)
   - Mas função não é executada ao clicar
   - Precisa testar no computador com console aberto (F12) para ver erro exato
+
+## Remover Aba Dores e Integrar em Produtos (22/12/2024)
+- [x] Remover aba Dores do Hub de Geração (InfluencerContentCreate.tsx)
+- [x] Adicionar campos no schema: idealClient (texto), pains (array de strings)
+- [x] Atualizar formulário de cadastro de produto com Cliente Ideal + Dores
+- [x] Migrar banco de dados (ALTER TABLE manual)
+- [x] Atualizar backend createProduct para aceitar novos campos
+- [ ] Testar criação de produto com Cliente Ideal e Dores
+
+## Sistema A+B: Produto + Trend/Viral/Assunto (22/12/2024)
+- [ ] Implementar validação: 1 produto (Grupo A) + 1 trend/viral/assunto (Grupo B)
+- [ ] Interface visual mostrando grupos selecionados
+- [ ] Atualizar handleGenerate para processar combinações
+- [ ] Backend: passar produto completo (com cliente ideal + dores) + trend/viral/assunto
+- [ ] Testar: Produto+Trend, Produto+Viral, Produto+Assunto

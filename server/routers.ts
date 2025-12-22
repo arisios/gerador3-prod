@@ -1792,6 +1792,8 @@ Retorne APENAS um array JSON com as abordagens:
         influencerId: z.number(),
         name: z.string(),
         description: z.string().optional(),
+        idealClient: z.string().optional(),
+        pains: z.array(z.string()).optional(),
         suggestedApproaches: z.array(z.string()).optional(),
         selectedApproaches: z.array(z.string()).optional(),
       }))

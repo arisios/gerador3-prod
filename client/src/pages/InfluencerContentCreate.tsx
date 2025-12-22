@@ -66,6 +66,8 @@ export default function InfluencerContentCreate() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [newProductName, setNewProductName] = useState("");
   const [newProductDescription, setNewProductDescription] = useState("");
+  const [newProductIdealClient, setNewProductIdealClient] = useState("");
+  const [newProductPains, setNewProductPains] = useState("");
   const [newProductApproaches, setNewProductApproaches] = useState("");
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   
@@ -98,6 +100,8 @@ export default function InfluencerContentCreate() {
       setIsProductModalOpen(false);
       setNewProductName("");
       setNewProductDescription("");
+      setNewProductIdealClient("");
+      setNewProductPains("");
       setNewProductApproaches("");
     },
     onError: (error) => {
@@ -140,10 +144,17 @@ export default function InfluencerContentCreate() {
       .map(a => a.trim())
       .filter(a => a.length > 0);
 
+    const pains = newProductPains
+      .split('\n')
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+
     createProductMutation.mutate({
       influencerId,
       name: newProductName,
       description: newProductDescription || undefined,
+      idealClient: newProductIdealClient || undefined,
+      pains: pains.length > 0 ? pains : undefined,
       suggestedApproaches: approaches.length > 0 ? approaches : undefined,
     });
   };
@@ -264,9 +275,8 @@ export default function InfluencerContentCreate() {
       <main className="container px-4 py-6 space-y-6">
         {/* Mode Selection */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
-          <TabsList className="w-full grid grid-cols-5">
+          <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger value="produtos" className="text-xs">Produtos</TabsTrigger>
-            <TabsTrigger value="dores" className="text-xs">Dores</TabsTrigger>
             <TabsTrigger value="trends" className="text-xs">Trends</TabsTrigger>
             <TabsTrigger value="virais" className="text-xs">Virais</TabsTrigger>
             <TabsTrigger value="assuntos" className="text-xs">Assuntos</TabsTrigger>
@@ -308,6 +318,26 @@ export default function InfluencerContentCreate() {
                         onChange={(e) => setNewProductDescription(e.target.value)}
                         rows={3}
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="product-ideal-client">Cliente Ideal</Label>
+                      <Input
+                        id="product-ideal-client"
+                        placeholder="Ex: Empreendedores que querem escalar negócios"
+                        value={newProductIdealClient}
+                        onChange={(e) => setNewProductIdealClient(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="product-pains">Dores do Cliente (uma por linha)</Label>
+                      <Textarea
+                        id="product-pains"
+                        placeholder="Ex:\nNão consegue atrair clientes\nFalta de tempo para marketing\nDificuldade em converter vendas"
+                        value={newProductPains}
+                        onChange={(e) => setNewProductPains(e.target.value)}
+                        rows={3}
+                      />
+                      <p className="text-xs text-muted-foreground">Cada linha será uma dor diferente</p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="product-approaches">Abordagens (uma por linha)</Label>
@@ -373,25 +403,6 @@ export default function InfluencerContentCreate() {
                 <p className="text-sm mt-2">Clique em "Novo Produto" para adicionar</p>
               </div>
             )}
-          </TabsContent>
-
-          {/* Dores Tab */}
-          <TabsContent value="dores" className="space-y-4 mt-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                <Target className="w-4 h-4 inline mr-1" />
-                Selecione dores do nicho para gerar conteúdo
-              </p>
-              <Button size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-1" />
-                Nova Dor
-              </Button>
-            </div>
-
-            <div className="text-center py-12 text-muted-foreground">
-              <p>Nenhuma dor cadastrada para este nicho</p>
-              <p className="text-sm mt-2">Clique em "Nova Dor" para adicionar</p>
-            </div>
           </TabsContent>
 
           {/* Trends Tab */}

@@ -126,6 +126,8 @@ export const influencerProducts = mysqlTable("influencerProducts", {
   influencerId: int("influencer_id").notNull(),
   name: text("name").notNull(),
   description: text("description"),
+  idealClient: text("ideal_client"), // Cliente ideal do produto
+  pains: json("pains").$type<string[]>(), // Dores do cliente ideal
   suggestedApproaches: json("suggested_approaches").$type<string[]>(),
   selectedApproaches: json("selected_approaches").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow(),
