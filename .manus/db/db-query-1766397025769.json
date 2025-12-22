@@ -1,0 +1,162 @@
+{
+  "query": "DESCRIBE contents",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute DESCRIBE contents",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int(11)",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "projectId",
+      "Type": "int(11)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "userId",
+      "Type": "int(11)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "type",
+      "Type": "enum('carousel','image','video')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "template",
+      "Type": "varchar(100)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "title",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "description",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "hook",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "hookType",
+      "Type": "varchar(50)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "formula",
+      "Type": "varchar(20)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "objective",
+      "Type": "enum('sale','authority','growth')",
+      "Null": "YES",
+      "Key": "",
+      "Default": "authority",
+      "Extra": ""
+    },
+    {
+      "Field": "person",
+      "Type": "enum('first','second','third')",
+      "Null": "YES",
+      "Key": "",
+      "Default": "second",
+      "Extra": ""
+    },
+    {
+      "Field": "clickbait",
+      "Type": "tinyint(1)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "status",
+      "Type": "enum('draft','generating','ready','published')",
+      "Null": "YES",
+      "Key": "",
+      "Default": "draft",
+      "Extra": ""
+    },
+    {
+      "Field": "batchId",
+      "Type": "varchar(36)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updatedAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Field": "platform",
+      "Type": "enum('instagram','tiktok')",
+      "Null": "YES",
+      "Key": "",
+      "Default": "instagram",
+      "Extra": ""
+    },
+    {
+      "Field": "voiceTone",
+      "Type": "varchar(50)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "casual",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint(11)\tNO\tPRI\tNULL\tauto_increment\nprojectId\tint(11)\tNO\t\tNULL\t\nuserId\tint(11)\tNO\t\tNULL\t\ntype\tenum('carousel','image','video')\tNO\t\tNULL\t\ntemplate\tvarchar(100)\tNO\t\tNULL\t\ntitle\ttext\tYES\t\tNULL\t\ndescription\ttext\tYES\t\tNULL\t\nhook\ttext\tYES\t\tNULL\t\nhookType\tvarchar(50)\tYES\t\tNULL\t\nformula\tvarchar(20)\tYES\t\tNULL\t\nobjective\tenum('sale','authority','growth')\tYES\t\tauthority\t\nperson\tenum('first','second','third')\tYES\t\tsecond\t\nclickbait\ttinyint(1)\tYES\t\t0\t\nstatus\tenum('draft','generating','ready','published')\tYES\t\tdraft\t\nbatchId\tvarchar(36)\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nplatform\tenum('instagram','tiktok')\tYES\t\tinstagram\t\nvoiceTone\tvarchar(50)\tYES\t\tcasual\t\n",
+  "stderr": "",
+  "execution_time_ms": 48
+}

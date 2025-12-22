@@ -93,7 +93,7 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
 
   const deleteProduct = (trpc.influencers.products as any).deleteProduct.useMutation({
     onSuccess: () => {
-      toast({ title: "Produto excluído com sucesso!" });
+      toast.success("Produto excluído com sucesso!");
       (utils.influencers as any).products.listProducts.invalidate({ influencerId });
     },
   });

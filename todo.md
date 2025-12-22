@@ -1043,3 +1043,14 @@ news (notícias)
 - [x] Aba "Conteúdos" não tem mais opção de gerar com trend/viral/assunto - RESTAURADO (3 botões: Trends, Virais, Assuntos)
 - [x] Funcionalidade de buscar notícia por assunto também foi removida - RESTAURADO (botão Assuntos leva para /content/new?type=subject)
 - [x] Solução aplicada: adicionados 3 botões na aba Conteúdos mantendo toda funcionalidade de Produtos intacta
+
+## Bug Crítico - Conteúdos Gerados Não Aparecem (22/12/2024)
+- [ ] Conteúdos são gerados com sucesso (mensagem aparece)
+- [ ] Mas não aparecem na lista da aba "Conteúdos"
+- [ ] Verificar se estão sendo salvos no banco de dados
+- [ ] Verificar se a query de listagem está correta
+
+## Bug Crítico: Conteúdo com Produtos Não Salva no Banco (22/12/2024)
+- [x] Identificado: generateContentWithProduct só retorna JSON, não salva no DB
+- [x] Corrigido: generateContentWithProduct agora salva usando createInfluencerContent()
+- [x] Testado: conteúdo gerado com produtos agora aparece na lista

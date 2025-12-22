@@ -1,0 +1,121 @@
+{
+  "query": "SELECT * FROM influencerContents ORDER BY createdAt DESC LIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT * FROM influencerContents ORDER BY createdAt DESC LIMIT 10",
+  "rows": [
+    {
+      "id": "630002",
+      "influencerId": "510002",
+      "userId": "1",
+      "type": "carousel",
+      "template": "dica-rapida",
+      "title": "Dica Rápida do João Bobão: O Carro Engasgando",
+      "description": "Rapaz, eu sou a pessoa mais azarada com carro que existe. Mas depois que descobri essa dica, pelo menos não chego mais no mecânico com cara de 'me engana que eu gosto'. Se liga nessa moral!",
+      "hook": "Seu carro tá fazendo um barulho estranho? Não seja pego de surpresa!",
+      "status": "ready",
+      "createdAt": "2025-12-21 22:07:01",
+      "updatedAt": "2025-12-21 22:07:01"
+    },
+    {
+      "id": "600001",
+      "influencerId": "480001",
+      "userId": "4050045",
+      "type": "carousel",
+      "template": "rotina",
+      "title": "Meu Dia na Real: Energia e Foco!",
+      "description": "Muita gente pergunta como eu mantenho a energia e o foco o dia todo! Não tem segredo mágico, é consistência e carinho com o corpo. Essa é uma espiadinha na minha rotina, adaptada para me dar o máximo de rendimento e bem-estar. Lembrem-se: o melhor treino é aquele que você faz, e a melhor dieta é a que você sustenta! 💪✨ #NandaFit #RotinaSaudavel #FitnessMotivation #BemEstar #VidaAtiva",
+      "hook": "Quer saber como eu organizo meu dia para ter energia máxima?",
+      "status": "ready",
+      "createdAt": "2025-12-21 18:37:37",
+      "updatedAt": "2025-12-21 18:37:37"
+    },
+    {
+      "id": "570001",
+      "influencerId": "90001",
+      "userId": "1",
+      "type": "carousel",
+      "template": "storytelling",
+      "title": "POV: Se eu ganhasse na Mega da Virada...",
+      "description": "Sonhar não custa nada, né? 😅 Mas se a sorte batesse na porta, meu plano seria bem claro: menos stress e mais tempo de qualidade. E o seu? Me conta nos comentários! 👇 #MegaDaVirada #Sonhos #Lifestyle #NoraReceitai",
+      "hook": "POV: O que eu faria se ganhasse na Mega da Virada (e como isso mudaria minha rotina)",
+      "status": "ready",
+      "createdAt": "2025-12-21 18:05:21",
+      "updatedAt": "2025-12-21 18:05:21"
+    },
+    {
+      "id": "540002",
+      "influencerId": "450001",
+      "userId": "4050045",
+      "type": "carousel",
+      "template": "recomendacao",
+      "title": "Meus 3 Lanches Fit Favoritos",
+      "description": "Quem disse que comer saudável precisa ser chato? Separei meus 3 lanches favoritos que são super práticos, deliciosos e não pesam na consciência (nem na balança!). Perfeitos para aquele momento de fome entre as refeições ou pré-treino. Qual deles você vai experimentar primeiro? Me conta!",
+      "hook": "3 lanches que salvam a minha dieta (e meu humor!)",
+      "status": "ready",
+      "createdAt": "2025-12-21 17:45:30",
+      "updatedAt": "2025-12-21 17:45:30"
+    },
+    {
+      "id": "540001",
+      "influencerId": "450001",
+      "userId": "4050045",
+      "type": "carousel",
+      "template": "rotina",
+      "title": "Minha Rotina Matinal para Máxima Produtividade",
+      "description": "Muita gente me pergunta como consigo manter o foco e a energia. A verdade é que a manhã dita o ritmo do seu dia! Não é sobre fazer tudo perfeito, mas sim sobre criar micro-hábitos que te impulsionam. Qual é o seu primeiro passo para um dia incrível? Me conta aqui nos comentários! 👇 #RotinaMatinal #Produtividade #CarolFit #BemEstar",
+      "hook": "5 passos que transformaram minhas manhãs (e minha energia!)",
+      "status": "ready",
+      "createdAt": "2025-12-21 17:38:00",
+      "updatedAt": "2025-12-21 17:38:00"
+    },
+    {
+      "id": "510001",
+      "influencerId": "420001",
+      "userId": "1",
+      "type": "carousel",
+      "template": "dica-rapida",
+      "title": "3 Fontes de Inspiração que Vão Salvar Seu Projeto",
+      "description": "Se você está travado na fase de ideação, respira fundo! Não precisa reinventar a roda, só olhar para os lugares certos. Eu sempre recorro a essas 3 fontes quando preciso daquele 'start' criativo. Elas ajudam a dar profundidade e originalidade, sem cair no clichê. Salva essa dica para a próxima vez que o bloqueio bater! 👇",
+      "hook": "Travado no seu próximo projeto? Veja onde encontrar as melhores ideias!",
+      "status": "ready",
+      "createdAt": "2025-12-21 15:38:44",
+      "updatedAt": "2025-12-21 15:38:44"
+    },
+    {
+      "id": "480001",
+      "influencerId": "390001",
+      "userId": "1",
+      "type": "carousel",
+      "template": "dica-rapida",
+      "title": "3 Passos para Começar a Guardar Dinheiro HOJE",
+      "description": "Sempre me perguntam como começar a guardar dinheiro sem sentir que estou abrindo mão de tudo. A chave é a consistência, não a quantidade! 🔑 Separei 3 dicas super rápidas para você dar o primeiro passo ainda essa semana. Me conta: qual desses passos você vai aplicar primeiro? 👇 #DicasFinanceiras #VidaFinanceira #RaquelTips #SoftSell #EconomiaInteligente",
+      "hook": "Cansada de só ver o dinheiro sumir? Comece a guardar com 3 passos simples!",
+      "status": "ready",
+      "createdAt": "2025-12-21 00:04:54",
+      "updatedAt": "2025-12-21 00:04:54"
+    },
+    {
+      "id": "450002",
+      "influencerId": "360002",
+      "userId": "1",
+      "type": "carousel",
+      "template": "bastidores",
+      "title": "Preparação para o Coliseu",
+      "description": "Dia de imersão total! 🎧 Tô aqui nos ajustes finais, revisando os critérios e aprimorando o olhar para o que vai ser a Batalha do Coliseu. A energia desse evento é surreal e a responsabilidade de ser jurado é grande. Quem vocês acham que vai brilhar mais? Contem aqui! 👇 #BatalhaDoColiseu #HelioJulgador #Bastidores",
+      "hook": "O que acontece antes de subir no palco digital?",
+      "status": "ready",
+      "createdAt": "2025-12-20 23:07:09",
+      "updatedAt": "2025-12-20 23:07:09"
+    }
+  ],
+  "messages": [
+    "660001\t90001\t1\tcarousel\trotina\tMinha Rotina de Almoço Saudável (e sem estresse!)\tQuem disse que manter o foco é difícil? Com a correria do dia a dia, eu preciso de ferramentas que me ajudem a ser prática. Hoje mostro como foi meu almoço e como o ReceitAI me ajuda a manter o controle calórico sem precisar pesar nada! 🥗✨",
+    "É só tirar a foto e pronto. Menos tempo calculando, mais tempo aproveitando a comida. 😉",
+    "#ReceitAI #RotinaSaudável #ControleCalórico #AlmoçoFit #NoraReceitai\tComo eu mantenho o controle das calorias sem complicação?\tready\t2025-12-21 23:40:59\t2025-12-21 23:40:59",
+    "630001\t510002\t1\tcarousel\trotina\tA Rotina de Manutenção do João Bobão\tQuem me conhece sabe que eu sou um desastre ambulante, e isso inclui meu carro. Mas com o App Meu Mecânico, até eu consigo manter a revisão em dia sem surtar! 😅",
+    "Se você também é enrolado ou só quer praticidade, corre lá baixar. É fácil demais, viu?",
+    "#joaobobao #rotinadocarro #meumecanico #vidareal #manutencao\tMinha rotina de cuidado com o carro (porque até eu aprendi a ser organizado).\tready\t2025-12-21 22:02:21\t2025-12-21 22:02:21"
+  ],
+  "stdout": "id\tinfluencerId\tuserId\ttype\ttemplate\ttitle\tdescription\thook\tstatus\tcreatedAt\tupdatedAt\n660001\t90001\t1\tcarousel\trotina\tMinha Rotina de Almoço Saudável (e sem estresse!)\tQuem disse que manter o foco é difícil? Com a correria do dia a dia, eu preciso de ferramentas que me ajudem a ser prática. Hoje mostro como foi meu almoço e como o ReceitAI me ajuda a manter o controle calórico sem precisar pesar nada! 🥗✨\n\nÉ só tirar a foto e pronto. Menos tempo calculando, mais tempo aproveitando a comida. 😉\n\n#ReceitAI #RotinaSaudável #ControleCalórico #AlmoçoFit #NoraReceitai\tComo eu mantenho o controle das calorias sem complicação?\tready\t2025-12-21 23:40:59\t2025-12-21 23:40:59\n630002\t510002\t1\tcarousel\tdica-rapida\tDica Rápida do João Bobão: O Carro Engasgando\tRapaz, eu sou a pessoa mais azarada com carro que existe. Mas depois que descobri essa dica, pelo menos não chego mais no mecânico com cara de 'me engana que eu gosto'. Se liga nessa moral!\tSeu carro tá fazendo um barulho estranho? Não seja pego de surpresa!\tready\t2025-12-21 22:07:01\t2025-12-21 22:07:01\n630001\t510002\t1\tcarousel\trotina\tA Rotina de Manutenção do João Bobão\tQuem me conhece sabe que eu sou um desastre ambulante, e isso inclui meu carro. Mas com o App Meu Mecânico, até eu consigo manter a revisão em dia sem surtar! 😅\n\nSe você também é enrolado ou só quer praticidade, corre lá baixar. É fácil demais, viu?\n\n#joaobobao #rotinadocarro #meumecanico #vidareal #manutencao\tMinha rotina de cuidado com o carro (porque até eu aprendi a ser organizado).\tready\t2025-12-21 22:02:21\t2025-12-21 22:02:21\n600001\t480001\t4050045\tcarousel\trotina\tMeu Dia na Real: Energia e Foco!\tMuita gente pergunta como eu mantenho a energia e o foco o dia todo! Não tem segredo mágico, é consistência e carinho com o corpo. Essa é uma espiadinha na minha rotina, adaptada para me dar o máximo de rendimento e bem-estar. Lembrem-se: o melhor treino é aquele que você faz, e a melhor dieta é a que você sustenta! 💪✨ #NandaFit #RotinaSaudavel #FitnessMotivation #BemEstar #VidaAtiva\tQuer saber como eu organizo meu dia para ter energia máxima?\tready\t2025-12-21 18:37:37\t2025-12-21 18:37:37\n570001\t90001\t1\tcarousel\tstorytelling\tPOV: Se eu ganhasse na Mega da Virada...\tSonhar não custa nada, né? 😅 Mas se a sorte batesse na porta, meu plano seria bem claro: menos stress e mais tempo de qualidade. E o seu? Me conta nos comentários! 👇 #MegaDaVirada #Sonhos #Lifestyle #NoraReceitai\tPOV: O que eu faria se ganhasse na Mega da Virada (e como isso mudaria minha rotina)\tready\t2025-12-21 18:05:21\t2025-12-21 18:05:21\n540002\t450001\t4050045\tcarousel\trecomendacao\tMeus 3 Lanches Fit Favoritos\tQuem disse que comer saudável precisa ser chato? Separei meus 3 lanches favoritos que são super práticos, deliciosos e não pesam na consciência (nem na balança!). Perfeitos para aquele momento de fome entre as refeições ou pré-treino. Qual deles você vai experimentar primeiro? Me conta!\t3 lanches que salvam a minha dieta (e meu humor!)\tready\t2025-12-21 17:45:30\t2025-12-21 17:45:30\n540001\t450001\t4050045\tcarousel\trotina\tMinha Rotina Matinal para Máxima Produtividade\tMuita gente me pergunta como consigo manter o foco e a energia. A verdade é que a manhã dita o ritmo do seu dia! Não é sobre fazer tudo perfeito, mas sim sobre criar micro-hábitos que te impulsionam. Qual é o seu primeiro passo para um dia incrível? Me conta aqui nos comentários! 👇 #RotinaMatinal #Produtividade #CarolFit #BemEstar\t5 passos que transformaram minhas manhãs (e minha energia!)\tready\t2025-12-21 17:38:00\t2025-12-21 17:38:00\n510001\t420001\t1\tcarousel\tdica-rapida\t3 Fontes de Inspiração que Vão Salvar Seu Projeto\tSe você está travado na fase de ideação, respira fundo! Não precisa reinventar a roda, só olhar para os lugares certos. Eu sempre recorro a essas 3 fontes quando preciso daquele 'start' criativo. Elas ajudam a dar profundidade e originalidade, sem cair no clichê. Salva essa dica para a próxima vez que o bloqueio bater! 👇\tTravado no seu próximo projeto? Veja onde encontrar as melhores ideias!\tready\t2025-12-21 15:38:44\t2025-12-21 15:38:44\n480001\t390001\t1\tcarousel\tdica-rapida\t3 Passos para Começar a Guardar Dinheiro HOJE\tSempre me perguntam como começar a guardar dinheiro sem sentir que estou abrindo mão de tudo. A chave é a consistência, não a quantidade! 🔑 Separei 3 dicas super rápidas para você dar o primeiro passo ainda essa semana. Me conta: qual desses passos você vai aplicar primeiro? 👇 #DicasFinanceiras #VidaFinanceira #RaquelTips #SoftSell #EconomiaInteligente\tCansada de só ver o dinheiro sumir? Comece a guardar com 3 passos simples!\tready\t2025-12-21 00:04:54\t2025-12-21 00:04:54\n450002\t360002\t1\tcarousel\tbastidores\tPreparação para o Coliseu\tDia de imersão total! 🎧 Tô aqui nos ajustes finais, revisando os critérios e aprimorando o olhar para o que vai ser a Batalha do Coliseu. A energia desse evento é surreal e a responsabilidade de ser jurado é grande. Quem vocês acham que vai brilhar mais? Contem aqui! 👇 #BatalhaDoColiseu #HelioJulgador #Bastidores\tO que acontece antes de subir no palco digital?\tready\t2025-12-20 23:07:09\t2025-12-20 23:07:09\n",
+  "stderr": "",
+  "execution_time_ms": 93
+}

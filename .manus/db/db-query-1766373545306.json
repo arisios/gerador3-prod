@@ -1,0 +1,150 @@
+{
+  "query": "SELECT id, influencerId, title FROM influencerContents ORDER BY createdAt DESC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT id, influencerId, title FROM influencerContents ORDER BY createdAt DESC",
+  "rows": [
+    {
+      "id": "660001",
+      "influencerId": "90001",
+      "title": "Minha Rotina de Almoço Saudável (e sem estresse!)"
+    },
+    {
+      "id": "630002",
+      "influencerId": "510002",
+      "title": "Dica Rápida do João Bobão: O Carro Engasgando"
+    },
+    {
+      "id": "630001",
+      "influencerId": "510002",
+      "title": "A Rotina de Manutenção do João Bobão"
+    },
+    {
+      "id": "600001",
+      "influencerId": "480001",
+      "title": "Meu Dia na Real: Energia e Foco!"
+    },
+    {
+      "id": "570001",
+      "influencerId": "90001",
+      "title": "POV: Se eu ganhasse na Mega da Virada..."
+    },
+    {
+      "id": "540002",
+      "influencerId": "450001",
+      "title": "Meus 3 Lanches Fit Favoritos"
+    },
+    {
+      "id": "540001",
+      "influencerId": "450001",
+      "title": "Minha Rotina Matinal para Máxima Produtividade"
+    },
+    {
+      "id": "510001",
+      "influencerId": "420001",
+      "title": "3 Fontes de Inspiração que Vão Salvar Seu Projeto"
+    },
+    {
+      "id": "480001",
+      "influencerId": "390001",
+      "title": "3 Passos para Começar a Guardar Dinheiro HOJE"
+    },
+    {
+      "id": "450002",
+      "influencerId": "360002",
+      "title": "Preparação para o Coliseu"
+    },
+    {
+      "id": "450001",
+      "influencerId": "360001",
+      "title": "A Vida do Truck: Preparação e Chopp Gelado"
+    },
+    {
+      "id": "420001",
+      "influencerId": "330001",
+      "title": "Minha Rotina de Preparação para a Semana"
+    },
+    {
+      "id": "390001",
+      "influencerId": "300001",
+      "title": "Minha Rotina de Self-Care Matinal"
+    },
+    {
+      "id": "360001",
+      "influencerId": "270001",
+      "title": "A Magia de Petrópolis: Além dos Palácios"
+    },
+    {
+      "id": "330001",
+      "influencerId": "240001",
+      "title": "Cuidado que Transforma"
+    },
+    {
+      "id": "300001",
+      "influencerId": "180001",
+      "title": "Mitos e Verdades sobre os Fails de Natal 🎄"
+    },
+    {
+      "id": "270001",
+      "influencerId": "210001",
+      "title": "Desafio do Estúdio em Casa: Onde a Arte Acontece"
+    },
+    {
+      "id": "240002",
+      "influencerId": "180002",
+      "title": "Bastidores da Notícia: CBN"
+    },
+    {
+      "id": "240001",
+      "influencerId": "180001",
+      "title": "Rotina de Cuidado e Movimento"
+    },
+    {
+      "id": "210001",
+      "influencerId": "150001",
+      "title": "A minha rotina (e como ela ficou mais saborosa)"
+    },
+    {
+      "id": "180001",
+      "influencerId": "120001",
+      "title": "Minha Rotina de Jantar Descomplicado"
+    },
+    {
+      "id": "150001",
+      "influencerId": "90001",
+      "title": "O Desafio do Espelho Inverso: Eu vs. Minha Versão IA"
+    },
+    {
+      "id": "120002",
+      "influencerId": "90001",
+      "title": "A Saga das Luzes de Natal (E o Drama da Gravidade)"
+    },
+    {
+      "id": "120001",
+      "influencerId": "90001",
+      "title": "A Saga das Luzes de Natal (e a Gravidade)"
+    },
+    {
+      "id": "90001",
+      "influencerId": "60001",
+      "title": "A Melhor Dupla Pra Tarde: Café e Queijo!"
+    },
+    {
+      "id": "60001",
+      "influencerId": "30001",
+      "title": "A Realidade do Treino: Por Trás dos Stories"
+    },
+    {
+      "id": "30001",
+      "influencerId": "1",
+      "title": "3 Erros Comuns na Hidratação Pós-Treino"
+    },
+    {
+      "id": "1",
+      "influencerId": "1",
+      "title": "Conteúdo de influenciador"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tinfluencerId\ttitle\n660001\t90001\tMinha Rotina de Almoço Saudável (e sem estresse!)\n630002\t510002\tDica Rápida do João Bobão: O Carro Engasgando\n630001\t510002\tA Rotina de Manutenção do João Bobão\n600001\t480001\tMeu Dia na Real: Energia e Foco!\n570001\t90001\tPOV: Se eu ganhasse na Mega da Virada...\n540002\t450001\tMeus 3 Lanches Fit Favoritos\n540001\t450001\tMinha Rotina Matinal para Máxima Produtividade\n510001\t420001\t3 Fontes de Inspiração que Vão Salvar Seu Projeto\n480001\t390001\t3 Passos para Começar a Guardar Dinheiro HOJE\n450002\t360002\tPreparação para o Coliseu\n450001\t360001\tA Vida do Truck: Preparação e Chopp Gelado\n420001\t330001\tMinha Rotina de Preparação para a Semana\n390001\t300001\tMinha Rotina de Self-Care Matinal\n360001\t270001\tA Magia de Petrópolis: Além dos Palácios\n330001\t240001\tCuidado que Transforma\n300001\t180001\tMitos e Verdades sobre os Fails de Natal 🎄\n270001\t210001\tDesafio do Estúdio em Casa: Onde a Arte Acontece\n240002\t180002\tBastidores da Notícia: CBN\n240001\t180001\tRotina de Cuidado e Movimento\n210001\t150001\tA minha rotina (e como ela ficou mais saborosa)\n180001\t120001\tMinha Rotina de Jantar Descomplicado\n150001\t90001\tO Desafio do Espelho Inverso: Eu vs. Minha Versão IA\n120002\t90001\tA Saga das Luzes de Natal (E o Drama da Gravidade)\n120001\t90001\tA Saga das Luzes de Natal (e a Gravidade)\n90001\t60001\tA Melhor Dupla Pra Tarde: Café e Queijo!\n60001\t30001\tA Realidade do Treino: Por Trás dos Stories\n30001\t1\t3 Erros Comuns na Hidratação Pós-Treino\n1\t1\tConteúdo de influenciador\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

@@ -84,19 +84,28 @@ export default function InfluencerContentCreate() {
   };
 
   const generateMultipleContents = async () => {
+    console.log("[DEBUG] generateMultipleContents started");
     for (const item of selectedItems) {
+      console.log("[DEBUG] Processing item:", item);
       for (let i = 0; i < item.quantity; i++) {
         try {
-          await generateContent.mutateAsync({
+          console.log("[DEBUG] Calling mutateAsync with:", {
             influencerId,
             template: item.template,
             product: item.name,
           });
+          const result = await generateContent.mutateAsync({
+            influencerId,
+            template: item.template,
+            product: item.name,
+          });
+          console.log("[DEBUG] mutateAsync result:", result);
         } catch (e) {
-          console.error("Erro ao gerar conteúdo", e);
+          console.error("[DEBUG] Erro ao gerar conteúdo", e);
         }
       }
     }
+    console.log("[DEBUG] All contents generated");
     setIsGenerating(false);
     toast.success(`${selectedItems.reduce((acc, item) => acc + item.quantity, 0)} conteúdos gerados!`);
     setLocation(`/influencer/${influencerId}`);
@@ -365,7 +374,7 @@ export default function InfluencerContentCreate() {
         )}
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-50">
         <Button 
           className="w-full" 
           size="lg" 

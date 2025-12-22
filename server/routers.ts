@@ -1773,7 +1773,7 @@ Retorne APENAS um array JSON com as abordagens:
           }
         });
 
-        const result = JSON.parse(response.choices[0].message.content || "{}");
+        const result = JSON.parse((response.choices[0].message.content as string) || "{}");
         return { approaches: result.approaches || [] };
       }),
 
@@ -1863,7 +1863,7 @@ Retorne APENAS um array JSON com as abordagens:
         let contextInfo = '';
         if (input.contextType === 'trend' && input.trendId) {
           const trend = await db.getTrendById(input.trendId);
-          if (trend) contextInfo = `TREND: ${trend.keyword}`;
+          if (trend) contextInfo = `TREND: ${trend.name}`;
         } else if (input.contextType === 'viral' && input.viralId) {
           const viral = await db.getViralById(input.viralId);
           if (viral) contextInfo = `VIRAL: ${viral.title}`;
@@ -1871,10 +1871,83 @@ Retorne APENAS um array JSON com as abordagens:
           contextInfo = `ASSUNTO: ${input.freeSubject}`;
         }
 
-        const prompt = `Crie conteúdo para ${influencer.name} (${influencer.niche}) vendendo ${product.name}.\nAbordagens: ${product.selectedApproaches}${contextInfo ? `\nContexto: ${contextInfo}` : ''}\n\nRetorne JSON: {hook, script, cta, hashtags[], tips}`;
+        const response = await invokeLLM({
+          messages: [
+            { 
+              role: "system", 
+              content: `Você é um especialista em marketing de influência e soft sell.
+Crie conteúdo para o influenciador virtual ${influencer.name}.
+Descrição: ${influencer.description || "Influenciador digital"}
+Nicho: ${influencer.niche || "lifestyle"}
+Produto/Serviço: ${product.name}
+Abordagens: ${product.selectedApproaches.join(", ")}${contextInfo ? `\nContexto: ${contextInfo}` : ''}
 
-        const response = await invokeLLM({ messages: [{ role: "user", content: prompt }], response_format: { type: "json_schema", json_schema: { name: "content", strict: true, schema: { type: "object", properties: { hook: { type: "string" }, script: { type: "string" }, cta: { type: "string" }, hashtags: { type: "array", items: { type: "string" } }, tips: { type: "string" } }, required: ["hook", "script", "cta", "hashtags", "tips"], additionalProperties: false } } } });
-        return JSON.parse(response.choices[0].message.content);
+O conteúdo deve parecer natural e autêntico, não vendedor demais.
+O conteúdo DEVE estar relacionado ao nicho do influenciador e ser relevante para seu público-alvo.`
+            },
+            { role: "user", content: `Gere um conteúdo de carrossel para Instagram.` }
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "influencer_content",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  title: { type: "string", description: "Título do conteúdo" },
+                  description: { type: "string", description: "Descrição para legenda" },
+                  hook: { type: "string", description: "Frase de gancho inicial" },
+                  slides: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        order: { type: "integer", description: "Ordem do slide" },
+                        text: { type: "string", description: "Texto do slide (máx 100 caracteres)" }
+                      },
+                      required: ["order", "text"],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ["title", "description", "hook", "slides"],
+                additionalProperties: false
+              }
+            }
+          }
+        });
+
+        const contentText = response.choices[0]?.message?.content || "{}";
+        let contentData;
+        try {
+          contentData = JSON.parse(typeof contentText === 'string' ? contentText : JSON.stringify(contentText));
+        } catch {
+          contentData = { title: "Conteúdo de influenciador", description: "", hook: "", slides: [] };
+        }
+
+        const contentId = await db.createInfluencerContent({
+          influencerId: input.influencerId,
+          userId: ctx.user.id,
+          type: "carousel",
+          template: "product",
+          title: contentData.title || "Conteúdo",
+          description: contentData.description || null,
+          hook: contentData.hook || null,
+          status: "ready",
+        });
+
+        if (contentData.slides && Array.isArray(contentData.slides)) {
+          const slidesData = contentData.slides.map((s: { order?: number; text: string }, idx: number) => ({
+            order: s.order || idx + 1,
+            text: s.text || "",
+          }));
+          if (slidesData.length > 0) {
+            await db.createInfluencerSlides(contentId, slidesData);
+          }
+        }
+
+        return { contentId };
       }),
     }),
   }),
@@ -2391,7 +2464,7 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
             url: a.url,
             source: a.source,
             publishedAt: a.publishedAt,
-            imageUrl: a.imageUrl,
+            imageUrl: a.imageUrl ?? null,
             isSelected: false,
             isManual: false,
           })));
@@ -2618,30 +2691,18 @@ Retorne JSON válido:
             type: input.type,
             template: input.template,
             batchId,
-            metadata: {
-              newsId: input.newsId,
-              newsTitle: news.title,
-              angle: contentData.angle,
-              objective: input.objective,
-              person: input.person,
-              platform: input.platform,
-              voiceTone: input.voiceTone,
-            },
           });
 
           contentIds.push(contentId);
 
           if (contentData.slides && Array.isArray(contentData.slides)) {
-            for (let slideIndex = 0; slideIndex < contentData.slides.length; slideIndex++) {
-              const slide = contentData.slides[slideIndex];
-              await db.createSlide({
-                contentId,
-                slideNumber: slideIndex + 1,
-                text: slide.text || "",
-                imagePrompt: slide.imagePrompt || "",
-                imageUrl: null,
-              });
-            }
+            const slidesData = contentData.slides.map((slide: any, slideIndex: number) => ({
+              slideNumber: slideIndex + 1,
+              text: slide.text || "",
+              imagePrompt: slide.imagePrompt || "",
+              imageUrl: null,
+            }));
+            await db.createSlides(contentId, slidesData);
           }
         }
 

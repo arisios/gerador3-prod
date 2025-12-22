@@ -1,0 +1,22 @@
+{
+  "query": "SELECT id, influencerId, title, createdAt FROM influencerContents WHERE influencerId = 510002 ORDER BY createdAt DESC LIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT id, influencerId, title, createdAt FROM influencerContents WHERE influencerId = 510002 ORDER BY createdAt DESC LIMIT 10",
+  "rows": [
+    {
+      "id": "630002",
+      "influencerId": "510002",
+      "title": "Dica Rápida do João Bobão: O Carro Engasgando",
+      "createdAt": "2025-12-21 22:07:01"
+    },
+    {
+      "id": "630001",
+      "influencerId": "510002",
+      "title": "A Rotina de Manutenção do João Bobão",
+      "createdAt": "2025-12-21 22:02:21"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tinfluencerId\ttitle\tcreatedAt\n630002\t510002\tDica Rápida do João Bobão: O Carro Engasgando\t2025-12-21 22:07:01\n630001\t510002\tA Rotina de Manutenção do João Bobão\t2025-12-21 22:02:21\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}
