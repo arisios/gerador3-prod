@@ -120,6 +120,16 @@ export const influencers = mysqlTable("influencers", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+// Influencer Products table
+export const influencerProducts = mysqlTable("influencerProducts", {
+  id: int("id").autoincrement().primaryKey(),
+  influencerId: int("influencerId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  salesApproach: text("salesApproach"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 // Influencer Contents table
 export const influencerContents = mysqlTable("influencerContents", {
   id: int("id").autoincrement().primaryKey(),
@@ -303,6 +313,8 @@ export type Slide = typeof slides.$inferSelect;
 export type InsertSlide = typeof slides.$inferInsert;
 export type Influencer = typeof influencers.$inferSelect;
 export type InsertInfluencer = typeof influencers.$inferInsert;
+export type InfluencerProduct = typeof influencerProducts.$inferSelect;
+export type InsertInfluencerProduct = typeof influencerProducts.$inferInsert;
 export type InfluencerContent = typeof influencerContents.$inferSelect;
 export type InfluencerSlide = typeof influencerSlides.$inferSelect;
 export type Trend = typeof trends.$inferSelect;

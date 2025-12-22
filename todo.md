@@ -949,8 +949,8 @@ news (notícias)
 - [x] Adicionar botão "Editar Nicho" no projeto
 - [x] Modal de edição de nicho do projeto
 - [x] Rota backend projects.update para atualizar nicho do projeto
-- [ ] Adicionar botão "Editar Nicho" no influenciador
-- [ ] Modal de edição de nicho do influenciador
+- [x] Adicionar botão "Editar Nicho" no influenciador
+- [x] Modal de edição de nicho do influenciador
 - [x] Rota backend influencers.update para atualizar nicho do influenciador
 
 ### 2. Sistema de Produtos do Influenciador

@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { 
   ArrowLeft, Trash2, Loader2, User, ChevronRight, Zap, 
-  Camera, Image, Download, RefreshCw, Maximize2
+  Camera, Image, Download, RefreshCw, Maximize2, Pencil
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,8 +34,18 @@ export default function InfluencerDetail() {
   const [profilePhotos, setProfilePhotos] = useState<ProfilePhoto[]>([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxPhoto, setLightboxPhoto] = useState<ProfilePhoto | null>(null);
+  const [showEditNicheModal, setShowEditNicheModal] = useState(false);
+  const [editNicheForm, setEditNicheForm] = useState({ niche: "" });
 
   const { data: influencer, isLoading } = trpc.influencers.get.useQuery({ id: influencerId });
+
+  const utils = trpc.useUtils();
+
+  useEffect(() => {
+    if (showEditNicheModal && influencer) {
+      setEditNicheForm({ niche: influencer.niche || "" });
+    }
+  }, [showEditNicheModal, influencer]);
 
   const generateProfilePhotos = trpc.influencers.generateProfilePhotos.useMutation({
     onSuccess: (data) => {
@@ -45,6 +59,14 @@ export default function InfluencerDetail() {
     onSuccess: () => {
       toast.success("Influenciador excluído");
       setLocation("/influencers");
+    },
+  });
+
+  const updateInfluencer = (trpc.influencers as any).update.useMutation({
+    onSuccess: () => {
+      toast.success("Influenciador atualizado!");
+      utils.influencers.get.invalidate({ id: influencerId });
+      setShowEditNicheModal(false);
     },
   });
 
@@ -137,8 +159,22 @@ export default function InfluencerDetail() {
             )}
           </div>
           <div>
-            <h1 className="text-xl font-bold">{influencer.name}</h1>
-            <p className="text-muted-foreground">{influencer.niche}</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold">{influencer.name}</h1>
+              {influencer.niche && (
+                <Badge variant="secondary" className="text-xs">
+                  {influencer.niche}
+                </Badge>
+              )}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6"
+                onClick={() => setShowEditNicheModal(true)}
+              >
+                <Pencil className="w-3 h-3" />
+              </Button>
+            </div>
             <p className="text-sm text-muted-foreground capitalize">{influencer.type}</p>
           </div>
         </div>
@@ -263,6 +299,45 @@ export default function InfluencerDetail() {
           showPrompt={true}
         />
       )}
+
+      {/* Modal de Edição de Nicho */}
+      <Dialog open={showEditNicheModal} onOpenChange={setShowEditNicheModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Nicho do Influenciador</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="niche">Nicho</Label>
+              <Input
+                id="niche"
+                placeholder="Ex: Fitness, Culinária, Tecnologia..."
+                value={editNicheForm.niche}
+                onChange={(e) => setEditNicheForm({ niche: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditNicheModal(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                updateInfluencer.mutate({
+                  id: influencerId,
+                  niche: editNicheForm.niche || undefined,
+                });
+              }}
+              disabled={updateInfluencer.isPending}
+            >
+              {updateInfluencer.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : null}
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
