@@ -599,29 +599,33 @@ export default function InfluencerDetail() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="contents">
-          <TabsList className="w-full">
-            <TabsTrigger value="contents" className="flex-1">Conteúdos</TabsTrigger>
-            <TabsTrigger value="softsell" className="flex-1">Soft Sell</TabsTrigger>
-            <TabsTrigger value="products" className="flex-1">Produtos</TabsTrigger>
-          </TabsList>
+        {/* Header de Conteúdos */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Conteúdos</h2>
+          <Button 
+            size="sm"
+            onClick={() => setLocation(`/influencer/${influencerId}/content/new`)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Gerar Novo Conteúdo
+          </Button>
+        </div>
 
-          {/* Contents Tab */}
-          <TabsContent value="contents" className="space-y-4 mt-4">
+        {/* Lista de Conteúdos */}
+        <div className="space-y-2">
             {contents.length > 0 ? (
               contents.map((content: InfluencerContent & { preview?: string }) => (
                 <Card key={content.id} className="hover:border-primary/50 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <Link href={`/influencer/${influencerId}/content/${content.id}`} className="flex-1 cursor-pointer">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <div className="font-medium">{content.title || "Sem título"}</div>
+                  <CardContent className="p-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <Link href={`/influencer/${influencerId}/content/${content.id}`} className="flex-1 cursor-pointer min-w-0">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <div className="text-sm font-medium line-clamp-1">{content.title || "Sem título"}</div>
                             {content.source && (
                               <Badge 
                                 variant="secondary" 
-                                className={`text-xs ${
+                                className={`text-[10px] px-1.5 py-0 h-4 ${
                                   content.source === 'produto' ? 'bg-purple-100 text-purple-700' :
                                   content.source === 'softsell' ? 'bg-blue-100 text-blue-700' :
                                   content.source === 'trend' ? 'bg-green-100 text-green-700' :
@@ -639,9 +643,9 @@ export default function InfluencerDetail() {
                               </Badge>
                             )}
                           </div>
-                          <div className="text-xs text-muted-foreground">{content.template}</div>
+                          <div className="text-[10px] text-muted-foreground">{content.template}</div>
                           {content.preview && (
-                            <div className="text-xs text-muted-foreground/70 italic line-clamp-1">
+                            <div className="text-[10px] text-muted-foreground/70 italic line-clamp-1">
                               "{content.preview}..."
                             </div>
                           )}
@@ -650,7 +654,7 @@ export default function InfluencerDetail() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive flex-shrink-0"
                         onClick={(e) => {
                           e.preventDefault();
                           if (confirm('Tem certeza que deseja excluir este conteúdo?')) {
@@ -658,7 +662,7 @@ export default function InfluencerDetail() {
                           }
                         }}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
                   </CardContent>
@@ -670,37 +674,7 @@ export default function InfluencerDetail() {
               </div>
             )}
 
-            {/* Botão Gerar Novo Conteúdo */}
-            <Button 
-              className="w-full" 
-              size="lg"
-              onClick={() => setLocation(`/influencer/${influencerId}/content/new`)}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Gerar Novo Conteúdo
-            </Button>
-          </TabsContent>
-
-          {/* Soft Sell Tab */}
-          <TabsContent value="softsell" className="space-y-4 mt-4">
-            <Button 
-              className="w-full" 
-              onClick={() => setLocation(`/influencer/${influencerId}/content/new?type=softsell`)}
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              Gerar Conteúdo Soft Sell
-            </Button>
-
-            <div className="text-center py-8 text-muted-foreground">
-              <p className="text-sm">Clique no botão acima para gerar conteúdo usando templates de soft sell</p>
-            </div>
-          </TabsContent>
-
-          {/* Products Tab */}
-          <TabsContent value="products" className="space-y-4 mt-4">
-            <ProductsTab influencerId={influencerId} influencerNiche={influencer.niche || ""} />
-          </TabsContent>
-        </Tabs>
+        </div>
       </main>
 
       {/* Lightbox */}

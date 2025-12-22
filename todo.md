@@ -1298,3 +1298,9 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Manter abas (Conteúdos, Soft Sell, Produtos) - usuário pediu para manter
 - [x] Remover botões Trends/Virais/Assuntos da página de lista
 - [x] Testar navegação e layout mobile
+
+## Simplificação Adicional da Página de Conteúdos (22/12/2024)
+- [x] Remover abas "Soft Sell" e "Produtos" - deixar apenas "Conteúdos"
+- [x] Mover botão "Gerar Novo Conteúdo" para o topo, ao lado do título "Conteúdos"
+- [x] Compactar cards drasticamente: reduzir padding, espaçamentos, tamanho de fonte
+- [x] Cards devem ser bem menores e mais escaneáveis (quadradinhos compactos)
