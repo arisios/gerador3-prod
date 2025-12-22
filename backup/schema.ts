@@ -303,36 +303,6 @@ export const userSettings = mysqlTable("userSettings", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-// Influencer Niches table
-export const influencerNiches = mysqlTable("influencerNiches", {
-  id: int("id").autoincrement().primaryKey(),
-  influencerId: int("influencerId").notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-// Influencer Ideal Clients table
-export const influencerIdealClients = mysqlTable("influencerIdealClients", {
-  id: int("id").autoincrement().primaryKey(),
-  nicheId: int("nicheId").notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  demographics: json("demographics"),
-  psychographics: json("psychographics"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-// Influencer Pains table
-export const influencerPains = mysqlTable("influencerPains", {
-  id: int("id").autoincrement().primaryKey(),
-  idealClientId: int("idealClientId").notNull(),
-  level: mysqlEnum("level", ["primary", "secondary", "unexplored"]).notNull(),
-  pain: text("pain").notNull(),
-  description: text("description"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -363,9 +333,3 @@ export type Topic = typeof topics.$inferSelect;
 export type InsertTopic = typeof topics.$inferInsert;
 export type News = typeof news.$inferSelect;
 export type InsertNews = typeof news.$inferInsert;
-export type InfluencerNiche = typeof influencerNiches.$inferSelect;
-export type InsertInfluencerNiche = typeof influencerNiches.$inferInsert;
-export type InfluencerIdealClient = typeof influencerIdealClients.$inferSelect;
-export type InsertInfluencerIdealClient = typeof influencerIdealClients.$inferInsert;
-export type InfluencerPain = typeof influencerPains.$inferSelect;
-export type InsertInfluencerPain = typeof influencerPains.$inferInsert;

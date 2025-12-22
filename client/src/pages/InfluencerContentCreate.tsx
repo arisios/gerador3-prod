@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Loader2, Zap, TrendingUp, Flame, Target, Plus, Minus } from "lucide-react";
+import { ArrowLeft, Loader2, Zap, TrendingUp, Flame, Target, Plus, Minus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 const SOFT_SELL_TEMPLATES = [
@@ -96,6 +96,16 @@ export default function InfluencerContentCreate() {
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao criar produto");
+    },
+  });
+
+  const collectViralsMutation = trpc.virals.collect.useMutation({
+    onSuccess: () => {
+      toast.success("Virais coletados com sucesso!");
+      utils.virals.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao coletar virais");
     },
   });
 
@@ -426,11 +436,28 @@ export default function InfluencerContentCreate() {
           </TabsContent>
 
           {/* Virals Tab */}
-          <TabsContent value="virals" className="space-y-4 mt-4">
-            <p className="text-sm text-muted-foreground">
-              <Flame className="w-4 h-4 inline mr-1" />
-              Selecione conteúdos virais para criar adaptações
-            </p>
+          <TabsContent value="virais" className="space-y-4 mt-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                <Flame className="w-4 h-4 inline mr-1" />
+                Selecione conteúdos virais para criar adaptações
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={collectViralsMutation.isPending}
+                onClick={() => {
+                  collectViralsMutation.mutate({ source: "viralhog" });
+                }}
+              >
+                {collectViralsMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
+                Coletar Virais
+              </Button>
+            </div>
             
             {virals && virals.length > 0 ? (
               <div className="space-y-3">

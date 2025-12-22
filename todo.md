@@ -1141,3 +1141,86 @@ news (notícias)
 - [x] Corrigir caminhos: influencers.products.listProducts e influencers.products.createProduct
 - [ ] Testar listagem de produtos
 - [ ] Testar criação de produtos
+
+## Implementar Sistema de Dores para Influenciadores (22/12/2024)
+
+### Fase 1: Schema (Banco de Dados)
+- [x] Criar tabela `influencerNiches` (id, influencerId, name, description, createdAt)
+- [x] Criar tabela `influencerIdealClients` (id, nicheId, name, description, demographics, psychographics, createdAt)
+- [x] Criar tabela `influencerPains` (id, idealClientId, level, pain, description, createdAt)
+- [x] Executar SQL direto para aplicar mudanças (tabelas criadas com sucesso)
+
+### Fase 2: Funções de Banco (db.ts)
+- [x] `createInfluencerNiche(influencerId, name, description)`
+- [x] `getInfluencerNiches(influencerId)`
+- [x] `getInfluencerNicheById(id)`
+- [x] `createInfluencerIdealClient(nicheId, data)`
+- [x] `getIdealClientByNiche(nicheId)`
+- [x] `createInfluencerPains(idealClientId, pains[])`
+- [x] `getInfluencerPainsByIdealClient(idealClientId)` - renomeado para evitar conflito
+- [x] `getAllPainsByInfluencer(influencerId)` - lista todas as dores com nome do nicho e cliente
+
+### Fase 3: Procedures Backend (routers.ts) - PENDENTE
+- [ ] Ver arquivo `PENDENTE-DORES.md` para implementação completa
+- [ ] `influencers.niches.create` - Criar nicho
+- [ ] `influencers.niches.list` - Listar nichos do influenciador
+- [ ] `influencers.niches.generateIdealClient` - Gerar cliente ideal a partir do nicho (com LLM)
+- [ ] `influencers.niches.generatePains` - Gerar dores a partir do cliente ideal (com LLM)
+- [ ] `influencers.niches.listPains` - Listar todas as dores do influenciador
+- [ ] Verificar caminhos corretos: `influencers.niches.*`
+
+### Fase 4: Frontend (InfluencerContentCreate.tsx) - PENDENTE
+- [ ] Ver arquivo `PENDENTE-DORES.md` para código completo
+- [ ] Campo "Nome do Nicho" + "Descrição do Nicho"
+- [ ] Botão "Criar Nicho" com modal
+- [ ] Listar nichos criados com dropdown/seleção
+- [ ] Botão "Gerar Cliente Ideal" (após selecionar nicho)
+- [ ] Exibir cliente ideal gerado (nome, descrição, demografia, psicografia)
+- [ ] Botão "Gerar Dores" (após cliente ideal gerado)
+- [ ] Listar dores com checkboxes (primary, secondary, unexplored)
+- [ ] Estado de seleção de dores
+- [ ] Loading states em todas as operações
+
+### Fase 5: Testes Completos - PENDENTE
+- [ ] Criar nicho novo
+- [ ] Gerar cliente ideal a partir do nicho
+- [ ] Gerar dores a partir do cliente ideal
+- [ ] Listar dores com checkboxes funcionais
+- [ ] Selecionar dores
+- [ ] Verificar se não há erros de caminho (aprendizado do erro de Produtos)
+- [ ] Testar fluxo completo: criar nicho → cliente → dores → seleção
+
+---
+
+**NOTA:** Implementação de Dores pausada. Ver `PENDENTE-DORES.md` para retomar.
+Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
+
+## Implementar Abas Virais, Assuntos e Integração (22/12/2024)
+
+### Parte 1: Aba Virais
+- [ ] Verificar procedures de virais no backend
+- [ ] Implementar listagem de virais
+- [ ] Botão "Coletar Virais" funcional
+- [ ] Checkboxes para selecionar virais
+- [ ] Estado de seleção de virais
+- [ ] Testar: Coletar virais → Listar → Selecionar
+
+### Parte 2: Aba Assuntos
+- [ ] Verificar procedures de busca de notícias no backend
+- [ ] Campo de busca funcional
+- [ ] Botão "Buscar Notícias" que chama API
+- [ ] Listar resultados de notícias
+- [ ] Checkboxes para selecionar notícias
+- [ ] Estado de seleção de notícias
+- [ ] Testar: Buscar → Listar → Selecionar
+
+### Parte 3: Verificar Trends
+- [ ] Verificar se aba Trends está funcionando completamente
+- [ ] Corrigir problemas se houver
+
+### Parte 4: Integração com Produtos (depois das abas funcionarem)
+- [ ] Adicionar seleção de produto opcional nas abas Trends, Virais, Assuntos
+- [ ] Mostrar dropdown "Combinar com Produto?" quando houver trends/virais/assuntos selecionados
+- [ ] Atualizar procedure generateContent para aceitar productId opcional
+- [ ] Passar informações do produto para o LLM junto com trend/viral/assunto
+- [ ] Testar todas as combinações

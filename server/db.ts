@@ -11,6 +11,9 @@ import {
   influencerProducts, InfluencerProduct, InsertInfluencerProduct,
   influencerContents, InfluencerContent,
   influencerSlides, InfluencerSlide,
+  influencerNiches, InfluencerNiche, InsertInfluencerNiche,
+  influencerIdealClients, InfluencerIdealClient, InsertInfluencerIdealClient,
+  influencerPains, InfluencerPain, InsertInfluencerPain,
   trends, Trend,
   virals, Viral,
   userSettings, UserSettings,
@@ -885,6 +888,78 @@ export async function getSelectedNewsByProject(projectId: number): Promise<(News
     .innerJoin(topics, eq(news.topicId, topics.id))
     .where(and(eq(topics.projectId, projectId), eq(news.isSelected, true)))
     .orderBy(desc(news.createdAt));
+  
+  return result;
+}
+
+// ===== INFLUENCER NICHES FUNCTIONS =====
+export async function createInfluencerNiche(influencerId: number, name: string, description?: string): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(influencerNiches).values({ influencerId, name, description });
+  return Number(result[0].insertId);
+}
+
+export async function getInfluencerNiches(influencerId: number): Promise<InfluencerNiche[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(influencerNiches).where(eq(influencerNiches.influencerId, influencerId)).orderBy(desc(influencerNiches.createdAt));
+}
+
+export async function getInfluencerNicheById(id: number): Promise<InfluencerNiche | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(influencerNiches).where(eq(influencerNiches.id, id));
+  return result[0];
+}
+
+// ===== INFLUENCER IDEAL CLIENTS FUNCTIONS =====
+export async function createInfluencerIdealClient(nicheId: number, data: { name: string; description?: string; demographics?: unknown; psychographics?: unknown }): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(influencerIdealClients).values({ nicheId, ...data });
+  return Number(result[0].insertId);
+}
+
+export async function getIdealClientByNiche(nicheId: number): Promise<InfluencerIdealClient | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(influencerIdealClients).where(eq(influencerIdealClients.nicheId, nicheId));
+  return result[0];
+}
+
+// ===== INFLUENCER PAINS FUNCTIONS =====
+export async function createInfluencerPains(idealClientId: number, painsList: { level: "primary" | "secondary" | "unexplored"; pain: string; description?: string }[]): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(influencerPains).values(painsList.map(p => ({ idealClientId, ...p })));
+}
+
+export async function getInfluencerPainsByIdealClient(idealClientId: number): Promise<InfluencerPain[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(influencerPains).where(eq(influencerPains.idealClientId, idealClientId)).orderBy(desc(influencerPains.createdAt));
+}
+
+export async function getAllPainsByInfluencer(influencerId: number): Promise<(InfluencerPain & { nicheName: string; clientName: string })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select({
+    id: influencerPains.id,
+    idealClientId: influencerPains.idealClientId,
+    level: influencerPains.level,
+    pain: influencerPains.pain,
+    description: influencerPains.description,
+    createdAt: influencerPains.createdAt,
+    nicheName: influencerNiches.name,
+    clientName: influencerIdealClients.name,
+  })
+    .from(influencerPains)
+    .innerJoin(influencerIdealClients, eq(influencerPains.idealClientId, influencerIdealClients.id))
+    .innerJoin(influencerNiches, eq(influencerIdealClients.nicheId, influencerNiches.id))
+    .where(eq(influencerNiches.influencerId, influencerId))
+    .orderBy(desc(influencerPains.createdAt));
   
   return result;
 }
