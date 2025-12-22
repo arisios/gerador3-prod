@@ -932,3 +932,9 @@ news (notícias)
 - [x] Redirecionar para editor após geraçãonerate)
 - [x] Conteúdos gerados aparecem na lista de conteúdos do projeto
 - [x] Testar fluxo completo: notícia → gerar → configurar → conteúdo criado
+
+
+## Correção de Prompts (21/12/2024)
+- [x] Adicionar nicho ao prompt de conteúdo de influenciador (routers.ts linha 1450)
+- [x] Adicionar nicho ao prompt de imagem de projeto (routers.ts linha 1110)
+- [x] Melhorar clareza do prompt de selfie de influenciador (routers.ts linha 1544 e 1602)

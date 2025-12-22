@@ -130,6 +130,11 @@ export const appRouter = router({
           throw new TRPCError({ code: "NOT_FOUND" });
         }
 
+        // Buscar projeto para pegar nicho
+        const project = await db.getProjectById(content.projectId);
+        const niche = project?.niche || "lifestyle";
+        const businessContext = project?.businessContext || "";
+
         const slides = await db.getSlidesByContent(input.contentId);
         if (slides.length === 0) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Nenhum slide encontrado" });
@@ -1098,6 +1103,11 @@ Retorne JSON com:
           throw new TRPCError({ code: "NOT_FOUND" });
         }
 
+        // Buscar projeto para pegar nicho
+        const project = await db.getProjectById(content.projectId);
+        const niche = project?.niche || "lifestyle";
+        const businessContext = project?.businessContext || "";
+
         const slides = await db.getSlidesByContent(input.contentId);
         const results: { slideId: number; imageUrl: string | null; error?: string }[] = [];
         
@@ -1109,6 +1119,12 @@ Retorne JSON com:
           try {
             const basePrompt = slide.imagePrompt || `Professional Instagram image for: ${slide.text || "lifestyle content"}`;
             let fullPrompt = `${basePrompt}
+
+=== CONTEXTO DO NEGÓCIO ===
+Nicho: ${niche}
+${businessContext ? `Contexto: ${businessContext}` : ""}
+
+A imagem DEVE refletir o nicho do negócio e ser relevante para o público-alvo.
 
 === REGRAS OBRIGATÓRIAS ===
 1. A imagem DEVE ser uma FOTOGRAFIA REAL, não ilustração, arte digital ou desenho
@@ -1454,10 +1470,12 @@ REGRA PRIMORDIAL: Imagem REAL, SEM NENHUM TEXTO. Selfie casual.`
               content: `Você é um especialista em marketing de influência e soft sell.
 Crie conteúdo para o influenciador virtual ${influencer.name}.
 Descrição: ${influencer.description || "Influenciador digital"}
+Nicho: ${influencer.niche || "lifestyle"}
 Template: ${input.template}
 ${input.product ? `Produto/Serviço: ${input.product}` : "Conteúdo de autoridade sem venda direta"}
 
-O conteúdo deve parecer natural e autêntico, não vendedor demais.`
+O conteúdo deve parecer natural e autêntico, não vendedor demais.
+O conteúdo DEVE estar relacionado ao nicho do influenciador e ser relevante para seu público-alvo.`
             },
             { role: "user", content: `Gere um conteúdo de carrossel no formato ${input.template} para Instagram.` }
           ],
@@ -1551,9 +1569,9 @@ ${input.context ? `Contexto adicional: ${input.context}` : ""}
 
 REGRAS PRIMORDIAIS (NÃO ALTERAR):
 1. IMAGEM REAL SEM NENHUM TEXTO - Não inclua letras, palavras, números ou qualquer elemento textual
-2. FOTO EM PRIMEIRA PESSOA - Como se o influenciador estivesse tirando a própria foto (selfie, foto no espelho, foto com braço estendido, ou foto tirada por amigo próximo)
+2. FOTO EM PRIMEIRA PESSOA - A foto FINAL já pronta, como se você estivesse vendo o resultado de uma selfie ou foto casual. NÃO mostre a pessoa segurando celular, NÃO mostre o ato de tirar a foto, NÃO mostre braços estendidos com celular. Apenas o resultado: selfie no espelho, foto casual, retrato natural.
 3. CONSISTÊNCIA FÍSICA - A pessoa na foto DEVE ser idêntica à imagem de referência (mesmas características físicas, rosto, corpo, cabelo)
-4. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores
+4. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores. Foco no rosto e expressão, não no equipamento.
 5. QUALIDADE - Foto de alta qualidade mas natural, não muito produzida
 
 Estilo da foto:
@@ -1608,9 +1626,9 @@ Contexto da foto: ${slide.text}
 
 REGRAS PRIMORDIAIS (NÃO ALTERAR):
 1. IMAGEM REAL SEM NENHUM TEXTO - Não inclua letras, palavras, números ou qualquer elemento textual
-2. FOTO EM PRIMEIRA PESSOA - Como se o influenciador estivesse tirando a própria foto (selfie, foto no espelho, foto com braço estendido, ou foto tirada por amigo próximo)
+2. FOTO EM PRIMEIRA PESSOA - A foto FINAL já pronta, como se você estivesse vendo o resultado de uma selfie ou foto casual. NÃO mostre a pessoa segurando celular, NÃO mostre o ato de tirar a foto, NÃO mostre braços estendidos com celular. Apenas o resultado: selfie no espelho, foto casual, retrato natural.
 3. CONSISTÊNCIA FÍSICA - A pessoa na foto DEVE ser idêntica à imagem de referência (mesmas características físicas, rosto, corpo, cabelo)
-4. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores
+4. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores. Foco no rosto e expressão, não no equipamento.
 5. QUALIDADE - Foto de alta qualidade mas natural, não muito produzida
 
 Estilo da foto:
