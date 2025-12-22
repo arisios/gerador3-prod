@@ -1290,7 +1290,9 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Redesenhar layout: Foto + Nome + "Conteúdos" no topo (compacto) - mantido
 - [x] Compactar cards de conteúdo: Título + Fonte (badge) + Template
 - [x] Cards já estão em ordem cronológica (backend)
-- [ ] Adicionar botões de ação: Excluir, Reutilizar (pendente)
+- [x] Adicionar botão de excluir nos cards de conteúdo
+- [x] Adicionar preview ultra-compacto (máx 40 caracteres do primeiro slide)
+- [x] Criar rota backend influencers.deleteContent
 - [x] Adicionar botão grande "Gerar Novo Conteúdo" no final da lista
 - [x] Botão leva para Hub de Geração (/influencer/:id/content/new)
 - [x] Manter abas (Conteúdos, Soft Sell, Produtos) - usuário pediu para manter

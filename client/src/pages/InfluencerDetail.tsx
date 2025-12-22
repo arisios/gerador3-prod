@@ -480,6 +480,16 @@ export default function InfluencerDetail() {
     },
   });
 
+  const deleteContentMutation = trpc.influencers.deleteContent.useMutation({
+    onSuccess: () => {
+      toast.success("Conteúdo excluído com sucesso!");
+      utils.influencers.get.invalidate({ id: influencerId });
+    },
+    onError: (e) => {
+      toast.error("Erro ao excluir conteúdo: " + e.message);
+    },
+  });
+
   const handleOpenLightbox = (photo: ProfilePhoto) => {
     setLightboxPhoto(photo);
     setLightboxOpen(true);
@@ -600,40 +610,59 @@ export default function InfluencerDetail() {
           {/* Contents Tab */}
           <TabsContent value="contents" className="space-y-4 mt-4">
             {contents.length > 0 ? (
-              contents.map((content: InfluencerContent) => (
-                <Link key={content.id} href={`/influencer/${influencerId}/content/${content.id}`}>
-                  <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <div className="font-medium">{content.title || "Sem título"}</div>
-                          {content.source && (
-                            <Badge 
-                              variant="secondary" 
-                              className={`text-xs ${
-                                content.source === 'produto' ? 'bg-purple-100 text-purple-700' :
-                                content.source === 'softsell' ? 'bg-blue-100 text-blue-700' :
-                                content.source === 'trend' ? 'bg-green-100 text-green-700' :
-                                content.source === 'viral' ? 'bg-orange-100 text-orange-700' :
-                                content.source === 'assunto' ? 'bg-cyan-100 text-cyan-700' :
-                                ''
-                              }`}
-                            >
-                              {content.source === 'produto' ? 'Produto' :
-                               content.source === 'softsell' ? 'Soft Sell' :
-                               content.source === 'trend' ? 'Trend' :
-                               content.source === 'viral' ? 'Viral' :
-                               content.source === 'assunto' ? 'Assunto' :
-                               content.source}
-                            </Badge>
+              contents.map((content: InfluencerContent & { preview?: string }) => (
+                <Card key={content.id} className="hover:border-primary/50 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <Link href={`/influencer/${influencerId}/content/${content.id}`} className="flex-1 cursor-pointer">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium">{content.title || "Sem título"}</div>
+                            {content.source && (
+                              <Badge 
+                                variant="secondary" 
+                                className={`text-xs ${
+                                  content.source === 'produto' ? 'bg-purple-100 text-purple-700' :
+                                  content.source === 'softsell' ? 'bg-blue-100 text-blue-700' :
+                                  content.source === 'trend' ? 'bg-green-100 text-green-700' :
+                                  content.source === 'viral' ? 'bg-orange-100 text-orange-700' :
+                                  content.source === 'assunto' ? 'bg-cyan-100 text-cyan-700' :
+                                  ''
+                                }`}
+                              >
+                                {content.source === 'produto' ? 'Produto' :
+                                 content.source === 'softsell' ? 'Soft Sell' :
+                                 content.source === 'trend' ? 'Trend' :
+                                 content.source === 'viral' ? 'Viral' :
+                                 content.source === 'assunto' ? 'Assunto' :
+                                 content.source}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">{content.template}</div>
+                          {content.preview && (
+                            <div className="text-xs text-muted-foreground/70 italic line-clamp-1">
+                              "{content.preview}..."
+                            </div>
                           )}
                         </div>
-                        <div className="text-xs text-muted-foreground">{content.template}</div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    </CardContent>
-                  </Card>
-                </Link>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (confirm('Tem certeza que deseja excluir este conteúdo?')) {
+                            deleteContentMutation.mutate({ id: content.id });
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ))
             ) : (
               <div className="text-center py-8 text-muted-foreground">

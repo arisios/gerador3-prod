@@ -1298,7 +1298,20 @@ ISTO É CRÍTICO: a consistência visual do personagem é essencial.`;
           throw new TRPCError({ code: "NOT_FOUND" });
         }
         const contents = await db.getInfluencerContentsByInfluencer(input.id);
-        return { ...influencer, contents };
+        
+        // Adicionar preview (primeiros 40 caracteres do primeiro slide)
+        const contentsWithPreview = await Promise.all(
+          contents.map(async (content) => {
+            const slides = await db.getInfluencerSlidesByContent(content.id);
+            const firstSlideText = slides[0]?.text || "";
+            const preview = firstSlideText.length > 40 
+              ? firstSlideText.substring(0, 40)
+              : firstSlideText;
+            return { ...content, preview };
+          })
+        );
+        
+        return { ...influencer, contents: contentsWithPreview };
       }),
 
     generateReferencePhotos: protectedProcedure
@@ -1710,6 +1723,22 @@ Lembre-se: Esta foto será postada como se fosse do próprio influenciador, ent�
           niche: input.niche,
           description: input.description,
         });
+        return { success: true };
+      }),
+
+    // Deletar conteúdo do influenciador
+    deleteContent: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const content = await db.getInfluencerContentById(input.id);
+        if (!content) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        const influencer = await db.getInfluencerById(content.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        await db.deleteInfluencerContent(input.id);
         return { success: true };
       }),
 
