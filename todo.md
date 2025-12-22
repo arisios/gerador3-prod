@@ -1075,3 +1075,11 @@ news (notícias)
 - [x] Botão Assuntos abre direto na aba Dores (assuntos)
 - [x] Adicionar useEffect para atualizar aba quando URL mudar (corrige problema de cache)
 - [x] Elimina necessidade de clicar duas vezes no mesmo botão
+
+## Adicionar Aba Assuntos no Hub de Geração (22/12/2024)
+- [x] Adicionar 5ª aba "Assuntos" no InfluencerContentCreate
+- [x] Criar interface de busca de notícias por assunto
+- [x] Atualizar mapeamento: ?type=subject → aba Assuntos
+- [ ] Integrar com backend para buscar notícias (próxima etapa)
+- [ ] Permitir seleção de notícias e geração de conteúdo (próxima etapa)
+- [ ] Testar fluxo completo: Botão Assuntos → Busca → Seleção → Geração

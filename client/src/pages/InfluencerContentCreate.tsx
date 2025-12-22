@@ -49,10 +49,10 @@ export default function InfluencerContentCreate() {
   const initialMode = 
     typeParam === 'trend' ? 'trends' :
     typeParam === 'viral' ? 'virals' :
-    typeParam === 'subject' ? 'dores' :
+    typeParam === 'subject' ? 'assuntos' :
     'soft-sell';
 
-  const [mode, setMode] = useState<"soft-sell" | "dores" | "trends" | "virals">(initialMode);
+  const [mode, setMode] = useState<"soft-sell" | "dores" | "trends" | "virals" | "assuntos">(initialMode);
   const [template, setTemplate] = useState("");
   const [product, setProduct] = useState("");
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
@@ -65,9 +65,9 @@ export default function InfluencerContentCreate() {
     const newMode = 
       typeParam === 'trend' ? 'trends' :
       typeParam === 'viral' ? 'virals' :
-      typeParam === 'subject' ? 'dores' :
+      typeParam === 'subject' ? 'assuntos' :
       'soft-sell';
-    setMode(newMode);
+    setMode(newMode as typeof mode);
   }, [location]);
 
   const { data: influencer } = trpc.influencers.get.useQuery({ id: influencerId });
@@ -169,11 +169,12 @@ export default function InfluencerContentCreate() {
       <main className="container px-4 py-6 space-y-6">
         {/* Mode Selection */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
-          <TabsList className="w-full grid grid-cols-4">
+          <TabsList className="w-full grid grid-cols-5">
             <TabsTrigger value="soft-sell" className="text-xs">Soft Sell</TabsTrigger>
             <TabsTrigger value="dores" className="text-xs">Dores</TabsTrigger>
             <TabsTrigger value="trends" className="text-xs">Trends</TabsTrigger>
-            <TabsTrigger value="virals" className="text-xs">Virais</TabsTrigger>
+            <TabsTrigger value="virais" className="text-xs">Virais</TabsTrigger>
+            <TabsTrigger value="assuntos" className="text-xs">Assuntos</TabsTrigger>
           </TabsList>
 
           {/* Soft Sell Tab */}
@@ -377,6 +378,32 @@ export default function InfluencerContentCreate() {
                 </Button>
               </div>
             )}
+          </TabsContent>
+
+          {/* Assuntos Tab */}
+          <TabsContent value="assuntos" className="space-y-4 mt-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Buscar Notícias por Assunto</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="Ex: Inteligência Artificial, Carros Elétricos, Nutrição..." 
+                    className="flex-1"
+                  />
+                  <Button>
+                    Buscar
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Digite um assunto para buscar notícias recentes e gerar conteúdo baseado nelas
+                </p>
+              </div>
+
+              {/* Resultados aparecerão aqui */}
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Digite um assunto e clique em Buscar para encontrar notícias</p>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
