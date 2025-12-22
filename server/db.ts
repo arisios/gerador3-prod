@@ -14,6 +14,7 @@ import {
   influencerNiches, InfluencerNiche, InsertInfluencerNiche,
   influencerIdealClients, InfluencerIdealClient, InsertInfluencerIdealClient,
   influencerPains, InfluencerPain, InsertInfluencerPain,
+  influencerProductReferences,
   trends, Trend,
   virals, Viral,
   userSettings, UserSettings,
@@ -388,6 +389,33 @@ export async function deleteInfluencerProduct(id: number): Promise<void> {
   const db = await getDb();
   if (!db) return;
   await db.delete(influencerProducts).where(eq(influencerProducts.id, id));
+}
+
+// ===== INFLUENCER PRODUCT REFERENCES FUNCTIONS =====
+export async function createInfluencerProductReference(data: { productId: number; type: string; url: string; description?: string }): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(influencerProductReferences).values(data);
+  return result[0].insertId;
+}
+
+export async function getInfluencerProductReferences(productId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(influencerProductReferences).where(eq(influencerProductReferences.productId, productId)).orderBy(desc(influencerProductReferences.createdAt));
+}
+
+export async function getInfluencerProductReferenceById(id: number): Promise<any | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(influencerProductReferences).where(eq(influencerProductReferences.id, id)).limit(1);
+  return result[0];
+}
+
+export async function deleteInfluencerProductReference(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(influencerProductReferences).where(eq(influencerProductReferences.id, id));
 }
 
 // ===== INFLUENCER CONTENT FUNCTIONS =====

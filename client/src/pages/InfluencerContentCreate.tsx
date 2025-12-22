@@ -10,8 +10,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Loader2, Zap, TrendingUp, Flame, Target, Plus, Minus, RefreshCw, Search } from "lucide-react";
+import { ArrowLeft, Loader2, Zap, TrendingUp, Flame, Target, Plus, Minus, RefreshCw, Search, Settings } from "lucide-react";
 import { toast } from "sonner";
+import { ProductDetailModal } from "@/components/ProductDetailModal";
 
 const SOFT_SELL_TEMPLATES = [
   { id: "testemunho", name: "Testemunho Pessoal" },
@@ -70,6 +71,7 @@ export default function InfluencerContentCreate() {
   const [newProductPains, setNewProductPains] = useState("");
   const [newProductApproaches, setNewProductApproaches] = useState("");
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
+  const [selectedProductForModal, setSelectedProductForModal] = useState<any>(null);
   
   // Estados da aba Assuntos
   const [searchQuery, setSearchQuery] = useState("");
@@ -393,6 +395,16 @@ export default function InfluencerContentCreate() {
                           <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
                         </label>
                       </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedProductForModal(product);
+                        }}
+                      >
+                        <Settings className="w-4 h-4" />
+                      </Button>
                     </div>
                   </Card>
                 ))}
@@ -729,6 +741,18 @@ export default function InfluencerContentCreate() {
           }
         </Button>
       </div>
+
+      {/* Modal de Detalhes do Produto */}
+      {selectedProductForModal && (
+        <ProductDetailModal
+          product={selectedProductForModal}
+          isOpen={!!selectedProductForModal}
+          onClose={() => setSelectedProductForModal(null)}
+          onUpdate={() => {
+            utils.influencers.products.listProducts.invalidate({ influencerId });
+          }}
+        />
+      )}
     </div>
   );
 }

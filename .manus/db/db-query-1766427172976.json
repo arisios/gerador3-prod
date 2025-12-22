@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `influencerProductReferences` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `product_id` int NOT NULL,\n  `type` enum('product_photo','screenshot','environment','context') NOT NULL,\n  `url` text NOT NULL,\n  `description` text,\n  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,\n  CONSTRAINT `influencerProductReferences_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute CREATE TABLE IF NOT EXISTS `influencerProductReferences` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `product_id` int NOT NULL,\n  `type` enum('product_photo','screenshot','environment','context') NOT NULL,\n  `url` text NOT NULL,\n  `description` text,\n  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,\n  CONSTRAINT `influencerProductReferences_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 187
+}

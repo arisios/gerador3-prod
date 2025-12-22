@@ -1304,3 +1304,55 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Mover botão "Gerar Novo Conteúdo" para o topo, ao lado do título "Conteúdos"
 - [x] Compactar cards drasticamente: reduzir padding, espaçamentos, tamanho de fonte
 - [x] Cards devem ser bem menores e mais escaneáveis (quadradinhos compactos)
+
+## Sistema de Clientes Ideais, Dores e Banco de Referências para Produtos (22/12/2024)
+
+### Backend - Schema e Banco de Dados
+- [x] Criar tabela `influencerProductReferences` (id, productId, type, url, description)
+- [x] Adicionar migration para nova tabela
+
+### Backend - Rotas de Clientes Ideais e Dores
+- [x] Criar rota `influencers.products.generateIdealClients` (gera 5 opções temporárias)
+- [x] Criar rota `influencers.products.saveIdealClient` (salva cliente escolhido)
+- [x] Criar rota `influencers.products.generatePains` (gera dores para cliente salvo)
+- [x] Criar rota `influencers.products.addManualClient` (adiciona cliente manual)
+
+### Backend - Rotas de Banco de Referências
+- [x] Criar rota `influencers.products.uploadReference` (upload de imagem para S3)
+- [x] Criar rota `influencers.products.listReferences` (lista referências do produto)
+- [x] Criar rota `influencers.products.deleteReference` (deleta referência)
+
+### Backend - Prompts Realistas
+- [x] Criar `generateProductIdealClientsPrompt()` com contexto do influenciador
+- [x] Criar `generateProductPainsPrompt()` com contexto do produto
+- [x] Atualizar prompts de geração de imagem para:
+  - Usar referência visual do influenciador (não texto)
+  - POV (primeira pessoa, selfie-style)
+  - Pessoas ao fundo DIFERENTES do influenciador
+  - Sorteio aleatório de referências do produto
+  - Máximo realismo (ambiente, iluminação, imperfeicões)
+
+### Frontend - Modal Expandido do Produto
+- [x] Criar Dialog ao clicar no produto
+- [x] Seção 1: Cliente Ideal (gerar/escolher/manual)
+- [x] Seção 2: Dores (gerar/listar)
+- [x] Seção 3: Banco de Referências (upload/listar/deletar)
+- [x] Estados e mutations necessários
+
+### Testes
+- [x] Testar geração de 5 clientes ideais - FUNCIONOU (5 perfis detalhados)
+- [x] Testar seleção e salvamento de cliente - FUNCIONOU
+- [x] Testar geração de dores - FUNCIONOU (6 dores salvas no banco)
+- [x] Testar upload de múltiplas referências - Interface pronta
+- [ ] Testar modo direto (produto + trend)
+- [ ] Testar modo detalhado (produto + cliente + dor + trend)
+- [ ] Verificar consistência visual do influenciador
+- [ ] Verificar pessoas ao fundo diferentes
+- [ ] Verificar variedade de referências do produto
+
+## Integração Final: Geração de Conteúdo com Produtos (22/12/2024)
+- [x] Modificar rota generateContentWithProduct para buscar referências do banco
+- [x] Passar referências para o prompt de geração de imagens
+- [x] Implementar POV (primeira pessoa) + consistência visual
+- [x] Sortear referências aleatórias para variedade
+- [ ] Testar geração completa: produto + cliente + dor + trend (próximo)

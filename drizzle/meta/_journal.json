@@ -127,6 +127,13 @@
       "when": 1766417174864,
       "tag": "0017_narrow_leo",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1766427050513,
+      "tag": "0018_late_firestar",
+      "breakpoints": true
     }
   ]
 }

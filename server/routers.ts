@@ -1884,6 +1884,242 @@ Retorne APENAS um array JSON com as abordagens:
         return { success: true };
       }),
 
+    // Gerar 5 opções de clientes ideais (temporário, não salva)
+    generateIdealClients: protectedProcedure
+      .input(z.object({ productId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const product = await db.getInfluencerProductById(input.productId);
+        if (!product) throw new TRPCError({ code: "NOT_FOUND" });
+        const influencer = await db.getInfluencerById(product.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+
+        const prompt = `Você é um especialista em personas e público-alvo.
+
+INFLUENCIADOR:
+Nicho: ${influencer.niche}
+Descrição: ${influencer.description || "Não informada"}
+
+PRODUTO:
+Nome: ${product.name}
+Descrição: ${product.description || "Não informada"}
+
+TAREFA:
+Gere 5 perfis de clientes ideais para este produto no contexto do nicho do influenciador.
+
+Cada perfil deve ter:
+- Nome fictício representativo (ex: "João, 28 anos, Mecânico Iniciante")
+- Descrição do contexto de vida (ocupação, desafios, objetivos)
+- Motivação principal para comprar o produto
+- Objeção principal que impede a compra
+
+Retorne JSON com array de clientes.`;
+
+        const response = await invokeLLM({
+          messages: [{ role: "user", content: prompt }],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "ideal_clients",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  clients: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        description: { type: "string" },
+                        motivation: { type: "string" },
+                        objection: { type: "string" }
+                      },
+                      required: ["name", "description", "motivation", "objection"],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ["clients"],
+                additionalProperties: false
+              }
+            }
+          }
+        });
+
+        const result = JSON.parse((response.choices[0].message.content as string) || "{}");
+        return { clients: result.clients || [] };
+      }),
+
+    // Salvar cliente ideal escolhido
+    saveIdealClient: protectedProcedure
+      .input(z.object({ 
+        productId: z.number(), 
+        idealClient: z.string() 
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const product = await db.getInfluencerProductById(input.productId);
+        if (!product) throw new TRPCError({ code: "NOT_FOUND" });
+        const influencer = await db.getInfluencerById(product.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        await db.updateInfluencerProduct(input.productId, { 
+          idealClient: input.idealClient 
+        });
+        return { success: true };
+      }),
+
+    // Adicionar cliente ideal manualmente
+    addManualClient: protectedProcedure
+      .input(z.object({ 
+        productId: z.number(), 
+        idealClient: z.string() 
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const product = await db.getInfluencerProductById(input.productId);
+        if (!product) throw new TRPCError({ code: "NOT_FOUND" });
+        const influencer = await db.getInfluencerById(product.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        await db.updateInfluencerProduct(input.productId, { 
+          idealClient: input.idealClient 
+        });
+        return { success: true };
+      }),
+
+    // Gerar dores para o cliente ideal salvo
+    generatePains: protectedProcedure
+      .input(z.object({ productId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const product = await db.getInfluencerProductById(input.productId);
+        if (!product) throw new TRPCError({ code: "NOT_FOUND" });
+        if (!product.idealClient) {
+          throw new TRPCError({ 
+            code: "BAD_REQUEST", 
+            message: "Produto não tem cliente ideal definido" 
+          });
+        }
+        const influencer = await db.getInfluencerById(product.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+
+        const prompt = `Você é um especialista em copywriting e dores do cliente.
+
+INFLUENCIADOR:
+Nicho: ${influencer.niche}
+
+PRODUTO:
+Nome: ${product.name}
+Descrição: ${product.description || "Não informada"}
+
+CLIENTE IDEAL:
+${product.idealClient}
+
+TAREFA:
+Gere 5-8 dores específicas que este cliente ideal enfrenta e que o produto resolve.
+
+Cada dor deve:
+- Ser específica e concreta (não genérica)
+- Ser algo que o produto realmente resolve
+- Ser relevante para o nicho do influenciador
+- Ter potencial emocional (medo, frustração, desejo)
+
+Retorne array JSON de strings (apenas as dores, sem numeração).`;
+
+        const response = await invokeLLM({
+          messages: [{ role: "user", content: prompt }],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "pains",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  pains: {
+                    type: "array",
+                    items: { type: "string" }
+                  }
+                },
+                required: ["pains"],
+                additionalProperties: false
+              }
+            }
+          }
+        });
+
+        const result = JSON.parse((response.choices[0].message.content as string) || "{}");
+        const pains = result.pains || [];
+        
+        await db.updateInfluencerProduct(input.productId, { pains });
+        return { pains };
+      }),
+
+    // Upload de referência do produto (imagem)
+    uploadReference: protectedProcedure
+      .input(z.object({
+        productId: z.number(),
+        type: z.enum(["product_photo", "screenshot", "environment", "context"]),
+        imageData: z.string(), // Base64
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const product = await db.getInfluencerProductById(input.productId);
+        if (!product) throw new TRPCError({ code: "NOT_FOUND" });
+        const influencer = await db.getInfluencerById(product.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+
+        // Upload para S3
+        const buffer = Buffer.from(input.imageData.split(',')[1], 'base64');
+        const fileKey = `influencer-${product.influencerId}/product-${input.productId}/ref-${Date.now()}.jpg`;
+        const { url } = await storagePut(fileKey, buffer, "image/jpeg");
+
+        // Salvar no banco
+        const refId = await db.createInfluencerProductReference({
+          productId: input.productId,
+          type: input.type,
+          url,
+          description: input.description,
+        });
+
+        return { id: refId, url };
+      }),
+
+    // Listar referências do produto
+    listReferences: protectedProcedure
+      .input(z.object({ productId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const product = await db.getInfluencerProductById(input.productId);
+        if (!product) throw new TRPCError({ code: "NOT_FOUND" });
+        const influencer = await db.getInfluencerById(product.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        return db.getInfluencerProductReferences(input.productId);
+      }),
+
+    // Deletar referência
+    deleteReference: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const ref = await db.getInfluencerProductReferenceById(input.id);
+        if (!ref) throw new TRPCError({ code: "NOT_FOUND" });
+        const product = await db.getInfluencerProductById(ref.productId);
+        if (!product) throw new TRPCError({ code: "NOT_FOUND" });
+        const influencer = await db.getInfluencerById(product.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        await db.deleteInfluencerProductReference(input.id);
+        return { success: true };
+      }),
+
     // Gerar conteúdo combinando produto + abordagens + contexto
     generateContentWithProduct: protectedProcedure
       .input(z.object({
@@ -1911,21 +2147,38 @@ Retorne APENAS um array JSON com as abordagens:
           contextInfo = `ASSUNTO: ${input.freeSubject}`;
         }
 
+        // Buscar referências do produto
+        const productReferences = await db.getInfluencerProductReferences(input.productId);
+
         const response = await invokeLLM({
           messages: [
             { 
               role: "system", 
               content: `Você é um especialista em marketing de influência e soft sell.
-Crie conteúdo para o influenciador virtual ${influencer.name}.
+
+INFLUENCIADOR:
+Nome: ${influencer.name}
 Descrição: ${influencer.description || "Influenciador digital"}
 Nicho: ${influencer.niche || "lifestyle"}
-Produto/Serviço: ${product.name}
-Abordagens: ${product.selectedApproaches.join(", ")}${contextInfo ? `\nContexto: ${contextInfo}` : ''}
+Características físicas: Manter consistência visual (usar foto de referência)
 
-O conteúdo deve parecer natural e autêntico, não vendedor demais.
-O conteúdo DEVE estar relacionado ao nicho do influenciador e ser relevante para seu público-alvo.`
+PRODUTO:
+Nome: ${product.name}
+Descrição: ${product.description || "Não informada"}
+${product.idealClient ? `Cliente Ideal: ${product.idealClient}` : ''}
+${product.pains && product.pains.length > 0 ? `Dores: ${product.pains.join(", ")}` : ''}
+Abordagens: ${product.selectedApproaches.join(", ")}
+${contextInfo ? `\nContexto: ${contextInfo}` : ''}
+
+REGRAS DE REALISMO:
+1. PRIMEIRA PESSOA: Todo conteúdo deve ser na perspectiva "EU" (não "você" ou "a gente")
+2. TOM PESSOAL: "Eu testei", "Olha o que descobri", "Minha experiência com"
+3. AUTÊNCIA: Parecer natural, conversacional, não vendedor demais
+4. NICHO: Conteúdo DEVE estar relacionado ao nicho do influenciador
+
+O conteúdo deve parecer que ${influencer.name} está compartilhando uma experiência pessoal real.`
             },
-            { role: "user", content: `Gere um conteúdo de carrossel para Instagram.` }
+            { role: "user", content: `Gere um conteúdo de carrossel para Instagram na primeira pessoa.` }
           ],
           response_format: {
             type: "json_schema",
@@ -1978,11 +2231,55 @@ O conteúdo DEVE estar relacionado ao nicho do influenciador e ser relevante par
           status: "ready",
         });
 
+        // Gerar imagens para os slides com referências e POV
         if (contentData.slides && Array.isArray(contentData.slides)) {
-          const slidesData = contentData.slides.map((s: { order?: number; text: string }, idx: number) => ({
-            order: s.order || idx + 1,
-            text: s.text || "",
-          }));
+          const slidesData = await Promise.all(
+            contentData.slides.map(async (s: { order?: number; text: string }, idx: number) => {
+              // Sortear referência aleatória do banco (se houver)
+              const randomRef = productReferences.length > 0 
+                ? productReferences[Math.floor(Math.random() * productReferences.length)]
+                : null;
+
+              // Prompt de imagem com POV e realismo
+              const imagePrompt = `POV (primeira pessoa): ${influencer.name} mostrando ${product.name}.\n\nCena: ${s.text}\n\n${randomRef ? `Referência do produto: [usar imagem anexada como base visual]` : `Produto: ${product.description}`}\n\nAmbiente: ${influencer.niche === 'fitness' ? 'Academia, pessoas treinando ao fundo' : influencer.niche === 'tech' ? 'Escritório moderno, equipamentos tech ao fundo' : 'Ambiente casual, pessoas ao fundo'}\n\nPessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genéricos variados, NÃO usar referência do influenciador)\n\nEstilo: Selfie autêntica, luz natural, realista, imperfeicões naturais\nÂngulo: Câmera frontal, braço estendido, NÃO mostrar celular tirando foto\n\nIMPORTANTE: Manter características físicas do influenciador (usar foto de referência)`;
+
+              // Gerar imagem com referências
+              let imageUrl = null;
+              try {
+                const originalImages = [];
+                // Adicionar foto do influenciador como referência principal
+                if (influencer.referenceImageUrl) {
+                  originalImages.push({
+                    url: influencer.referenceImageUrl,
+                    mimeType: "image/jpeg" as const
+                  });
+                }
+                // Adicionar referência do produto (se houver)
+                if (randomRef) {
+                  originalImages.push({
+                    url: randomRef.url,
+                    mimeType: "image/jpeg" as const
+                  });
+                }
+
+                const imgResult = await generateImage({
+                  prompt: imagePrompt,
+                  originalImages: originalImages.length > 0 ? originalImages : undefined
+                });
+                imageUrl = imgResult.url;
+              } catch (error) {
+                console.error('Erro ao gerar imagem:', error);
+              }
+
+              return {
+                order: s.order || idx + 1,
+                text: s.text || "",
+                imageUrl,
+                imagePrompt
+              };
+            })
+          );
+
           if (slidesData.length > 0) {
             await db.createInfluencerSlides(contentId, slidesData);
           }

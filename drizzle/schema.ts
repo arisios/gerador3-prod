@@ -134,6 +134,16 @@ export const influencerProducts = mysqlTable("influencerProducts", {
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
+// Influencer Product References table - banco de imagens de referência do produto
+export const influencerProductReferences = mysqlTable("influencerProductReferences", {
+  id: int("id").primaryKey().autoincrement(),
+  productId: int("product_id").notNull(),
+  type: mysqlEnum("type", ["product_photo", "screenshot", "environment", "context"]).notNull(),
+  url: text("url").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Influencer Contents table
 export const influencerContents = mysqlTable("influencerContents", {
   id: int("id").autoincrement().primaryKey(),
