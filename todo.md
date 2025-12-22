@@ -1267,3 +1267,13 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [ ] Atualizar handleGenerate para processar combinações
 - [ ] Backend: passar produto completo (com cliente ideal + dores) + trend/viral/assunto
 - [ ] Testar: Produto+Trend, Produto+Viral, Produto+Assunto
+
+## Documentação Visual de Fluxo e Prompts de IA (22/12/2024)
+- [x] Mapear fluxo completo: Projetos (cadastro → análise → geração → download)
+- [x] Mapear fluxo completo: Influenciadores (cadastro → produtos → hub geração → download)
+- [x] Identificar todos os pontos de intervenção de IA (16 pontos)
+- [x] Extrair e documentar prompts de cada ponto de IA
+- [x] Criar diagrama visual (Mermaid) limpo e organizado
+- [x] Criar documento detalhado com todos os prompts (prompts-detalhados.md)
+- [x] Criar documento de código para limpar (codigo-para-limpar.md)
+- [x] Revisar e entregar documentação completa
