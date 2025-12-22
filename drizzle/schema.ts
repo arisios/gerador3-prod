@@ -151,7 +151,7 @@ export const influencerContents = mysqlTable("influencerContents", {
   userId: int("userId").notNull(),
   type: mysqlEnum("type", ["carousel", "image", "video"]).notNull(),
   template: varchar("template", { length: 100 }).notNull(),
-  source: mysqlEnum("source", ["produto", "softsell", "trend", "viral", "assunto"]),
+  source: mysqlEnum("source", ["produto", "softsell", "trend", "viral", "assunto"]).notNull(),
   title: text("title"),
   description: text("description"),
   hook: text("hook"),

@@ -1,0 +1,1 @@
+ALTER TABLE `influencerContents` MODIFY COLUMN `source` enum('produto','softsell','trend','viral','assunto') NOT NULL;

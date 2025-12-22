@@ -1420,3 +1420,8 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] **CRÍTICO:** Conteúdo gerado vem vazio (sem texto nos slides) - backend não está usando o template específico enviado pelo frontend - CORRIGIDO
 - [x] Backend ignora campos `input.template` e `input.type` na geração - CORRIGIDO: agora usa input.type e input.template
 - [x] Prompt LLM precisa ser ajustado para gerar conteúdo baseado no template selecionado (rotina, storytelling, antes-depois, etc.) - IMPLEMENTADO: função getTemplateInstructions() com 20 templates
+
+
+## Bug Crítico (22/12/2024 - 19:56)
+- [x] **CRÍTICO:** Erro ao gerar conteúdo: "Failed query: insert into influencerContents" - faltam valores padrão para campos obrigatórios - CORRIGIDO
+- [x] createInfluencerContent precisa fornecer valores para todos os campos obrigatórios da tabela - CORRIGIDO: campo source agora é obrigatório e usa 'softsell' como padrão

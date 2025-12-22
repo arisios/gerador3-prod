@@ -2270,7 +2270,7 @@ ${input.type === 'carousel' ? 'Gere entre 5-8 slides com textos curtos e impacta
           userId: ctx.user.id,
           type: input.type || "carousel",
           template: input.template || "generico",
-          source: input.productId ? "produto" : (input.contextType === "trend" ? "trend" : input.contextType === "viral" ? "viral" : input.contextType === "subject" ? "assunto" : "generico"),
+          source: input.productId ? "produto" : (input.contextType === "trend" ? "trend" : input.contextType === "viral" ? "viral" : input.contextType === "subject" ? "assunto" : "softsell"),
           title: contentData.title || "Conteúdo",
           description: contentData.description || null,
           hook: contentData.hook || null,

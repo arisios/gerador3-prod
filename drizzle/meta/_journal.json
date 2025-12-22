@@ -134,6 +134,13 @@
       "when": 1766427050513,
       "tag": "0018_late_firestar",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1766444318799,
+      "tag": "0019_safe_salo",
+      "breakpoints": true
     }
   ]
 }
