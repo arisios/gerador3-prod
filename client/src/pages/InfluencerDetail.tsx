@@ -599,22 +599,6 @@ export default function InfluencerDetail() {
 
           {/* Contents Tab */}
           <TabsContent value="contents" className="space-y-4 mt-4">
-            {/* Actions */}
-            <div className="grid grid-cols-3 gap-2">
-              <Button className="w-full" onClick={() => setLocation(`/influencer/${influencerId}/content/new?type=trend`)}>
-                <Zap className="w-4 h-4 mr-2" />
-                Trends
-              </Button>
-              <Button className="w-full" onClick={() => setLocation(`/influencer/${influencerId}/content/new?type=viral`)}>
-                <Zap className="w-4 h-4 mr-2" />
-                Virais
-              </Button>
-              <Button className="w-full" onClick={() => setLocation(`/influencer/${influencerId}/content/new?type=subject`)}>
-                <Zap className="w-4 h-4 mr-2" />
-                Assuntos
-              </Button>
-            </div>
-
             {contents.length > 0 ? (
               contents.map((content: InfluencerContent) => (
                 <Link key={content.id} href={`/influencer/${influencerId}/content/${content.id}`}>
@@ -656,6 +640,16 @@ export default function InfluencerDetail() {
                 <p>Nenhum conteúdo ainda</p>
               </div>
             )}
+
+            {/* Botão Gerar Novo Conteúdo */}
+            <Button 
+              className="w-full" 
+              size="lg"
+              onClick={() => setLocation(`/influencer/${influencerId}/content/new`)}
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Gerar Novo Conteúdo
+            </Button>
           </TabsContent>
 
           {/* Soft Sell Tab */}
