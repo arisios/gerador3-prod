@@ -32,6 +32,30 @@ const CAROUSEL_TEMPLATES = [
   { id: "passo-a-passo", name: "Passo a Passo" },
   { id: "mitos-verdades", name: "Mitos e Verdades" },
   { id: "problema-solucao", name: "Problema e Solução" },
+  { id: "rotina", name: "Rotina do Dia-a-Dia" },
+  { id: "testemunho", name: "Testemunho/Depoimento" },
+  { id: "comparacao", name: "Comparação" },
+  { id: "tutorial", name: "Tutorial" },
+  { id: "curiosidades", name: "Curiosidades" },
+  { id: "transformacao", name: "Transformação" },
+];
+
+const IMAGE_TEMPLATES = [
+  { id: "dica-rapida", name: "Dica Rápida" },
+  { id: "frase-impacto", name: "Frase de Impacto" },
+  { id: "testemunho", name: "Testemunho" },
+  { id: "antes-depois", name: "Antes e Depois" },
+  { id: "promocao", name: "Promoção/Oferta" },
+  { id: "citacao", name: "Citação" },
+];
+
+const VIDEO_TEMPLATES = [
+  { id: "tutorial", name: "Tutorial" },
+  { id: "bastidores", name: "Bastidores" },
+  { id: "depoimento", name: "Depoimento" },
+  { id: "demonstracao", name: "Demonstração" },
+  { id: "storytelling", name: "Storytelling" },
+  { id: "desafio", name: "Desafio" },
 ];
 
 interface SelectedItem {
@@ -403,7 +427,7 @@ export default function InfluencerContentCreate() {
                       {t.name}
                     </Button>
                   ))}
-                  {influencerContentType === 'image' && SOFT_SELL_TEMPLATES.map(t => (
+                  {influencerContentType === 'image' && IMAGE_TEMPLATES.map(t => (
                     <Button
                       key={t.id}
                       variant={influencerCopyTemplate === t.id ? 'default' : 'outline'}
@@ -413,12 +437,16 @@ export default function InfluencerContentCreate() {
                       {t.name}
                     </Button>
                   ))}
-                  {influencerContentType === 'video' && (
-                    <div className="col-span-2 text-center text-sm text-muted-foreground py-4">
-                      Templates de vídeo em breve
-                    </div>
-                  )}
-                </div>
+                  {influencerContentType === 'video' && VIDEO_TEMPLATES.map(t => (
+                    <Button
+                      key={t.id}
+                      variant={influencerCopyTemplate === t.id ? 'default' : 'outline'}
+                      className="text-xs h-auto py-2"
+                      onClick={() => setInfluencerCopyTemplate(t.id)}
+                    >
+                      {t.name}
+                    </Button>
+                  ))}                </div>
               </div>
             )}
           </div>

@@ -1408,3 +1408,9 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] **CRÍTICO:** Não consegue gerar conteúdo apenas com influenciador + nicho (sem produto, sem trend, sem viral, sem assunto) - CORRIGIDO: removida validação que exigia produto OU contexto
 - [x] **CRÍTICO:** Notícias (assuntos) somem quando faz nova pesquisa - MANTIDO: comportamento atual é correto (substitui pesquisa anterior)
 - [x] Permitir geração de conteúdo genérico apenas com influenciador (como era antes) - IMPLEMENTADO
+
+
+## Bugs Reportados (22/12/2024 - 19:37)
+- [x] **CRÍTICO:** Backend exige productId obrigatório quando deveria ser opcional (erro: "expected number, received undefined") - CORRIGIDO: productId agora é opcional no schema Zod
+- [x] Templates faltando na interface: Rotina do Dia-a-Dia, Testemunho/Depoimento, Comparação, e outros - ADICIONADOS: 12 templates para carrossel, 6 para imagem, 6 para vídeo
+- [x] Ampliar lista de templates disponíveis para cada tipo de conteúdo - IMPLEMENTADO

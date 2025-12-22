@@ -2124,16 +2124,22 @@ Retorne array JSON de strings (apenas as dores, sem numeração).`;
     // Gerar conteúdo combinando produto + abordagens + contexto
     generateContentWithProduct: protectedProcedure
       .input(z.object({
-        productId: z.number(),
+        productId: z.number().optional(), // Opcional: pode gerar conteúdo sem produto
         influencerId: z.number(),
         contextType: z.enum(['none', 'trend', 'viral', 'subject']),
         trendId: z.number().optional(),
         viralId: z.number().optional(),
         freeSubject: z.string().optional(),
+        template: z.string(), // Template de copywriting
+        type: z.enum(['carousel', 'image', 'video']), // Tipo de conteúdo
       }))
       .mutation(async ({ input, ctx }) => {
-        const product = await db.getInfluencerProductById(input.productId);
-        if (!product) throw new TRPCError({ code: "NOT_FOUND" });
+        // Buscar produto apenas se fornecido (opcional)
+        let product = null;
+        if (input.productId) {
+          product = await db.getInfluencerProductById(input.productId);
+          if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Produto não encontrado" });
+        }
         const influencer = await db.getInfluencerById(input.influencerId);
         if (!influencer || influencer.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
 
@@ -2148,8 +2154,18 @@ Retorne array JSON de strings (apenas as dores, sem numeração).`;
           contextInfo = `ASSUNTO: ${input.freeSubject}`;
         }
 
-        // Buscar referências do produto
-        const productReferences = await db.getInfluencerProductReferences(input.productId);
+        // Buscar referências do produto (se fornecido)
+        const productReferences = input.productId ? await db.getInfluencerProductReferences(input.productId) : [];
+
+        // Montar seção de produto (se fornecido)
+        const productSection = product ? `
+PRODUTO:
+Nome: ${product.name}
+Descrição: ${product.description || "Não informada"}
+${product.idealClient ? `Cliente Ideal: ${product.idealClient}` : ''}
+${product.pains && product.pains.length > 0 ? `Dores: ${product.pains.join(", ")}` : ''}
+${product.selectedApproaches && Array.isArray(product.selectedApproaches) && product.selectedApproaches.length > 0 ? `Abordagens: ${product.selectedApproaches.join(", ")}` : ''}
+` : '';
 
         const response = await invokeLLM({
           messages: [
@@ -2162,14 +2178,8 @@ Nome: ${influencer.name}
 Descrição: ${influencer.description || "Influenciador digital"}
 Nicho: ${influencer.niche || "lifestyle"}
 Características físicas: Manter consistência visual (usar foto de referência)
-
-PRODUTO:
-Nome: ${product.name}
-Descrição: ${product.description || "Não informada"}
-${product.idealClient ? `Cliente Ideal: ${product.idealClient}` : ''}
-${product.pains && product.pains.length > 0 ? `Dores: ${product.pains.join(", ")}` : ''}
-${product.selectedApproaches && Array.isArray(product.selectedApproaches) && product.selectedApproaches.length > 0 ? `Abordagens: ${product.selectedApproaches.join(", ")}` : ''}
-${contextInfo ? `\nContexto: ${contextInfo}` : ''}
+${productSection}
+${contextInfo ? `Contexto: ${contextInfo}` : ''}
 
 REGRAS DE REALISMO:
 1. PRIMEIRA PESSOA: Todo conteúdo deve ser na perspectiva "EU" (não "você" ou "a gente")
