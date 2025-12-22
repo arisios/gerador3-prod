@@ -2297,14 +2297,24 @@ ${input.type === 'carousel' ? 'Gere entre 5-8 slides com textos curtos e impacta
                   : influencer.niche === 'tech' 
                     ? 'Escritorio moderno, equipamentos tech ao fundo' 
                     : 'Ambiente casual, pessoas ao fundo';
-                imagePrompt = `POV (primeira pessoa): ${influencer.name} mostrando ${product.name}. Cena: ${s.text}. ${produtoInfo}. Ambiente: ${ambiente}. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: Manter caracteristicas fisicas do influenciador (usar foto de referencia). CRITICAL: NO TEXT, NO WORDS, NO LETTERS, NO WRITING in the image - pure photographic content only`;
+                const roupa = influencer.niche === 'fitness'
+                  ? 'roupa de treino apropriada para a cena'
+                  : influencer.niche === 'tech'
+                    ? 'roupa casual moderna (camiseta, camisa ou moletom)'
+                    : 'roupa casual apropriada para a cena';
+                imagePrompt = `POV (primeira pessoa): ${influencer.name} mostrando ${product.name}. Cena: ${s.text}. ${produtoInfo}. Ambiente: ${ambiente}. Roupa: ${roupa} - VARY clothing based on scene context. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: KEEP facial features, tattoos (only on exposed skin, NOT on clothes), body type, hairstyle from reference photo - VARY only clothing. CRITICAL: NO TEXT, NO WORDS, NO LETTERS, NO WRITING in the image - pure photographic content only`;
               } else {
                 const ambiente = influencer.niche === 'fitness' 
                   ? 'Academia, pessoas treinando ao fundo' 
                   : influencer.niche === 'tech' 
                     ? 'Escritorio moderno, equipamentos tech ao fundo' 
                     : 'Ambiente casual, pessoas ao fundo';
-                imagePrompt = `POV (primeira pessoa): ${influencer.name} no contexto de ${influencer.niche}. Cena: ${s.text}. Ambiente: ${ambiente}. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: Manter caracteristicas fisicas do influenciador (usar foto de referencia). CRITICAL: NO TEXT, NO WORDS, NO LETTERS, NO WRITING in the image - pure photographic content only`;
+                const roupa = influencer.niche === 'fitness'
+                  ? 'roupa de treino apropriada para a cena'
+                  : influencer.niche === 'tech'
+                    ? 'roupa casual moderna (camiseta, camisa ou moletom)'
+                    : 'roupa casual apropriada para a cena';
+                imagePrompt = `POV (primeira pessoa): ${influencer.name} no contexto de ${influencer.niche}. Cena: ${s.text}. Ambiente: ${ambiente}. Roupa: ${roupa} - VARY clothing based on scene context. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: KEEP facial features, tattoos (only on exposed skin, NOT on clothes), body type, hairstyle from reference photo - VARY only clothing. CRITICAL: NO TEXT, NO WORDS, NO LETTERS, NO WRITING in the image - pure photographic content only`;
               }
 
               // Gerar imagem com referencias

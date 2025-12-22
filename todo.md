@@ -1436,3 +1436,10 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 ## Melhorias (22/12/2024 - 20:10)
 - [x] Reforçar no prompt de geração de imagem que NÃO deve incluir texto, letras ou palavras escritas - IMPLEMENTADO
 - [x] Adicionar instruções explícitas: "NO TEXT, NO WORDS, NO LETTERS in the image" - IMPLEMENTADO
+
+
+## Melhorias (22/12/2024 - 20:15)
+- [x] Ajustar prompt para VARIAR roupas de acordo com contexto da cena - IMPLEMENTADO
+- [x] MANTER características físicas permanentes: rosto, tatuagens, corpo, cabelo - IMPLEMENTADO
+- [x] Garantir que tatuagens apareçam apenas em pele exposta, não sobre roupas - IMPLEMENTADO: "tattoos (only on exposed skin, NOT on clothes)"
+- [x] Roupas devem ser apropriadas para o contexto (fitness = roupa de treino, tech = casual moderno, etc) - IMPLEMENTADO
