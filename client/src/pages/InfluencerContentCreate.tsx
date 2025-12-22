@@ -187,33 +187,36 @@ export default function InfluencerContentCreate() {
 
   const handleGenerate = () => {
     console.log("[DEBUG] handleGenerate called", { selectedProductIds, selectedContextId, selectedContextType });
-    // Validação A+B: 1 produto + 1 contexto (trend/viral/assunto)
-    if (selectedProductIds.length === 0) {
-      toast.error("Selecione pelo menos 1 produto (Grupo A)");
+    
+    // Validação: produto OU contexto (pelo menos um obrigatório)
+    if (selectedProductIds.length === 0 && !selectedContextId) {
+      toast.error("Selecione pelo menos 1 produto OU 1 trend/viral/assunto");
       return;
     }
     if (selectedProductIds.length > 1) {
       toast.error("Selecione apenas 1 produto por vez");
       return;
     }
-    if (!selectedContextId || !selectedContextType) {
-      toast.error("Selecione 1 trend/viral/assunto (Grupo B)");
-      return;
-    }
-
-    // Buscar produto selecionado
-    const selectedProduct = products?.find(p => p.id === selectedProductIds[0]);
-    if (!selectedProduct) {
-      toast.error("Produto não encontrado");
-      return;
-    }
 
     // Preparar payload
     const payload: any = {
-      productId: selectedProduct.id,
       influencerId,
-      contextType: selectedContextType === 'subject' ? 'none' : selectedContextType,
     };
+
+    // Adicionar produto se selecionado
+    if (selectedProductIds.length > 0) {
+      const selectedProduct = products?.find(p => p.id === selectedProductIds[0]);
+      if (!selectedProduct) {
+        toast.error("Produto não encontrado");
+        return;
+      }
+      payload.productId = selectedProduct.id;
+    }
+
+    // Adicionar contexto se selecionado
+    if (selectedContextType) {
+      payload.contextType = selectedContextType === 'subject' ? 'none' : selectedContextType;
+    }
 
     if (selectedContextType === 'trend') {
       payload.trendId = selectedContextId;
