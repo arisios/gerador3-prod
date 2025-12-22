@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE influencerProducts (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  influencer_id INT NOT NULL,\n  name TEXT NOT NULL,\n  description TEXT,\n  suggested_approaches JSON,\n  selected_approaches JSON,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\n)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute CREATE TABLE influencerProducts (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  influencer_id INT NOT NULL,\n  name TEXT NOT NULL,\n  description TEXT,\n  suggested_approaches JSON,\n  selected_approaches JSON,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\n)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 181
+}

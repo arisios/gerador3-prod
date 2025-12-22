@@ -14,6 +14,9 @@ import {
   Camera, Image, Download, RefreshCw, Maximize2, Pencil
 } from "lucide-react";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Package, Sparkles } from "lucide-react";
 
 interface InfluencerContent {
   id: number;
@@ -25,6 +28,268 @@ interface ProfilePhoto {
   type: string;
   url: string;
   prompt: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  description: string | null;
+  suggestedApproaches: string[];
+  selectedApproaches: string[];
+}
+
+function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; influencerNiche: string }) {
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [productForm, setProductForm] = useState({ name: "", description: "" });
+  const [analyzingProduct, setAnalyzingProduct] = useState(false);
+  const [suggestedApproaches, setSuggestedApproaches] = useState<string[]>([]);
+
+  const { data: products = [], isLoading } = (trpc.influencers.products as any).listProducts.useQuery({ influencerId });
+  const utils = trpc.useUtils();
+
+  const analyzeProduct = (trpc.influencers.products as any).analyzeProduct.useMutation({
+    onSuccess: (data: { approaches: string[] }) => {
+      setSuggestedApproaches(data.approaches);
+      setAnalyzingProduct(false);
+      toast.success(`${data.approaches.length} abordagens sugeridas!`);
+    },
+    onError: (e: any) => {
+      toast.error("Erro ao analisar produto: " + e.message);
+      setAnalyzingProduct(false);
+    },
+  });
+
+  const createProduct = (trpc.influencers.products as any).createProduct.useMutation({
+    onSuccess: () => {
+      toast.success("Produto adicionado!");
+      (utils.influencers.products as any).listProducts.invalidate({ influencerId });
+      setShowAddModal(false);
+      setProductForm({ name: "", description: "" });
+      setSuggestedApproaches([]);
+    },
+    onError: (e: any) => toast.error("Erro: " + e.message),
+  });
+
+  const updateProduct = (trpc.influencers.products as any).updateProduct.useMutation({
+    onSuccess: () => {
+      (utils.influencers.products as any).listProducts.invalidate({ influencerId });
+    },
+  });
+
+  const deleteProduct = (trpc.influencers.products as any).deleteProduct.useMutation({
+    onSuccess: () => {
+      toast.success("Produto excluído");
+      (utils.influencers.products as any).listProducts.invalidate({ influencerId });
+    },
+  });
+
+  const handleAnalyze = () => {
+    if (!productForm.name.trim() || !productForm.description.trim()) {
+      toast.error("Preencha nome e descrição do produto");
+      return;
+    }
+    setAnalyzingProduct(true);
+    analyzeProduct.mutate({
+      influencerId,
+      name: productForm.name,
+      description: productForm.description,
+    });
+  };
+
+  const handleSaveProduct = () => {
+    console.log('handleSaveProduct called', { productForm, suggestedApproaches });
+    if (!productForm.name.trim()) {
+      toast.error("Nome do produto é obrigatório");
+      return;
+    }
+    console.log('About to call createProduct.mutate');
+    createProduct.mutate({
+      influencerId,
+      name: productForm.name,
+      description: productForm.description || undefined,
+      suggestedApproaches,
+      selectedApproaches: suggestedApproaches, // Todas selecionadas por padrão
+    });
+  };
+
+  const toggleApproach = (productId: number, approach: string, product: Product) => {
+    const isSelected = product.selectedApproaches.includes(approach);
+    const newSelected = isSelected
+      ? product.selectedApproaches.filter((a) => a !== approach)
+      : [...product.selectedApproaches, approach];
+    
+    updateProduct.mutate({
+      id: productId,
+      selectedApproaches: newSelected,
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Button className="w-full" onClick={() => setShowAddModal(true)}>
+        <Plus className="w-4 h-4 mr-2" />
+        Adicionar Produto
+      </Button>
+
+      {products.length > 0 ? (
+        <div className="space-y-4">
+          {products.map((product: Product) => (
+            <Card key={product.id}>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4 text-primary" />
+                      <h3 className="font-medium">{product.name}</h3>
+                    </div>
+                    {product.description && (
+                      <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive h-8 w-8"
+                    onClick={() => {
+                      if (confirm("Excluir produto?")) {
+                        deleteProduct.mutate({ id: product.id });
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {product.suggestedApproaches.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-muted-foreground">Abordagens de Venda:</div>
+                    {product.suggestedApproaches.map((approach, idx) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <Checkbox
+                          checked={product.selectedApproaches.includes(approach)}
+                          onCheckedChange={() => toggleApproach(product.id, approach, product)}
+                          className="mt-1"
+                        />
+                        <span className="text-sm flex-1">{approach}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {product.selectedApproaches.length > 0 && (
+                  <Button
+                    className="w-full mt-2"
+                    size="sm"
+                    onClick={() => {
+                      // TODO: Integrar com geração de conteúdo
+                      toast.info("Geração de conteúdo com produto será implementada");
+                    }}
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Gerar Conteúdo ({product.selectedApproaches.length} abordagens)
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 text-muted-foreground">
+          <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+          <p>Nenhum produto cadastrado</p>
+          <p className="text-sm">Adicione produtos para gerar conteúdo de divulgação</p>
+        </div>
+      )}
+
+      {/* Modal Adicionar Produto */}
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Adicionar Produto</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="product-name">Nome do Produto *</Label>
+              <Input
+                id="product-name"
+                placeholder="Ex: Whey Protein Premium"
+                value={productForm.name}
+                onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="product-desc">Descrição do Produto *</Label>
+              <Textarea
+                id="product-desc"
+                placeholder="Descreva o produto, benefícios, diferenciais..."
+                value={productForm.description}
+                onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                rows={4}
+              />
+            </div>
+
+            {suggestedApproaches.length === 0 ? (
+              <Button
+                className="w-full"
+                onClick={handleAnalyze}
+                disabled={analyzingProduct}
+              >
+                {analyzingProduct ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2" />
+                )}
+                {analyzingProduct ? "Analisando..." : "Analisar e Sugerir Abordagens"}
+              </Button>
+            ) : (
+              <div className="space-y-3">
+                <div className="text-sm font-medium text-green-600 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  {suggestedApproaches.length} abordagens sugeridas pela IA:
+                </div>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {suggestedApproaches.map((approach, idx) => (
+                    <div key={idx} className="text-sm p-2 bg-muted rounded">
+                      {idx + 1}. {approach}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowAddModal(false);
+                setProductForm({ name: "", description: "" });
+                setSuggestedApproaches([]);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSaveProduct}
+              disabled={createProduct.isPending || suggestedApproaches.length === 0}
+            >
+              {createProduct.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : null}
+              Salvar Produto
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
 
 export default function InfluencerDetail() {
@@ -184,6 +449,7 @@ export default function InfluencerDetail() {
           <TabsList className="w-full">
             <TabsTrigger value="contents" className="flex-1">Conteúdos</TabsTrigger>
             <TabsTrigger value="photos" className="flex-1">Fotos de Perfil</TabsTrigger>
+            <TabsTrigger value="products" className="flex-1">Produtos</TabsTrigger>
           </TabsList>
 
           {/* Contents Tab */}
@@ -281,6 +547,11 @@ export default function InfluencerDetail() {
                 <p className="text-sm">Clique no botão acima para gerar</p>
               </div>
             )}
+          </TabsContent>
+
+          {/* Products Tab */}
+          <TabsContent value="products" className="space-y-4 mt-4">
+            <ProductsTab influencerId={influencerId} influencerNiche={influencer.niche || ""} />
           </TabsContent>
         </Tabs>
       </main>

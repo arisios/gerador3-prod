@@ -1001,3 +1001,14 @@ news (notícias)
   - [ ] Dropdown para selecionar produto ao gerar conteúdo
   - [ ] Dropdown para selecionar abordagem (das selecionadas)
   - [ ] Passar produto + abordagem para o prompt de geração
+
+## Produtos do Influenciador (21/12/2024)
+- [x] Schema: tabela influencerProducts (id, influencer_id, name, description, suggested_approaches, selected_approaches, created_at, updated_at)
+- [x] Funções DB: createInfluencerProduct, getInfluencerProductsByInfluencer, getInfluencerProductById, updateInfluencerProduct, deleteInfluencerProduct
+- [x] Router tRPC: sub-router products dentro de influencers
+- [x] Procedures: analyzeProduct (IA gera abordagens), createProduct, listProducts, updateProduct, deleteProduct
+- [x] Frontend: aba Produtos no InfluencerDetail
+- [x] Modal de adicionar produto com análise de IA
+- [x] Listagem de produtos com abordagens sugeridas
+- [x] Botão "Gerar Conteúdo" para criar posts baseados nas abordagens
+- [x] Testes vitest: 5 testes passando (analyzeProduct, createProduct, listProducts, updateProduct, deleteProduct)

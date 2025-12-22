@@ -1703,6 +1703,147 @@ Lembre-se: Esta foto será postada como se fosse do próprio influenciador, ent�
         });
         return { success: true };
       }),
+
+    // ===== PRODUTOS DO INFLUENCIADOR =====
+    products: router({
+      // Analisar produto e sugerir abordagens de venda
+      analyzeProduct: protectedProcedure
+      .input(z.object({
+        influencerId: z.number(),
+        name: z.string(),
+        description: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const influencer = await db.getInfluencerById(input.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        const prompt = `Você é um especialista em marketing de influência e vendas.
+
+INFLUENCIADOR:
+Nicho: ${influencer.niche}
+Descrição: ${influencer.description || "Não informada"}
+
+PRODUTO:
+Nome: ${input.name}
+Descrição: ${input.description}
+
+TAREFA:
+Analise este produto no contexto do nicho do influenciador e sugira 4-5 abordagens de venda criativas e eficazes.
+
+Cada abordagem deve:
+1. Ser específica para o produto e nicho
+2. Ser acionável (o influenciador consegue executar)
+3. Ter potencial de conversão
+4. Ser autêntica (não parecer propaganda forçada)
+
+Exemplos de tipos de abordagem:
+- Comparação (vs concorrentes ou alternativas)
+- Transformação (antes/depois)
+- Educação (explicar benefícios técnicos)
+- Storytelling (história pessoal)
+- Prova social (depoimentos, resultados)
+- Economia (custo-benefício)
+- Urgência (oferta limitada, escassez)
+
+Retorne APENAS um array JSON com as abordagens:
+["Abordagem 1", "Abordagem 2", "Abordagem 3", "Abordagem 4", "Abordagem 5"]`;
+
+        const response = await invokeLLM({
+          messages: [{ role: "user", content: prompt }],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "approaches",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  approaches: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Lista de abordagens de venda"
+                  }
+                },
+                required: ["approaches"],
+                additionalProperties: false
+              }
+            }
+          }
+        });
+
+        const result = JSON.parse(response.choices[0].message.content || "{}");
+        return { approaches: result.approaches || [] };
+      }),
+
+    // Criar produto
+    createProduct: protectedProcedure
+      .input(z.object({
+        influencerId: z.number(),
+        name: z.string(),
+        description: z.string().optional(),
+        suggestedApproaches: z.array(z.string()).optional(),
+        selectedApproaches: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const influencer = await db.getInfluencerById(input.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        const productId = await db.createInfluencerProduct(input);
+        return { id: productId };
+      }),
+
+    // Listar produtos do influenciador
+    listProducts: protectedProcedure
+      .input(z.object({ influencerId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const influencer = await db.getInfluencerById(input.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        return db.getInfluencerProductsByInfluencer(input.influencerId);
+      }),
+
+    // Atualizar produto
+    updateProduct: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        suggestedApproaches: z.array(z.string()).optional(),
+        selectedApproaches: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const product = await db.getInfluencerProductById(input.id);
+        if (!product) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        const influencer = await db.getInfluencerById(product.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        await db.updateInfluencerProduct(input.id, input);
+        return { success: true };
+      }),
+
+    // Deletar produto
+    deleteProduct: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const product = await db.getInfluencerProductById(input.id);
+        if (!product) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        const influencer = await db.getInfluencerById(product.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        await db.deleteInfluencerProduct(input.id);
+        return { success: true };
+      }),
+    }),
   }),
 
   // ===== TRENDS =====

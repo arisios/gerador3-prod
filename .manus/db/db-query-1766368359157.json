@@ -1,0 +1,18 @@
+{
+  "query": "SELECT u.id as userId, u.openId, u.name, u.email, u.role, i.id as influencerId \nFROM users u \nJOIN influencers i ON i.userId = u.id \nLIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT u.id as userId, u.openId, u.name, u.email, u.role, i.id as influencerId \nFROM users u \nJOIN influencers i ON i.userId = u.id \nLIMIT 1",
+  "rows": [
+    {
+      "userId": "1",
+      "openId": "3Bj4dyrrSGvGrTz3bmTvbn",
+      "name": "Arisio Nogueira dos Santos",
+      "email": "arisio75santos@gmail.com",
+      "role": "admin",
+      "influencerId": "510002"
+    }
+  ],
+  "messages": [],
+  "stdout": "userId\topenId\tname\temail\trole\tinfluencerId\n1\t3Bj4dyrrSGvGrTz3bmTvbn\tArisio Nogueira dos Santos\tarisio75santos@gmail.com\tadmin\t510002\n",
+  "stderr": "",
+  "execution_time_ms": 375
+}
