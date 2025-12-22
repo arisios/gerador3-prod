@@ -213,9 +213,11 @@ export default function InfluencerContentCreate() {
       payload.productId = selectedProduct.id;
     }
 
-    // Adicionar contexto se selecionado
+    // Adicionar contexto (ou "none" se não selecionado)
     if (selectedContextType) {
       payload.contextType = selectedContextType === 'subject' ? 'none' : selectedContextType;
+    } else {
+      payload.contextType = 'none'; // Quando gera apenas com produto
     }
 
     if (selectedContextType === 'trend') {
@@ -229,6 +231,14 @@ export default function InfluencerContentCreate() {
         payload.contextType = 'subject';
         payload.freeSubject = `${subject.title} - ${subject.description}`;
       }
+    }
+
+    // Adicionar template e tipo de conteúdo
+    if (influencerCopyTemplate) {
+      payload.template = influencerCopyTemplate;
+    }
+    if (influencerContentType) {
+      payload.type = influencerContentType; // carousel, image, video
     }
 
     setIsGenerating(true);
