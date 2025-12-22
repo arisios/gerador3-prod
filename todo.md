@@ -977,3 +977,27 @@ news (notícias)
 - [ ] Botão "Escolher Imagem" que abre galeria
 - [ ] Botão "Gerar Nova" que adiciona ao banco
 - [ ] Indicador visual da imagem selecionada
+
+
+## Sistema de Produtos do Influenciador - REVISADO (21/12/2024)
+- [x] Atualizar schema influencerProducts para incluir:
+  - [x] Campo suggestedApproaches (json) - abordagens sugeridas pela IA
+  - [x] Campo selectedApproaches (json) - abordagens selecionadas pelo usuário
+- [ ] Criar rota backend analyzeProduct que:
+  - [ ] Recebe nome + descrição do produto + nicho do influenciador
+  - [ ] IA analisa e gera 3-5 abordagens de venda
+  - [ ] Retorna lista de abordagens
+- [ ] Criar rotas CRUD de produtos:
+  - [ ] products.create - cria produto e chama analyzeProduct
+  - [ ] products.list - lista produtos do influenciador
+  - [ ] products.update - atualiza produto (nome, descrição, abordagens selecionadas)
+  - [ ] products.delete - deleta produto
+- [ ] Criar aba "Produtos" no InfluencerDetail:
+  - [ ] Botão "Adicionar Produto"
+  - [ ] Modal com Nome + Descrição
+  - [ ] Após criar, mostrar abordagens sugeridas com checkboxes
+  - [ ] Lista de produtos salvos com abordagens selecionadas
+- [ ] Integrar com geração de conteúdo:
+  - [ ] Dropdown para selecionar produto ao gerar conteúdo
+  - [ ] Dropdown para selecionar abordagem (das selecionadas)
+  - [ ] Passar produto + abordagem para o prompt de geração

@@ -122,12 +122,14 @@ export const influencers = mysqlTable("influencers", {
 
 // Influencer Products table
 export const influencerProducts = mysqlTable("influencerProducts", {
-  id: int("id").autoincrement().primaryKey(),
-  influencerId: int("influencerId").notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
+  id: int("id").primaryKey().autoincrement(),
+  influencerId: int("influencer_id").notNull(),
+  name: text("name").notNull(),
   description: text("description"),
-  salesApproach: text("salesApproach"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  suggestedApproaches: json("suggested_approaches").$type<string[]>(),
+  selectedApproaches: json("selected_approaches").$type<string[]>().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
 // Influencer Contents table
