@@ -1477,6 +1477,7 @@ REGRA PRIMORDIAL: Imagem REAL, SEM NENHUM TEXTO. Selfie casual.`
         influencerId: z.number(),
         template: z.string(),
         product: z.string().optional(),
+        type: z.enum(['trend', 'viral', 'subject', 'softsell']).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const influencer = await db.getInfluencerById(input.influencerId);
@@ -1539,11 +1540,19 @@ O conteúdo DEVE estar relacionado ao nicho do influenciador e ser relevante par
           contentData = { title: "Conteúdo de influenciador", description: "", hook: "", slides: [] };
         }
 
+        // Determinar source baseado no tipo
+        let source: "produto" | "softsell" | "trend" | "viral" | "assunto" | null = null;
+        if (input.type === 'trend') source = 'trend';
+        else if (input.type === 'viral') source = 'viral';
+        else if (input.type === 'subject') source = 'assunto';
+        else if (input.type === 'softsell') source = 'softsell';
+
         const contentId = await db.createInfluencerContent({
           influencerId: input.influencerId,
           userId: ctx.user.id,
           type: "carousel",
           template: input.template,
+          source: source,
           title: contentData.title || "Conteúdo",
           description: contentData.description || null,
           hook: contentData.hook || null,
@@ -1931,6 +1940,7 @@ O conteúdo DEVE estar relacionado ao nicho do influenciador e ser relevante par
           userId: ctx.user.id,
           type: "carousel",
           template: "product",
+          source: "produto",
           title: contentData.title || "Conteúdo",
           description: contentData.description || null,
           hook: contentData.hook || null,

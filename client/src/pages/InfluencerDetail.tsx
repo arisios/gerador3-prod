@@ -22,6 +22,7 @@ interface InfluencerContent {
   id: number;
   title: string | null;
   template: string;
+  source: "produto" | "softsell" | "trend" | "viral" | "assunto" | null;
 }
 
 interface ProfilePhoto {
@@ -619,8 +620,30 @@ export default function InfluencerDetail() {
                 <Link key={content.id} href={`/influencer/${influencerId}/content/${content.id}`}>
                   <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                     <CardContent className="p-4 flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">{content.title || "Sem título"}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium">{content.title || "Sem título"}</div>
+                          {content.source && (
+                            <Badge 
+                              variant="secondary" 
+                              className={`text-xs ${
+                                content.source === 'produto' ? 'bg-purple-100 text-purple-700' :
+                                content.source === 'softsell' ? 'bg-blue-100 text-blue-700' :
+                                content.source === 'trend' ? 'bg-green-100 text-green-700' :
+                                content.source === 'viral' ? 'bg-orange-100 text-orange-700' :
+                                content.source === 'assunto' ? 'bg-cyan-100 text-cyan-700' :
+                                ''
+                              }`}
+                            >
+                              {content.source === 'produto' ? 'Produto' :
+                               content.source === 'softsell' ? 'Soft Sell' :
+                               content.source === 'trend' ? 'Trend' :
+                               content.source === 'viral' ? 'Viral' :
+                               content.source === 'assunto' ? 'Assunto' :
+                               content.source}
+                            </Badge>
+                          )}
+                        </div>
                         <div className="text-xs text-muted-foreground">{content.template}</div>
                       </div>
                       <ChevronRight className="w-4 h-4 text-muted-foreground" />

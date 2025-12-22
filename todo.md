@@ -1060,3 +1060,10 @@ news (notícias)
 - [x] Adicionar aba "Soft Sell" no lugar de "Fotos de Perfil"
 - [x] Botão "Gerar Conteúdo Soft Sell" na nova aba
 - [x] Manter abas: Conteúdos (Trends/Virais/Assuntos), Soft Sell, Produtos
+
+## Badges de Origem nos Conteúdos (22/12/2024)
+- [x] Adicionar campo source na tabela influencerContents (produto, softsell, trend, viral, assunto)
+- [x] Atualizar generateContent para salvar source baseado no tipo
+- [x] Atualizar generateContentWithProduct para salvar source como "produto"
+- [x] Exibir badge colorido na lista de conteúdos mostrando a origem
+- [x] Badges com cores distintas: Produto (roxo), Soft Sell (azul), Trend (verde), Viral (laranja), Assunto (ciano)
