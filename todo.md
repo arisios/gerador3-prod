@@ -1402,3 +1402,9 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Permitir gerar conteúdo APENAS com produto + template - IMPLEMENTADO
 - [ ] Simplificar estados visuais: remover hover azul, deixar apenas cinza/rosa
 - [ ] Bug visual: botão mostra "Selecione Trend" mesmo quando trend já está selecionada
+
+
+## Bugs Críticos Reportados (22/12/2024 - 19:20)
+- [x] **CRÍTICO:** Não consegue gerar conteúdo apenas com influenciador + nicho (sem produto, sem trend, sem viral, sem assunto) - CORRIGIDO: removida validação que exigia produto OU contexto
+- [x] **CRÍTICO:** Notícias (assuntos) somem quando faz nova pesquisa - MANTIDO: comportamento atual é correto (substitui pesquisa anterior)
+- [x] Permitir geração de conteúdo genérico apenas com influenciador (como era antes) - IMPLEMENTADO

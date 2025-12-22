@@ -189,10 +189,7 @@ export default function InfluencerContentCreate() {
     console.log("[DEBUG] handleGenerate called", { selectedProductIds, selectedContextId, selectedContextType });
     
     // Validação: produto OU contexto (pelo menos um obrigatório)
-    if (selectedProductIds.length === 0 && !selectedContextId) {
-      toast.error("Selecione pelo menos 1 produto OU 1 trend/viral/assunto");
-      return;
-    }
+    // Validar apenas múltiplos produtos
     if (selectedProductIds.length > 1) {
       toast.error("Selecione apenas 1 produto por vez");
       return;
@@ -341,9 +338,7 @@ export default function InfluencerContentCreate() {
           ) : (
             <Zap className="w-4 h-4 mr-2" />
           )}
-          {selectedProductIds.length === 0 && selectedContextId === null
-            ? "Selecione Produto OU Trend/Viral/Assunto"
-            : influencerContentType === null
+          {influencerContentType === null
             ? "Escolha o Tipo de Conteúdo"
             : influencerCopyTemplate === null
             ? "Escolha o Template"
@@ -351,8 +346,8 @@ export default function InfluencerContentCreate() {
           }
         </Button>
 
-        {/* Seleção de Tipo de Conteúdo */}
-        {(selectedProductIds.length > 0 || selectedContextId !== null) && (
+        {/* Seleção de Tipo de Conteúdo (sempre visível) */}
+        {true && (
           <div className="space-y-4 mt-4">
             <div>
               <Label className="text-sm font-medium mb-2 block">Tipo de Conteúdo</Label>
