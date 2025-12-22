@@ -2168,7 +2168,7 @@ Nome: ${product.name}
 Descrição: ${product.description || "Não informada"}
 ${product.idealClient ? `Cliente Ideal: ${product.idealClient}` : ''}
 ${product.pains && product.pains.length > 0 ? `Dores: ${product.pains.join(", ")}` : ''}
-Abordagens: ${product.selectedApproaches.join(", ")}
+${product.selectedApproaches && Array.isArray(product.selectedApproaches) && product.selectedApproaches.length > 0 ? `Abordagens: ${product.selectedApproaches.join(", ")}` : ''}
 ${contextInfo ? `\nContexto: ${contextInfo}` : ''}
 
 REGRAS DE REALISMO:
