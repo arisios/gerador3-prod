@@ -364,7 +364,7 @@ Esta dor é o CENTRO de todo o conteúdo. Cada slide deve:
 
 ===== ESTRUTURA DO CARROSSEL =====
 Template: ${params.template}
-Estrutura: ${params.templateStructure.join(" → ")}
+Estrutura: ${Array.isArray(params.templateStructure) && params.templateStructure.length > 0 ? params.templateStructure.join(" → ") : "Estrutura padrão"}
 Número de slides: ${platformConfig.minSlides} a ${platformConfig.maxSlides}
 
 Siga EXATAMENTE esta estrutura. Cada slide tem um propósito específico.

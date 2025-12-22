@@ -74,6 +74,8 @@ export default function InfluencerContentCreate() {
   const [selectedProductForModal, setSelectedProductForModal] = useState<any>(null);
   const [selectedContextId, setSelectedContextId] = useState<number | null>(null);
   const [selectedContextType, setSelectedContextType] = useState<'trend' | 'viral' | 'subject' | null>(null);
+  const [influencerContentType, setInfluencerContentType] = useState<'carousel' | 'image' | 'video' | null>(null);
+  const [influencerCopyTemplate, setInfluencerCopyTemplate] = useState<string | null>(null);
   
   // Estados da aba Assuntos
   const [searchQuery, setSearchQuery] = useState("");
@@ -326,13 +328,95 @@ export default function InfluencerContentCreate() {
           ) : (
             <Zap className="w-4 h-4 mr-2" />
           )}
-          {selectedProductIds.length > 0 && selectedContextId !== null
-            ? "Gerar Conteúdo" 
-            : selectedProductIds.length === 0
+          {selectedProductIds.length === 0
             ? "Selecione 1 Produto"
-            : "Selecione 1 Trend/Viral/Assunto"
+            : selectedContextId === null
+            ? "Selecione 1 Trend/Viral/Assunto"
+            : influencerContentType === null
+            ? "Escolha o Tipo de Conteúdo"
+            : influencerCopyTemplate === null
+            ? "Escolha o Template"
+            : "Gerar Conteúdo"
           }
         </Button>
+
+        {/* Seleção de Tipo de Conteúdo */}
+        {selectedProductIds.length > 0 && selectedContextId !== null && (
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Tipo de Conteúdo</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  variant={influencerContentType === 'carousel' ? 'default' : 'outline'}
+                  className="flex flex-col items-center gap-1 h-auto py-3"
+                  onClick={() => {
+                    setInfluencerContentType('carousel');
+                    setInfluencerCopyTemplate(null);
+                  }}
+                >
+                  <span className="text-2xl">📱</span>
+                  <span className="text-xs">Carrossel</span>
+                </Button>
+                <Button
+                  variant={influencerContentType === 'image' ? 'default' : 'outline'}
+                  className="flex flex-col items-center gap-1 h-auto py-3"
+                  onClick={() => {
+                    setInfluencerContentType('image');
+                    setInfluencerCopyTemplate(null);
+                  }}
+                >
+                  <span className="text-2xl">🖼️</span>
+                  <span className="text-xs">Imagem Única</span>
+                </Button>
+                <Button
+                  variant={influencerContentType === 'video' ? 'default' : 'outline'}
+                  className="flex flex-col items-center gap-1 h-auto py-3"
+                  onClick={() => {
+                    setInfluencerContentType('video');
+                    setInfluencerCopyTemplate(null);
+                  }}
+                >
+                  <span className="text-2xl">🎬</span>
+                  <span className="text-xs">Vídeo</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Seleção de Template */}
+            {influencerContentType && (
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Template</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {influencerContentType === 'carousel' && CAROUSEL_TEMPLATES.map(t => (
+                    <Button
+                      key={t.id}
+                      variant={influencerCopyTemplate === t.id ? 'default' : 'outline'}
+                      className="text-xs h-auto py-2"
+                      onClick={() => setInfluencerCopyTemplate(t.id)}
+                    >
+                      {t.name}
+                    </Button>
+                  ))}
+                  {influencerContentType === 'image' && SOFT_SELL_TEMPLATES.map(t => (
+                    <Button
+                      key={t.id}
+                      variant={influencerCopyTemplate === t.id ? 'default' : 'outline'}
+                      className="text-xs h-auto py-2"
+                      onClick={() => setInfluencerCopyTemplate(t.id)}
+                    >
+                      {t.name}
+                    </Button>
+                  ))}
+                  {influencerContentType === 'video' && (
+                    <div className="col-span-2 text-center text-sm text-muted-foreground py-4">
+                      Templates de vídeo em breve
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Mode Selection */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>

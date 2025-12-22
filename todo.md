@@ -1371,3 +1371,23 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [ ] Usar apenas card clicável (rosa quando selecionado)
 - [ ] Garantir que seleção persista ao mudar de aba
 - [ ] Testar geração de conteúdo A+B funcionando
+
+## Bugs Críticos (22/12/2024)
+- [ ] Fluxo de geração incompleto: falta seleção de tipo de conteúdo (carrossel/imagem/vídeo) e template
+- [ ] Adicionar etapa de seleção de tipo após selecionar produto + trend/viral
+- [ ] Adicionar etapa de seleção de template baseado no tipo escolhido
+- [ ] Produto desmarca ao trocar de aba (Produtos → Trends) - investigar
+
+
+## Melhorias de Fluxo de Geração (22/12/2024)
+- [x] Botão "Gerar Conteúdo" movido para o topo (sempre visível)
+- [x] Adicionar seleção de tipo de conteúdo (Carrossel/Imagem/Vídeo)
+- [x] Adicionar seleção de template baseado no tipo escolhido
+- [x] Fluxo completo: Produto → Trend/Viral → Tipo → Template → Gerar
+- [x] Botão muda de texto conforme progresso (4 etapas)
+- [x] Variáveis renomeadas para evitar conflito com sistema de Projetos:
+  - selectedContentType → influencerContentType
+  - selectedTemplate → influencerCopyTemplate
+- [ ] Corrigir erro TypeScript no backend (falta campo `source` na linha 1282)
+- [ ] Testar geração completa no dispositivo real
+- [ ] Investigar por que produto desmarca ao trocar de aba
