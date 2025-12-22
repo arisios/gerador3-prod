@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -57,6 +57,18 @@ export default function InfluencerContentCreate() {
   const [product, setProduct] = useState("");
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Atualizar mode quando URL mudar
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.split('?')[1] || '');
+    const typeParam = urlParams.get('type');
+    const newMode = 
+      typeParam === 'trend' ? 'trends' :
+      typeParam === 'viral' ? 'virals' :
+      typeParam === 'subject' ? 'dores' :
+      'soft-sell';
+    setMode(newMode);
+  }, [location]);
 
   const { data: influencer } = trpc.influencers.get.useQuery({ id: influencerId });
   const { data: trends } = trpc.trends.list.useQuery();

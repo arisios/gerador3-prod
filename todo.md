@@ -1073,4 +1073,5 @@ news (notícias)
 - [x] Botão Trends abre direto na aba Trends (não mais em Soft Sell)
 - [x] Botão Virais abre direto na aba Virais
 - [x] Botão Assuntos abre direto na aba Dores (assuntos)
+- [x] Adicionar useEffect para atualizar aba quando URL mudar (corrige problema de cache)
 - [x] Elimina necessidade de clicar duas vezes no mesmo botão
