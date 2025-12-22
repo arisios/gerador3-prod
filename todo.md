@@ -1027,3 +1027,8 @@ news (notícias)
 - [x] Trends só mostram fonte ("tiktok", "google") em vez do nome real da trend - CORRIGIDO (mudou trend.keyword para trend.name)
 - [x] Todas as abordagens vêm marcadas por padrão (devem vir desmarcadas) - CORRIGIDO (selectedApproaches agora começa vazio [])
 - [x] Erro ao selecionar múltiplas abordagens - modal não abre tabs de Trend/Viral/Assunto - CORRIGIDO (modal abre normalmente com múltiplas abordagens)
+
+## Bug Crítico - Layout Modal de Geração (21/12/2024)
+- [x] Botão "Gerar Conteúdo" fica invisível quando lista de trends/virais é grande - CORRIGIDO
+- [x] Modal não tem scroll interno, empurra botão para fora da tela - CORRIGIDO
+- [x] Solução aplicada: DialogContent com max-h-[90vh] + flex-col, conteúdo com overflow-y-auto + flex-1, botões fixos no rodapé

@@ -331,12 +331,12 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
 
       {/* Modal Gerar Conteúdo */}
       <Dialog open={showGenerateModal} onOpenChange={setShowGenerateModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Gerar Conteúdo com Produto</DialogTitle>
           </DialogHeader>
           {selectedProduct && (
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto flex-1 pr-2">
               <div className="p-4 bg-muted rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Package className="w-4 h-4 text-primary" />
