@@ -592,7 +592,7 @@ export default function InfluencerDetail() {
         <Tabs defaultValue="contents">
           <TabsList className="w-full">
             <TabsTrigger value="contents" className="flex-1">Conteúdos</TabsTrigger>
-            <TabsTrigger value="photos" className="flex-1">Fotos de Perfil</TabsTrigger>
+            <TabsTrigger value="softsell" className="flex-1">Soft Sell</TabsTrigger>
             <TabsTrigger value="products" className="flex-1">Produtos</TabsTrigger>
           </TabsList>
 
@@ -635,72 +635,19 @@ export default function InfluencerDetail() {
             )}
           </TabsContent>
 
-          {/* Photos Tab */}
-          <TabsContent value="photos" className="space-y-4 mt-4">
-            {/* Generate Button */}
+          {/* Soft Sell Tab */}
+          <TabsContent value="softsell" className="space-y-4 mt-4">
             <Button 
               className="w-full" 
-              onClick={() => generateProfilePhotos.mutate({ influencerId })}
-              disabled={generateProfilePhotos.isPending || !influencer.referenceImageUrl}
+              onClick={() => setLocation(`/influencer/${influencerId}/content/new?type=softsell`)}
             >
-              {generateProfilePhotos.isPending ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Camera className="w-4 h-4 mr-2" />
-              )}
-              {profilePhotos.length > 0 ? "Regenerar Fotos de Perfil" : "Gerar Fotos de Perfil"}
+              <Sparkles className="w-4 h-4 mr-2" />
+              Gerar Conteúdo Soft Sell
             </Button>
 
-            {!influencer.referenceImageUrl && (
-              <p className="text-sm text-muted-foreground text-center">
-                O influenciador precisa ter uma foto de referência para gerar fotos de perfil.
-              </p>
-            )}
-
-            {/* Photo Grid */}
-            {profilePhotos.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3">
-                {profilePhotos.map((photo, index) => (
-                  <Card key={index} className="overflow-hidden">
-                    <div 
-                      className="aspect-square relative cursor-pointer group"
-                      onClick={() => handleOpenLightbox(photo)}
-                    >
-                      <img 
-                        src={photo.url} 
-                        alt={getPhotoTypeLabel(photo.type)}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Maximize2 className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                    <CardContent className="p-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{getPhotoTypeLabel(photo.type)}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDownloadPhoto(photo.url, photo.type);
-                          }}
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhuma foto de perfil gerada</p>
-                <p className="text-sm">Clique no botão acima para gerar</p>
-              </div>
-            )}
+            <div className="text-center py-8 text-muted-foreground">
+              <p className="text-sm">Clique no botão acima para gerar conteúdo usando templates de soft sell</p>
+            </div>
           </TabsContent>
 
           {/* Products Tab */}

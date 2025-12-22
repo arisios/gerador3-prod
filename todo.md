@@ -1054,3 +1054,9 @@ news (notícias)
 - [x] Identificado: generateContentWithProduct só retorna JSON, não salva no DB
 - [x] Corrigido: generateContentWithProduct agora salva usando createInfluencerContent()
 - [x] Testado: conteúdo gerado com produtos agora aparece na lista
+
+## Reorganização de Navegação do Influenciador (22/12/2024)
+- [x] Remover aba "Fotos de Perfil" do InfluencerDetail
+- [x] Adicionar aba "Soft Sell" no lugar de "Fotos de Perfil"
+- [x] Botão "Gerar Conteúdo Soft Sell" na nova aba
+- [x] Manter abas: Conteúdos (Trends/Virais/Assuntos), Soft Sell, Produtos
