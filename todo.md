@@ -1391,3 +1391,14 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [ ] Corrigir erro TypeScript no backend (falta campo `source` na linha 1282)
 - [ ] Testar geração completa no dispositivo real
 - [ ] Investigar por que produto desmarca ao trocar de aba
+
+
+## Bugs Críticos Reportados (22/12/2024 - 16:40)
+- [x] **CRÍTICO:** Produto novo não gera conteúdo (dá erro ao tentar gerar) - CORRIGIDO: adicionado source='produto' como padrão
+- [ ] **CRÍTICO:** Dores não aparecem selecionadas após gerar clientes ideais e dores
+- [x] **CRÍTICO:** Não consegue gerar conteúdo só com dor (sem trend/viral) - CORRIGIDO: produto OU contexto (pelo menos um)
+- [x] **CRÍTICO:** Não consegue gerar conteúdo só com produto (sem trend/viral) - CORRIGIDO: produto OU contexto (pelo menos um)
+- [x] Mudança de regra: Trend/viral/dor devem ser OPCIONAIS, não obrigatórios - IMPLEMENTADO
+- [x] Permitir gerar conteúdo APENAS com produto + template - IMPLEMENTADO
+- [ ] Simplificar estados visuais: remover hover azul, deixar apenas cinza/rosa
+- [ ] Bug visual: botão mostra "Selecione Trend" mesmo quando trend já está selecionada

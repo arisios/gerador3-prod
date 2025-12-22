@@ -1554,11 +1554,12 @@ O conteúdo DEVE estar relacionado ao nicho do influenciador e ser relevante par
         }
 
         // Determinar source baseado no tipo
-        let source: "produto" | "softsell" | "trend" | "viral" | "assunto" | null = null;
+        let source: "produto" | "softsell" | "trend" | "viral" | "assunto" = "produto"; // default
         if (input.type === 'trend') source = 'trend';
         else if (input.type === 'viral') source = 'viral';
         else if (input.type === 'subject') source = 'assunto';
         else if (input.type === 'softsell') source = 'softsell';
+        // Se não for nenhum dos acima, mantém 'produto' como padrão
 
         const contentId = await db.createInfluencerContent({
           influencerId: input.influencerId,

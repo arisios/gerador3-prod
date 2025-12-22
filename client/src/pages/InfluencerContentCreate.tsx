@@ -328,10 +328,8 @@ export default function InfluencerContentCreate() {
           ) : (
             <Zap className="w-4 h-4 mr-2" />
           )}
-          {selectedProductIds.length === 0
-            ? "Selecione 1 Produto"
-            : selectedContextId === null
-            ? "Selecione 1 Trend/Viral/Assunto"
+          {selectedProductIds.length === 0 && selectedContextId === null
+            ? "Selecione Produto OU Trend/Viral/Assunto"
             : influencerContentType === null
             ? "Escolha o Tipo de Conteúdo"
             : influencerCopyTemplate === null
@@ -341,7 +339,7 @@ export default function InfluencerContentCreate() {
         </Button>
 
         {/* Seleção de Tipo de Conteúdo */}
-        {selectedProductIds.length > 0 && selectedContextId !== null && (
+        {(selectedProductIds.length > 0 || selectedContextId !== null) && (
           <div className="space-y-4 mt-4">
             <div>
               <Label className="text-sm font-medium mb-2 block">Tipo de Conteúdo</Label>
