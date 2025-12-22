@@ -835,6 +835,27 @@ Retorne JSON com:
 
         return { success: true, painsCount: allPains.length, pains: painsData };
       }),
+
+    // Atualizar informações do projeto (nicho, contexto, nome)
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        niche: z.string().optional(),
+        businessContext: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const project = await db.getProjectById(input.id);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        await db.updateProject(input.id, {
+          name: input.name,
+          niche: input.niche,
+          businessContext: input.businessContext,
+        });
+        return { success: true };
+      }),
   }),
 
   // ===== CONTENT =====
@@ -1660,6 +1681,27 @@ Lembre-se: Esta foto será postada como se fosse do próprio influenciador, ent�
         }
 
         return { results };
+      }),
+
+    // Atualizar informações do influenciador (nicho, nome, descrição)
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        niche: z.string().optional(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const influencer = await db.getInfluencerById(input.id);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        await db.updateInfluencer(input.id, {
+          name: input.name,
+          niche: input.niche,
+          description: input.description,
+        });
+        return { success: true };
       }),
   }),
 

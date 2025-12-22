@@ -19,6 +19,8 @@ export const projects = mysqlTable("projects", {
   userId: int("userId").notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
+  niche: varchar("niche", { length: 255 }),
+  businessContext: text("businessContext"),
   sourceType: mysqlEnum("sourceType", ["site", "instagram", "tiktok", "description"]).notNull(),
   sourceUrl: text("sourceUrl"),
   sourceDescription: text("sourceDescription"),

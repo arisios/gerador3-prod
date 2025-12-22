@@ -17,7 +17,7 @@ import { LogoPositionSelector } from "@/components/LogoPositionSelector";
 import { 
   ArrowLeft, Plus, Image, Video, Layers, Loader2, 
   ChevronRight, Trash2, Users, Zap, Target, AlertCircle,
-  TrendingUp, Flame, X, Check, UserPlus, Sparkles, Newspaper
+  TrendingUp, Flame, X, Check, UserPlus, Sparkles, Newspaper, Pencil
 } from "lucide-react";
 import { toast } from "sonner";
 

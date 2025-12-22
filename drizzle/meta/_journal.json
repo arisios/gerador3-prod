@@ -85,6 +85,13 @@
       "when": 1766345517231,
       "tag": "0011_early_raider",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1766365170992,
+      "tag": "0012_glossy_metal_master",
+      "breakpoints": true
     }
   ]
 }

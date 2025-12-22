@@ -938,3 +938,42 @@ news (notícias)
 - [x] Adicionar nicho ao prompt de conteúdo de influenciador (routers.ts linha 1450)
 - [x] Adicionar nicho ao prompt de imagem de projeto (routers.ts linha 1110)
 - [x] Melhorar clareza do prompt de selfie de influenciador (routers.ts linha 1544 e 1602)
+
+
+## Melhorias de Controle do Usuário (21/12/2024)
+
+### 1. Nicho Visível e Editável
+- [x] Adicionar campo niche e businessContext na tabela projects
+- [x] Exibir nicho na lista de projetos (Projects.tsx)
+- [ ] Exibir nicho no topo do ProjectDetail
+- [ ] Adicionar botão "Editar Nicho" no projeto
+- [ ] Modal de edição de nicho do projeto
+- [x] Rota backend projects.update para atualizar nicho do projeto
+- [ ] Adicionar botão "Editar Nicho" no influenciador
+- [ ] Modal de edição de nicho do influenciador
+- [x] Rota backend influencers.update para atualizar nicho do influenciador
+
+### 2. Sistema de Produtos do Influenciador
+- [ ] Criar tabela `influencer_products` no schema
+  - [ ] id, influencerId, name, description, salesApproach, createdAt
+- [ ] Adicionar campo `productId` na tabela `influencer_contents`
+- [ ] Rotas backend:
+  - [ ] `influencers.products.list` - Listar produtos do influenciador
+  - [ ] `influencers.products.create` - Criar produto
+  - [ ] `influencers.products.update` - Editar produto
+  - [ ] `influencers.products.delete` - Excluir produto
+- [ ] Nova aba "Produtos" no InfluencerDetail
+- [ ] Modal "Adicionar Produto" com campos: nome, descrição, abordagens
+- [ ] Lista de produtos salvos com botões editar/excluir
+- [ ] Dropdown de seleção de produto ao gerar conteúdo
+- [ ] Exibir produto usado na lista de conteúdos
+
+### 3. Banco de Imagens por Slide
+- [ ] Verificar se campo `imageBank` já existe na tabela slides
+- [ ] Atualizar lógica de geração para ADICIONAR ao banco, não substituir
+- [ ] Rota backend para listar imagens do banco de um slide
+- [ ] Rota backend para selecionar imagem do banco
+- [ ] Interface de galeria de imagens no editor
+- [ ] Botão "Escolher Imagem" que abre galeria
+- [ ] Botão "Gerar Nova" que adiciona ao banco
+- [ ] Indicador visual da imagem selecionada

@@ -57,7 +57,7 @@ export default function Projects() {
                   <div>
                     <div className="font-medium">{project.name}</div>
                     <div className="text-xs text-muted-foreground">
-                      {project.sourceType === "site" && "Site"}
+                      {project.niche} • {project.sourceType === "site" && "Site"}
                       {project.sourceType === "instagram" && "Instagram"}
                       {project.sourceType === "tiktok" && "TikTok"}
                       {project.sourceType === "description" && "Descrição"}
