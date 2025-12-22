@@ -34,10 +34,12 @@ const CAROUSEL_TEMPLATES = [
 ];
 
 interface SelectedItem {
-  id: number;
+  id: string | number;
   name: string;
   template: string;
   quantity: number;
+  type?: 'trend' | 'viral' | 'subject';
+  data?: any; // Dados completos do item (trend, viral ou notícia)
 }
 
 export default function InfluencerContentCreate() {
@@ -182,16 +184,28 @@ export default function InfluencerContentCreate() {
       console.log("[DEBUG] Processing item:", item);
       for (let i = 0; i < item.quantity; i++) {
         try {
-          console.log("[DEBUG] Calling mutateAsync with:", {
+          const payload: any = {
             influencerId,
             template: item.template,
-            product: item.name,
-          });
-          const result = await generateContent.mutateAsync({
-            influencerId,
-            template: item.template,
-            product: item.name,
-          });
+          };
+
+          // Se tem tipo (trend/viral/subject), adicionar ao payload
+          if (item.type) {
+            payload.type = item.type;
+            
+            // Para assuntos, passar dados da notícia como product
+            if (item.type === 'subject' && item.data) {
+              payload.product = `NOTÍCIA: ${item.data.title}\n\nDESCRIÇÃO: ${item.data.description}\n\nFONTE: ${item.data.source}\n\nCATEGORIA: ${item.data.category}`;
+            } else {
+              payload.product = item.name;
+            }
+          } else {
+            // Produtos e dores tradicionais
+            payload.product = item.name;
+          }
+
+          console.log("[DEBUG] Calling mutateAsync with:", payload);
+          const result = await generateContent.mutateAsync(payload);
           console.log("[DEBUG] mutateAsync result:", result);
         } catch (e) {
           console.error("[DEBUG] Erro ao gerar conteúdo", e);
@@ -204,12 +218,21 @@ export default function InfluencerContentCreate() {
     setLocation(`/influencer/${influencerId}`);
   };
 
-  const toggleItem = (id: number, name: string) => {
+  const toggleItem = (id: string | number, name: string) => {
     const exists = selectedItems.find(item => item.id === id);
     if (exists) {
       setSelectedItems(selectedItems.filter(item => item.id !== id));
     } else {
       setSelectedItems([...selectedItems, { id, name, template: "storytelling", quantity: 1 }]);
+    }
+  };
+
+  const toggleItemWithType = (id: string | number, name: string, type: 'trend' | 'viral' | 'subject', data: any) => {
+    const exists = selectedItems.find(item => item.id === id);
+    if (exists) {
+      setSelectedItems(selectedItems.filter(item => item.id !== id));
+    } else {
+      setSelectedItems([...selectedItems, { id, name, template: "storytelling", quantity: 1, type, data }]);
     }
   };
 
@@ -384,7 +407,7 @@ export default function InfluencerContentCreate() {
                   <Card 
                     key={trend.id} 
                     className={`cursor-pointer transition-all ${isItemSelected(trend.id) ? 'border-primary bg-primary/5' : ''}`}
-                    onClick={() => toggleItem(trend.id, trend.name)}
+                    onClick={() => toggleItemWithType(trend.id, trend.name, 'trend', trend)}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-start gap-3">
@@ -483,7 +506,7 @@ export default function InfluencerContentCreate() {
                   <Card 
                     key={viral.id} 
                     className={`cursor-pointer transition-all ${isItemSelected(viral.id) ? 'border-primary bg-primary/5' : ''}`}
-                    onClick={() => toggleItem(viral.id, viral.title)}
+                    onClick={() => toggleItemWithType(viral.id, viral.title, 'viral', viral)}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-start gap-3">
@@ -593,7 +616,7 @@ export default function InfluencerContentCreate() {
                     <Card 
                       key={index} 
                       className={`cursor-pointer transition-all ${isItemSelected(`news-${index}`) ? 'border-primary bg-primary/5' : ''}`}
-                      onClick={() => toggleItem(`news-${index}`, news.title)}
+                      onClick={() => toggleItemWithType(`news-${index}`, news.title, 'subject', news)}
                     >
                       <CardContent className="p-3">
                         <div className="flex items-start gap-3">

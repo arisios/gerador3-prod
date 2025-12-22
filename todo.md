@@ -1234,3 +1234,21 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Implementar listagem de resultados com checkboxes
 - [x] Integrar com sistema de seleção existente (template + quantidade)
 - [x] Testar funcionalidade completa no navegador - FUNCIONANDO 100%
+
+## Correção Geração de Conteúdo com Assuntos (22/12/2024)
+- [ ] Testar geração de conteúdo selecionando uma notícia
+- [ ] Verificar se handleGenerate está processando assuntos corretamente
+- [ ] Verificar se mutation generateContent aceita notícias como fonte
+- [ ] Corrigir integração entre frontend e backend para assuntos
+- [ ] Testar geração completa de conteúdo a partir de notícia
+
+## Implementar Geração de Conteúdo com Notícias no Hub do Influenciador (22/12/2024)
+- [x] Analisar como funciona em ProjectDetail.tsx (commit dbd3609)
+- [x] Criar router subjects no backend com rota search
+- [x] Implementar busca de notícias usando IA - FUNCIONANDO
+- [x] Interface de seleção de notícias - FUNCIONANDO
+- [ ] **BUG**: Botão "Gerar X Conteúdo(s)" não chama handleGenerate quando clicado
+  - onClick está correto no código (linha 707)
+  - handleGenerate existe e está implementado (linha 159)
+  - Mas função não é executada ao clicar
+  - Precisa testar no computador com console aberto (F12) para ver erro exato
