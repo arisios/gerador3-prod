@@ -84,6 +84,15 @@ export default function ProjectDetail() {
     url: "",
     publishedAt: "",
   });
+  const [selectedNewsForContent, setSelectedNewsForContent] = useState<any>(null);
+  const [newsContentModalOpen, setNewsContentModalOpen] = useState(false);
+  const [newsContentType, setNewsContentType] = useState<"carousel" | "image" | "video">("carousel");
+  const [newsContentTemplate, setNewsContentTemplate] = useState("");
+  const [newsContentQuantity, setNewsContentQuantity] = useState(1);
+  const [newsContentObjective, setNewsContentObjective] = useState<"sale" | "authority" | "growth">("authority");
+  const [newsContentPerson, setNewsContentPerson] = useState<"first" | "second" | "third">("second");
+  const [newsContentPlatform, setNewsContentPlatform] = useState<"instagram" | "tiktok">("instagram");
+  const [newsContentVoiceTone, setNewsContentVoiceTone] = useState("casual");
 
   const { data: project, isLoading } = trpc.projects.get.useQuery({ id: projectId });
   const { data: contents } = trpc.content.list.useQuery({ projectId }, { enabled: !!projectId });
@@ -303,6 +312,18 @@ export default function ProjectDetail() {
     },
     onError: () => {
       toast.error("Erro ao adicionar notícia");
+    },
+  });
+
+  const generateContentFromNews = (trpc as any).topics.generateContentFromNews.useMutation({
+    onSuccess: (data: { contentIds: number[] }) => {
+      toast.success(`${data.contentIds.length} conteúdo(s) gerado(s) com sucesso!`);
+      setNewsContentModalOpen(false);
+      setSelectedNewsForContent(null);
+      utils.content.list.invalidate({ projectId });
+    },
+    onError: (error: { message: string }) => {
+      toast.error("Erro ao gerar conteúdo: " + error.message);
     },
   });
 
@@ -941,12 +962,26 @@ export default function ProjectDetail() {
                               <p className="text-xs text-muted-foreground">
                                 {newsItem.description}
                               </p>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <span>{newsItem.source}</span>
-                                <span>•</span>
-                                <span>
-                                  {new Date(newsItem.publishedAt).toLocaleDateString("pt-BR")}
-                                </span>
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span>{newsItem.source}</span>
+                                  <span>•</span>
+                                  <span>
+                                    {new Date(newsItem.publishedAt).toLocaleDateString("pt-BR")}
+                                  </span>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs"
+                                  onClick={() => {
+                                    setSelectedNewsForContent(newsItem);
+                                    setNewsContentModalOpen(true);
+                                  }}
+                                >
+                                  <Sparkles className="h-3 w-3 mr-1" />
+                                  Gerar Conteúdo
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -1477,6 +1512,204 @@ export default function ProjectDetail() {
               Adicionar
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Gerar Conteúdo a partir de Notícia */}
+      <Dialog open={newsContentModalOpen} onOpenChange={setNewsContentModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Gerar Conteúdo a partir de Notícia</DialogTitle>
+          </DialogHeader>
+          
+          {selectedNewsForContent && (
+            <div className="space-y-4">
+              {/* Preview da notícia */}
+              <Card className="bg-muted/50">
+                <CardContent className="p-4 space-y-2">
+                  <h4 className="font-semibold text-sm">{selectedNewsForContent.title}</h4>
+                  <p className="text-xs text-muted-foreground">{selectedNewsForContent.description}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{selectedNewsForContent.source}</span>
+                    <span>•</span>
+                    <span>{new Date(selectedNewsForContent.publishedAt).toLocaleDateString("pt-BR")}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Configurações */}
+              <div className="space-y-4">
+                {/* Tipo de conteúdo */}
+                <div>
+                  <Label>Tipo de Conteúdo</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    <Button
+                      variant={newsContentType === "carousel" ? "default" : "outline"}
+                      onClick={() => {
+                        setNewsContentType("carousel");
+                        setNewsContentTemplate("");
+                      }}
+                      className="w-full"
+                    >
+                      <Layers className="w-4 h-4 mr-2" />
+                      Carrossel
+                    </Button>
+                    <Button
+                      variant={newsContentType === "image" ? "default" : "outline"}
+                      onClick={() => {
+                        setNewsContentType("image");
+                        setNewsContentTemplate("");
+                      }}
+                      className="w-full"
+                    >
+                      <Image className="w-4 h-4 mr-2" />
+                      Imagem
+                    </Button>
+                    <Button
+                      variant={newsContentType === "video" ? "default" : "outline"}
+                      onClick={() => {
+                        setNewsContentType("video");
+                        setNewsContentTemplate("");
+                      }}
+                      className="w-full"
+                    >
+                      <Video className="w-4 h-4 mr-2" />
+                      Vídeo
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Template */}
+                <div>
+                  <Label>Template</Label>
+                  <Select value={newsContentTemplate} onValueChange={setNewsContentTemplate}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {newsContentType === "carousel" && carouselTemplates?.map((t: any) => (
+                        <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                      ))}
+                      {newsContentType === "image" && imageTemplates?.map((t: any) => (
+                        <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                      ))}
+                      {newsContentType === "video" && videoTemplates?.map((t: any) => (
+                        <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Quantidade */}
+                <div>
+                  <Label>Quantidade</Label>
+                  <Select value={newsContentQuantity.toString()} onValueChange={(v) => setNewsContentQuantity(parseInt(v))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 5, 10].map(q => (
+                        <SelectItem key={q} value={q.toString()}>{q} conteúdo(s)</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Objetivo */}
+                <div>
+                  <Label>Objetivo</Label>
+                  <Select value={newsContentObjective} onValueChange={(v: any) => setNewsContentObjective(v)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sale">Venda</SelectItem>
+                      <SelectItem value="authority">Autoridade</SelectItem>
+                      <SelectItem value="growth">Crescimento</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Pessoa */}
+                <div>
+                  <Label>Pessoa Gramatical</Label>
+                  <Select value={newsContentPerson} onValueChange={(v: any) => setNewsContentPerson(v)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="first">1ª pessoa (eu/nós)</SelectItem>
+                      <SelectItem value="second">2ª pessoa (você)</SelectItem>
+                      <SelectItem value="third">3ª pessoa (ele/ela)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Plataforma */}
+                <div>
+                  <Label>Plataforma</Label>
+                  <Select value={newsContentPlatform} onValueChange={(v: any) => setNewsContentPlatform(v)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="instagram">Instagram</SelectItem>
+                      <SelectItem value="tiktok">TikTok</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Tom de voz */}
+                <div>
+                  <Label>Tom de Voz</Label>
+                  <Select value={newsContentVoiceTone} onValueChange={setNewsContentVoiceTone}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="casual">Casual</SelectItem>
+                      <SelectItem value="professional">Profissional</SelectItem>
+                      <SelectItem value="friendly">Amigável</SelectItem>
+                      <SelectItem value="authoritative">Autoritário</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewsContentModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                if (!newsContentTemplate) {
+                  toast.error("Selecione um template");
+                  return;
+                }
+                generateContentFromNews.mutate({
+                  newsId: selectedNewsForContent.id,
+                  projectId,
+                  type: newsContentType,
+                  template: newsContentTemplate,
+                  quantity: newsContentQuantity,
+                  objective: newsContentObjective,
+                  person: newsContentPerson,
+                  platform: newsContentPlatform,
+                  voiceTone: newsContentVoiceTone,
+                });
+              }}
+              disabled={generateContentFromNews.isPending || !newsContentTemplate}
+            >
+              {generateContentFromNews.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <Sparkles className="w-4 h-4 mr-2" />
+              )}
+              Gerar Conteúdo
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -911,3 +911,24 @@ news (notícias)
 - [x] Mostrar botões "Todas com Texto" e "Todas sem Texto" apenas quando allSlidesAreFullTemplate === true
 - [x] Ocultar botões de lote quando algum slide tem template visual customizado
 - [x] Implementação testada e funcionando corretamente
+
+
+## Misturar Notícia com Nicho (21/12/2024)
+- [x] Criar rota backend `topics.generateContentFromNews` que recebe:
+  - [x] newsId (ID da notícia)
+  - [x] projectId (para pegar nicho do projeto)
+  - [x] contentType (carrossel, imagem, vídeo)
+  - [x] quantity (quantidade de conteúdos)
+  - [x] objective (venda, autoridade, crescimento)
+- [x] IA gera gancho/ângulo conectando notícia com nicho
+- [x] IA gera conteúdo completo adaptado ao nicho
+- [x] Adicionar botão "Gerar Conteúdo" em cada notícia salva na aba Assuntos
+- [x] Criar modal de configuração ao clicar no botão:
+  - [x] Tipo de conteúdo (carrossel, imagem única, vídeo)
+  - [x] Quantidade
+  - [x] Objetivo (venda, autoridade, crescimento)
+  - [x] Preview do gancho gerado pela IA
+- [x] Salvar conteúdo gerado no banco
+- [x] Redirecionar para editor após geraçãonerate)
+- [x] Conteúdos gerados aparecem na lista de conteúdos do projeto
+- [x] Testar fluxo completo: notícia → gerar → configurar → conteúdo criado

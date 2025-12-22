@@ -2274,6 +2274,145 @@ Para cada viral, sugira nichos que podem adaptar e ângulos de abordagem.`
         }
         return db.getSelectedNewsByProject(input.projectId);
       }),
+
+    // Gerar conteúdo a partir de notícia + nicho
+    generateContentFromNews: protectedProcedure
+      .input(z.object({
+        newsId: z.number(),
+        projectId: z.number(),
+        type: z.enum(["carousel", "image", "video"]),
+        template: z.string(),
+        quantity: z.number().min(1).max(10).default(1),
+        objective: z.enum(["sale", "authority", "growth"]).default("authority"),
+        person: z.enum(["first", "second", "third"]).default("second"),
+        platform: z.enum(["instagram", "tiktok"]).default("instagram"),
+        voiceTone: z.string().default("casual"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Verificar projeto
+        const project = await db.getProjectById(input.projectId);
+        if (!project || project.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        // Buscar notícia
+        const news = await db.getNewsById(input.newsId);
+        if (!news) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Notícia não encontrada" });
+        }
+
+        const analysis = project.analysis as { niche?: string; businessName?: string; mainProduct?: string } | null;
+        const niche = analysis?.niche || "geral";
+        const businessContext = analysis ? `${analysis.businessName || ''} - ${analysis.mainProduct || ''}` : undefined;
+        const batchId = nanoid();
+
+        const templateInfo = carouselTemplates.find(t => t.id === input.template) ||
+                           imageTemplates.find(t => t.id === input.template) ||
+                           videoTemplates.find(t => t.id === input.template);
+
+        const voiceToneInfo = voiceTones.find(v => v.id === input.voiceTone);
+        
+        const contentIds: number[] = [];
+
+        for (let i = 0; i < input.quantity; i++) {
+          // Prompt especial que conecta notícia com nicho
+          const newsAnglePrompt = `
+Você é um especialista em criar conteúdo viral para redes sociais.
+
+NOTÍCIA ATUAL:
+Título: ${news.title}
+Descrição: ${news.description}
+Fonte: ${news.source}
+Data: ${news.publishedAt}
+
+NICHO DO NEGÓCIO: ${niche}
+${businessContext ? `Contexto: ${businessContext}` : ''}
+
+Sua tarefa:
+1. Analise a notícia e identifique o GANCHO/ÂNGULO que conecta ela com o nicho "${niche}"
+2. Crie conteúdo ${input.type === 'carousel' ? 'em carrossel' : input.type === 'image' ? 'de imagem única' : 'de vídeo'} usando o template "${input.template}"
+3. Objetivo: ${input.objective === 'sale' ? 'vender' : input.objective === 'authority' ? 'gerar autoridade' : 'crescer audiência'}
+4. Pessoa gramatical: ${input.person === 'first' ? '1ª pessoa (eu/nós)' : input.person === 'second' ? '2ª pessoa (você)' : '3ª pessoa (ele/ela)'}
+5. Plataforma: ${input.platform}
+6. Tom de voz: ${input.voiceTone}${voiceToneInfo ? ` - ${voiceToneInfo.characteristics.join(', ')}` : ''}
+
+ESTRUTURA DO TEMPLATE:
+${(templateInfo as { structure?: string[] })?.structure?.map((s, i) => `Slide ${i + 1}: ${s}`).join('\n') || 'Estrutura padrão'}
+
+IMPORTANTE:
+- Conecte a notícia com o nicho de forma NATURAL e RELEVANTE
+- Use a notícia como GANCHO inicial, mas foque no valor para o nicho
+- Não force a conexão - encontre o ângulo verdadeiro
+- Gere conteúdo ACIONÁVEL e ÚTIL para quem trabalha com "${niche}"
+
+Retorne JSON válido:
+{
+  "title": "Título do conteúdo",
+  "angle": "Explicação do gancho/ângulo usado para conectar notícia + nicho",
+  "slides": [
+    { "text": "Texto do slide 1", "imagePrompt": "Prompt para gerar imagem" },
+    ...
+  ]
+}
+`;
+
+          const response = await invokeLLM({
+            messages: [
+              { role: "system", content: "Você é um especialista em criar conteúdo viral para redes sociais conectando notícias atuais com nichos específicos. Retorne apenas JSON válido." },
+              { role: "user", content: newsAnglePrompt }
+            ]
+          });
+
+          const contentText = (typeof response.choices[0]?.message?.content === 'string' ? response.choices[0]?.message?.content : JSON.stringify(response.choices[0]?.message?.content)) || "{}";
+          let contentData;
+          try {
+            let jsonStr = contentText;
+            const jsonMatch = contentText.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (jsonMatch) {
+              jsonStr = jsonMatch[1].trim();
+            }
+            contentData = JSON.parse(jsonStr);
+          } catch (e) {
+            console.error("[News Content Generate] Failed to parse:", e);
+            contentData = { title: "Conteúdo gerado", angle: "", slides: [] };
+          }
+
+          const contentId = await db.createContent({
+            projectId: input.projectId,
+            userId: ctx.user.id,
+            title: contentData.title || `Conteúdo baseado em: ${news.title.substring(0, 50)}...`,
+            type: input.type,
+            template: input.template,
+            batchId,
+            metadata: {
+              newsId: input.newsId,
+              newsTitle: news.title,
+              angle: contentData.angle,
+              objective: input.objective,
+              person: input.person,
+              platform: input.platform,
+              voiceTone: input.voiceTone,
+            },
+          });
+
+          contentIds.push(contentId);
+
+          if (contentData.slides && Array.isArray(contentData.slides)) {
+            for (let slideIndex = 0; slideIndex < contentData.slides.length; slideIndex++) {
+              const slide = contentData.slides[slideIndex];
+              await db.createSlide({
+                contentId,
+                slideNumber: slideIndex + 1,
+                text: slide.text || "",
+                imagePrompt: slide.imagePrompt || "",
+                imageUrl: null,
+              });
+            }
+          }
+        }
+
+        return { contentIds, batchId };
+      }),
   }),
 
   // ===== PROVIDERS =====
