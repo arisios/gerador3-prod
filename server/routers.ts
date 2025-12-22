@@ -14,6 +14,34 @@ import { designTemplates, colorPalettes } from "@shared/designTemplates";
 import { nanoid } from "nanoid";
 import { storagePut } from "./storage";
 
+// Função helper para obter instruções específicas de cada template
+function getTemplateInstructions(template?: string): string {
+  const instructions: Record<string, string> = {
+    "rotina": "Mostre a rotina diária do influenciador, incluindo momentos-chave do dia. Use slides para diferentes horários ou atividades. Seja autêntico e pessoal.",
+    "antes-depois": "Mostre uma transformação ou evolução. Comece com o 'antes' (problema/situação inicial), depois mostre o processo e finalize com o 'depois' (resultado/solução).",
+    "storytelling": "Conte uma história envolvente com início, meio e fim. Use narrativa pessoal, emoções e uma lição aprendida. Mantenha o suspense entre os slides.",
+    "lista": "Crie uma lista numerada de dicas, conselhos ou itens. Cada slide deve ter um ponto claro e útil. Use linguagem direta e acionável.",
+    "passo-a-passo": "Ensine um processo ou tutorial em etapas sequenciais. Cada slide é um passo claro e fácil de seguir. Use verbos de ação.",
+    "mitos-verdades": "Desmistifique crenças comuns. Alterne entre 'MITO' e 'VERDADE', explicando cada um. Use fatos e experiência pessoal para embasar.",
+    "problema-solucao": "Identifique um problema comum do público, explore suas consequências, depois apresente a solução de forma clara e prática.",
+    "testemunho": "Compartilhe uma experiência pessoal autêntica. Foque em emoções, desafios superados e resultados reais. Seja vulnerável e verdadeiro.",
+    "comparacao": "Compare duas opções, métodos ou produtos. Mostre prós e contras de cada um de forma equilibrada. Conclua com recomendação baseada em experiência.",
+    "tutorial": "Ensine algo prático e útil. Use instruções claras, exemplos visuais (mencione o que mostrar) e dicas extras. Seja didático.",
+    "curiosidades": "Compartilhe fatos interessantes ou pouco conhecidos sobre o nicho. Use tom descontraído e surpreenda o público.",
+    "transformacao": "Mostre uma jornada de mudança significativa. Enfatize o ponto de partida, os desafios, o processo e o resultado final inspirador.",
+    "dica-rapida": "Dê uma dica única, rápida e acionável. Vá direto ao ponto. Use linguagem simples e impactante.",
+    "frase-impacto": "Crie uma frase marcante, motivacional ou reflexiva. Deve ser memorável e alinhada com o nicho do influenciador.",
+    "promocao": "Apresente uma oferta ou promoção de forma atrativa mas não agressiva. Destaque benefícios e crie senso de urgência sutil.",
+    "citacao": "Compartilhe uma citação inspiradora (própria ou de terceiros) e explique por que ela ressoa com você. Conecte com o nicho.",
+    "bastidores": "Mostre o que acontece por trás das câmeras. Seja autêntico, mostre o processo real, erros e aprendizados. Crie conexão.",
+    "depoimento": "Compartilhe um testemunho pessoal ou de terceiros. Foque em resultados reais, emoções e transformação.",
+    "demonstracao": "Mostre como algo funciona na prática. Use descrições visuais claras e destaque benefícios durante a demonstração.",
+    "desafio": "Proponha um desafio ao público. Explique as regras, benefícios e como participar. Use tom motivacional e inclusivo.",
+  };
+  
+  return instructions[template || ""] || "Crie um conteúdo genérico relevante para o nicho do influenciador. Seja autêntico, pessoal e engajador.";
+}
+
 export const appRouter = router({
   system: systemRouter,
   
@@ -2189,7 +2217,14 @@ REGRAS DE REALISMO:
 
 O conteúdo deve parecer que ${influencer.name} está compartilhando uma experiência pessoal real.`
             },
-            { role: "user", content: `Gere um conteúdo de carrossel para Instagram na primeira pessoa.` }
+            { role: "user", content: `Gere um conteúdo de ${input.type === 'carousel' ? 'carrossel' : input.type === 'image' ? 'imagem única' : 'vídeo'} para Instagram na primeira pessoa.
+
+TEMPLATE: ${input.template || 'genérico'}
+
+Instrucoes do template:
+${getTemplateInstructions(input.template)}
+
+${input.type === 'carousel' ? 'Gere entre 5-8 slides com textos curtos e impactantes (máx 100 caracteres por slide).' : input.type === 'image' ? 'Gere um texto único impactante para a imagem.' : 'Gere um roteiro de vídeo com introdução, desenvolvimento e conclusão.'}` }
           ],
           response_format: {
             type: "json_schema",
@@ -2233,9 +2268,9 @@ O conteúdo deve parecer que ${influencer.name} está compartilhando uma experi�
         const contentId = await db.createInfluencerContent({
           influencerId: input.influencerId,
           userId: ctx.user.id,
-          type: "carousel",
-          template: "product",
-          source: "produto",
+          type: input.type || "carousel",
+          template: input.template || "generico",
+          source: input.productId ? "produto" : (input.contextType === "trend" ? "trend" : input.contextType === "viral" ? "viral" : input.contextType === "subject" ? "assunto" : "generico"),
           title: contentData.title || "Conteúdo",
           description: contentData.description || null,
           hook: contentData.hook || null,

@@ -1414,3 +1414,9 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] **CRÍTICO:** Backend exige productId obrigatório quando deveria ser opcional (erro: "expected number, received undefined") - CORRIGIDO: productId agora é opcional no schema Zod
 - [x] Templates faltando na interface: Rotina do Dia-a-Dia, Testemunho/Depoimento, Comparação, e outros - ADICIONADOS: 12 templates para carrossel, 6 para imagem, 6 para vídeo
 - [x] Ampliar lista de templates disponíveis para cada tipo de conteúdo - IMPLEMENTADO
+
+
+## Bug Crítico (22/12/2024 - 19:50)
+- [x] **CRÍTICO:** Conteúdo gerado vem vazio (sem texto nos slides) - backend não está usando o template específico enviado pelo frontend - CORRIGIDO
+- [x] Backend ignora campos `input.template` e `input.type` na geração - CORRIGIDO: agora usa input.type e input.template
+- [x] Prompt LLM precisa ser ajustado para gerar conteúdo baseado no template selecionado (rotina, storytelling, antes-depois, etc.) - IMPLEMENTADO: função getTemplateInstructions() com 20 templates
