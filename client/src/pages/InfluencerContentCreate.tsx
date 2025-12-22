@@ -81,14 +81,14 @@ export default function InfluencerContentCreate() {
 
   const utils = trpc.useUtils();
   const { data: influencer } = trpc.influencers.get.useQuery({ id: influencerId });
-  const { data: products } = trpc.influencers.listProducts.useQuery({ influencerId });
+  const { data: products } = trpc.influencers.products.listProducts.useQuery({ influencerId });
   const { data: trends } = trpc.trends.list.useQuery();
   const { data: virals } = trpc.virals.list.useQuery();
 
-  const createProductMutation = trpc.influencers.createProduct.useMutation({
+  const createProductMutation = trpc.influencers.products.createProduct.useMutation({
     onSuccess: () => {
       toast.success("Produto criado com sucesso!");
-      utils.influencers.listProducts.invalidate({ influencerId });
+      utils.influencers.products.listProducts.invalidate({ influencerId });
       setIsProductModalOpen(false);
       setNewProductName("");
       setNewProductDescription("");

@@ -1133,3 +1133,11 @@ news (notícias)
 - [ ] Ao selecionar item do Grupo B, mostrar "Combinar com Produto/Dor?"
 - [ ] Validar regras: máximo 1 de cada grupo
 - [ ] Gerar conteúdo com combinação correta
+
+## Bug: Procedures de Produtos Não Encontradas (22/12/2024)
+- [x] Erro: No procedure found on path "influencers.listProducts"
+- [x] Erro: No procedure found on path "influencers.createProduct"
+- [x] Verificar estrutura de routers no backend
+- [x] Corrigir caminhos: influencers.products.listProducts e influencers.products.createProduct
+- [ ] Testar listagem de produtos
+- [ ] Testar criação de produtos
