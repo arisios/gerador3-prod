@@ -1037,3 +1037,9 @@ news (notícias)
 - [x] Erro ao gerar conteúdo com trend: "db.getTrendById is not a function" - CORRIGIDO
 - [x] Erro ao gerar conteúdo com viral: "db.getViralById is not a function" - CORRIGIDO (implementado preventivamente)
 - [x] Solução aplicada: implementadas funções getTrendById e getViralById no server/db.ts, testado com sucesso no navegador
+
+## Bug Crítico - Funcionalidade Original Removida (22/12/2024)
+- [x] Geração de conteúdo sem produto foi removida acidentalmente - RESTAURADO
+- [x] Aba "Conteúdos" não tem mais opção de gerar com trend/viral/assunto - RESTAURADO (3 botões: Trends, Virais, Assuntos)
+- [x] Funcionalidade de buscar notícia por assunto também foi removida - RESTAURADO (botão Assuntos leva para /content/new?type=subject)
+- [x] Solução aplicada: adicionados 3 botões na aba Conteúdos mantendo toda funcionalidade de Produtos intacta
