@@ -50,9 +50,12 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
   const [analyzingProduct, setAnalyzingProduct] = useState(false);
   const [suggestedApproaches, setSuggestedApproaches] = useState<string[]>([]);
 
-  const { data: products = [], isLoading } = (trpc.influencers as any).products.listProducts.useQuery({
+  const { data: products = [], isLoading, error } = (trpc.influencers as any).products.listProducts.useQuery({
     influencerId,
   });
+
+  // Garantir que products é sempre um array
+  const safeProducts = Array.isArray(products) ? products : [];
 
   const { data: trends = [] } = trpc.trends.list.useQuery();
   const { data: virals = [] } = trpc.virals.list.useQuery();
@@ -145,7 +148,7 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
       name: productForm.name,
       description: productForm.description || undefined,
       suggestedApproaches,
-      selectedApproaches: suggestedApproaches, // Todas selecionadas por padrão
+      selectedApproaches: [], // Começam desmarcadas, usuário escolhe quais quer
     });
   };
 
@@ -176,9 +179,9 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
         Adicionar Produto
       </Button>
 
-      {products.length > 0 ? (
+      {safeProducts.length > 0 ? (
         <div className="space-y-4">
-          {products.map((product: Product) => (
+          {safeProducts.map((product: Product) => (
             <Card key={product.id}>
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-start justify-between">
@@ -205,13 +208,13 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
                   </Button>
                 </div>
 
-                {product.suggestedApproaches.length > 0 && (
+                {product.suggestedApproaches && product.suggestedApproaches.length > 0 && (
                   <div className="space-y-2">
                     <div className="text-sm font-medium text-muted-foreground">Abordagens de Venda:</div>
                     {product.suggestedApproaches.map((approach, idx) => (
                       <div key={idx} className="flex items-start gap-2">
                         <Checkbox
-                          checked={product.selectedApproaches.includes(approach)}
+                          checked={product.selectedApproaches?.includes(approach) || false}
                           onCheckedChange={() => toggleApproach(product.id, approach, product)}
                           className="mt-1"
                         />
@@ -221,7 +224,7 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
                   </div>
                 )}
 
-                {product.selectedApproaches.length > 0 && (
+                {product.selectedApproaches && product.selectedApproaches.length > 0 && (
                   <Button
                     className="w-full mt-2"
                     size="sm"
@@ -378,7 +381,7 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
                             }`}
                             onClick={() => setSelectedTrendId(trend.id)}
                           >
-                            <div className="font-medium text-sm">{trend.keyword}</div>
+                            <div className="font-medium text-sm">{trend.name}</div>
                             <div className="text-xs text-muted-foreground mt-1">{trend.source}</div>
                           </div>
                         ))}

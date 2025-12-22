@@ -1022,3 +1022,8 @@ news (notícias)
 - [x] Testes vitest completos (2 testes passando: sem contexto + assunto livre)
 - [ ] Salvar conteúdo gerado no banco de dados (pendente)
 - [ ] Testar fluxo completo no navegador (pendente - problema com tipos tRPC)
+
+## Bugs Reportados - Geração de Conteúdo com Produtos (21/12/2024)
+- [x] Trends só mostram fonte ("tiktok", "google") em vez do nome real da trend - CORRIGIDO (mudou trend.keyword para trend.name)
+- [x] Todas as abordagens vêm marcadas por padrão (devem vir desmarcadas) - CORRIGIDO (selectedApproaches agora começa vazio [])
+- [x] Erro ao selecionar múltiplas abordagens - modal não abre tabs de Trend/Viral/Assunto - CORRIGIDO (modal abre normalmente com múltiplas abordagens)
