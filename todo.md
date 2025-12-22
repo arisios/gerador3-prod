@@ -1032,3 +1032,8 @@ news (notícias)
 - [x] Botão "Gerar Conteúdo" fica invisível quando lista de trends/virais é grande - CORRIGIDO
 - [x] Modal não tem scroll interno, empurra botão para fora da tela - CORRIGIDO
 - [x] Solução aplicada: DialogContent com max-h-[90vh] + flex-col, conteúdo com overflow-y-auto + flex-1, botões fixos no rodapé
+
+## Bug Crítico - Geração de Conteúdo com Trend/Viral (21/12/2024)
+- [x] Erro ao gerar conteúdo com trend: "db.getTrendById is not a function" - CORRIGIDO
+- [x] Erro ao gerar conteúdo com viral: "db.getViralById is not a function" - CORRIGIDO (implementado preventivamente)
+- [x] Solução aplicada: implementadas funções getTrendById e getViralById no server/db.ts, testado com sucesso no navegador

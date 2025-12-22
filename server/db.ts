@@ -451,6 +451,13 @@ export async function getTrendsBySource(userId: number, source: "google" | "tikt
   return db.select().from(trends).where(and(eq(trends.userId, userId), eq(trends.source, source))).orderBy(desc(trends.collectedAt));
 }
 
+export async function getTrendById(trendId: number): Promise<Trend | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(trends).where(eq(trends.id, trendId)).limit(1);
+  return result[0];
+}
+
 // ===== VIRALS FUNCTIONS =====
 export async function createVirals(userId: number, viralsList: Omit<Viral, "id" | "userId" | "collectedAt">[]): Promise<void> {
   const db = await getDb();
@@ -472,6 +479,13 @@ export async function getViralsBySource(userId: number, source: "viralhog" | "re
   const db = await getDb();
   if (!db) return [];
   return db.select().from(virals).where(and(eq(virals.userId, userId), eq(virals.source, source))).orderBy(desc(virals.collectedAt));
+}
+
+export async function getViralById(viralId: number): Promise<Viral | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(virals).where(eq(virals.id, viralId)).limit(1);
+  return result[0];
 }
 
 // ===== USER SETTINGS FUNCTIONS =====
