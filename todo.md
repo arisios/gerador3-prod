@@ -1012,3 +1012,13 @@ news (notícias)
 - [x] Listagem de produtos com abordagens sugeridas
 - [x] Botão "Gerar Conteúdo" para criar posts baseados nas abordagens
 - [x] Testes vitest: 5 testes passando (analyzeProduct, createProduct, listProducts, updateProduct, deleteProduct)
+
+## Geração de Conteúdo com Produtos (21/12/2024)
+- [x] Modal de geração: selecionar produto e abordagem(ns)
+- [x] Opção de conectar com Trend, Viral ou Assunto livre
+- [x] Procedure tRPC generateContentWithProduct (implementada)
+- [x] IA combina abordagem de venda + contexto (trend/viral/assunto)
+- [x] Gerar conteúdo que mescla as duas estratégias
+- [x] Testes vitest completos (2 testes passando: sem contexto + assunto livre)
+- [ ] Salvar conteúdo gerado no banco de dados (pendente)
+- [ ] Testar fluxo completo no navegador (pendente - problema com tipos tRPC)

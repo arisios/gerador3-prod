@@ -40,11 +40,23 @@ interface Product {
 
 function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; influencerNiche: string }) {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [contextType, setContextType] = useState<'trend' | 'viral' | 'subject' | null>(null);
+  const [selectedTrendId, setSelectedTrendId] = useState<number | null>(null);
+  const [selectedViralId, setSelectedViralId] = useState<number | null>(null);
+  const [freeSubject, setFreeSubject] = useState('');
   const [productForm, setProductForm] = useState({ name: "", description: "" });
   const [analyzingProduct, setAnalyzingProduct] = useState(false);
   const [suggestedApproaches, setSuggestedApproaches] = useState<string[]>([]);
 
-  const { data: products = [], isLoading } = (trpc.influencers.products as any).listProducts.useQuery({ influencerId });
+  const { data: products = [], isLoading } = (trpc.influencers as any).products.listProducts.useQuery({
+    influencerId,
+  });
+
+  const { data: trends = [] } = trpc.trends.list.useQuery();
+  const { data: virals = [] } = trpc.virals.list.useQuery();
+
   const utils = trpc.useUtils();
 
   const analyzeProduct = (trpc.influencers.products as any).analyzeProduct.useMutation({
@@ -78,10 +90,35 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
 
   const deleteProduct = (trpc.influencers.products as any).deleteProduct.useMutation({
     onSuccess: () => {
-      toast.success("Produto excluído");
-      (utils.influencers.products as any).listProducts.invalidate({ influencerId });
+      toast({ title: "Produto excluído com sucesso!" });
+      (utils.influencers as any).products.listProducts.invalidate({ influencerId });
     },
   });
+
+  const generateContent = (trpc.influencers.products as any).generateContentWithProduct.useMutation({
+    onSuccess: (data: any) => {
+      console.log("Conteúdo gerado:", data);
+      toast.success("Conteúdo gerado com sucesso!");
+      setShowGenerateModal(false);
+      // TODO: Navegar para página de edição do conteúdo
+    },
+    onError: (error: any) => {
+      toast.error(`Erro ao gerar conteúdo: ${error.message}`);
+    },
+  });
+
+  const handleGenerateContent = () => {
+    if (!selectedProduct) return;
+
+    generateContent.mutate({
+      productId: selectedProduct.id,
+      influencerId,
+      contextType: contextType || 'none',
+      trendId: selectedTrendId || undefined,
+      viralId: selectedViralId || undefined,
+      freeSubject: freeSubject || undefined,
+    });
+  };
 
   const handleAnalyze = () => {
     if (!productForm.name.trim() || !productForm.description.trim()) {
@@ -189,8 +226,8 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
                     className="w-full mt-2"
                     size="sm"
                     onClick={() => {
-                      // TODO: Integrar com geração de conteúdo
-                      toast.info("Geração de conteúdo com produto será implementada");
+                      setSelectedProduct(product);
+                      setShowGenerateModal(true);
                     }}
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
@@ -284,6 +321,110 @@ function ProductsTab({ influencerId, influencerNiche }: { influencerId: number; 
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               ) : null}
               Salvar Produto
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Gerar Conteúdo */}
+      <Dialog open={showGenerateModal} onOpenChange={setShowGenerateModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Gerar Conteúdo com Produto</DialogTitle>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Package className="w-4 h-4 text-primary" />
+                  <span className="font-medium">{selectedProduct.name}</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{selectedProduct.description}</p>
+                <div className="mt-3">
+                  <span className="text-sm font-medium">Abordagens selecionadas:</span>
+                  <ul className="mt-1 space-y-1">
+                    {selectedProduct.selectedApproaches.map((approach, idx) => (
+                      <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        <span>{approach}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Conectar com: (opcional)</Label>
+                <p className="text-sm text-muted-foreground">Escolha uma opção para combinar a abordagem de venda com um contexto</p>
+                
+                <Tabs value={contextType || 'none'} onValueChange={(v) => setContextType(v as any)} className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="none">Nenhum</TabsTrigger>
+                    <TabsTrigger value="trend">🔥 Trend</TabsTrigger>
+                    <TabsTrigger value="viral">🎬 Viral</TabsTrigger>
+                    <TabsTrigger value="subject">💬 Assunto</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="none" className="mt-4">
+                    <p className="text-sm text-muted-foreground text-center py-4">Gerar conteúdo apenas com as abordagens do produto</p>
+                  </TabsContent>
+                  <TabsContent value="trend" className="mt-4">
+                    {trends.length > 0 ? (
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {trends.map((trend: any) => (
+                          <div
+                            key={trend.id}
+                            className={`p-3 border rounded-lg cursor-pointer hover:bg-muted transition-colors ${
+                              selectedTrendId === trend.id ? 'border-primary bg-muted' : ''
+                            }`}
+                            onClick={() => setSelectedTrendId(trend.id)}
+                          >
+                            <div className="font-medium text-sm">{trend.keyword}</div>
+                            <div className="text-xs text-muted-foreground mt-1">{trend.source}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">Nenhuma trend disponível</p>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="viral" className="mt-4">
+                    {virals.length > 0 ? (
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {virals.map((viral: any) => (
+                          <div
+                            key={viral.id}
+                            className={`p-3 border rounded-lg cursor-pointer hover:bg-muted transition-colors ${
+                              selectedViralId === viral.id ? 'border-primary bg-muted' : ''
+                            }`}
+                            onClick={() => setSelectedViralId(viral.id)}
+                          >
+                            <div className="font-medium text-sm">{viral.title}</div>
+                            <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{viral.description}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">Nenhum viral disponível</p>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="subject" className="mt-4">
+                    <Textarea
+                      placeholder="Digite um assunto ou tema para conectar com o produto...\nEx: Viagem de férias, economia de combustível, segurança no trânsito"
+                      value={freeSubject}
+                      onChange={(e) => setFreeSubject(e.target.value)}
+                      rows={4}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGenerateModal(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleGenerateContent} disabled={generateContent.isPending}>
+              {generateContent.isPending ? "Gerando..." : "Gerar Conteúdo"}
             </Button>
           </DialogFooter>
         </DialogContent>

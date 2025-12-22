@@ -1843,6 +1843,39 @@ Retorne APENAS um array JSON com as abordagens:
         await db.deleteInfluencerProduct(input.id);
         return { success: true };
       }),
+
+    // Gerar conteúdo combinando produto + abordagens + contexto
+    generateContentWithProduct: protectedProcedure
+      .input(z.object({
+        productId: z.number(),
+        influencerId: z.number(),
+        contextType: z.enum(['none', 'trend', 'viral', 'subject']),
+        trendId: z.number().optional(),
+        viralId: z.number().optional(),
+        freeSubject: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const product = await db.getInfluencerProductById(input.productId);
+        if (!product) throw new TRPCError({ code: "NOT_FOUND" });
+        const influencer = await db.getInfluencerById(input.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+
+        let contextInfo = '';
+        if (input.contextType === 'trend' && input.trendId) {
+          const trend = await db.getTrendById(input.trendId);
+          if (trend) contextInfo = `TREND: ${trend.keyword}`;
+        } else if (input.contextType === 'viral' && input.viralId) {
+          const viral = await db.getViralById(input.viralId);
+          if (viral) contextInfo = `VIRAL: ${viral.title}`;
+        } else if (input.contextType === 'subject' && input.freeSubject) {
+          contextInfo = `ASSUNTO: ${input.freeSubject}`;
+        }
+
+        const prompt = `Crie conteúdo para ${influencer.name} (${influencer.niche}) vendendo ${product.name}.\nAbordagens: ${product.selectedApproaches}${contextInfo ? `\nContexto: ${contextInfo}` : ''}\n\nRetorne JSON: {hook, script, cta, hashtags[], tips}`;
+
+        const response = await invokeLLM({ messages: [{ role: "user", content: prompt }], response_format: { type: "json_schema", json_schema: { name: "content", strict: true, schema: { type: "object", properties: { hook: { type: "string" }, script: { type: "string" }, cta: { type: "string" }, hashtags: { type: "array", items: { type: "string" } }, tips: { type: "string" } }, required: ["hook", "script", "cta", "hashtags", "tips"], additionalProperties: false } } } });
+        return JSON.parse(response.choices[0].message.content);
+      }),
     }),
   }),
 
