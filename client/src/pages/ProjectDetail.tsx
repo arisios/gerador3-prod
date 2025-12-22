@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -94,7 +94,24 @@ export default function ProjectDetail() {
   const [newsContentPlatform, setNewsContentPlatform] = useState<"instagram" | "tiktok">("instagram");
   const [newsContentVoiceTone, setNewsContentVoiceTone] = useState("casual");
 
+  // Estados para edição de nicho
+  const [showEditNicheModal, setShowEditNicheModal] = useState(false);
+  const [editNicheForm, setEditNicheForm] = useState({
+    niche: "",
+    businessContext: "",
+  });
+
   const { data: project, isLoading } = trpc.projects.get.useQuery({ id: projectId });
+
+  // Preencher formulário de edição quando modal abre
+  useEffect(() => {
+    if (showEditNicheModal && project) {
+      setEditNicheForm({
+        niche: project.niche || "",
+        businessContext: project.businessContext || "",
+      });
+    }
+  }, [showEditNicheModal, project]);
   const { data: contents } = trpc.content.list.useQuery({ projectId }, { enabled: !!projectId });
   const { data: trends } = trpc.trends.list.useQuery({ source: "google" });
   const { data: virals } = trpc.virals.list.useQuery({});
@@ -134,6 +151,14 @@ export default function ProjectDetail() {
     onSuccess: () => {
       toast.success("Projeto excluído");
       setLocation("/dashboard");
+    },
+  });
+
+  const updateProject = (trpc.projects as any).update.useMutation({
+    onSuccess: () => {
+      toast.success("Projeto atualizado!");
+      utils.projects.get.invalidate({ id: projectId });
+      setShowEditNicheModal(false);
     },
   });
 
@@ -526,7 +551,22 @@ export default function ProjectDetail() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="font-bold truncate max-w-[200px]">{project.name}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="font-bold truncate max-w-[200px]">{project.name}</h1>
+                {project.niche && (
+                  <Badge variant="secondary" className="text-xs">
+                    {project.niche}
+                  </Badge>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6"
+                  onClick={() => setShowEditNicheModal(true)}
+                >
+                  <Pencil className="w-3 h-3" />
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground">{project.sourceType}</p>
             </div>
           </div>
@@ -1708,6 +1748,56 @@ export default function ProjectDetail() {
                 <Sparkles className="w-4 h-4 mr-2" />
               )}
               Gerar Conteúdo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Edição de Nicho */}
+      <Dialog open={showEditNicheModal} onOpenChange={setShowEditNicheModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Nicho do Projeto</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="niche">Nicho</Label>
+              <Input
+                id="niche"
+                placeholder="Ex: Mecânico de carros, Nutricionista, Advogado..."
+                value={editNicheForm.niche}
+                onChange={(e) => setEditNicheForm({ ...editNicheForm, niche: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="businessContext">Contexto do Negócio (opcional)</Label>
+              <Textarea
+                id="businessContext"
+                placeholder="Descreva o contexto do seu negócio, público-alvo, diferenciais..."
+                value={editNicheForm.businessContext}
+                onChange={(e) => setEditNicheForm({ ...editNicheForm, businessContext: e.target.value })}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditNicheModal(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                updateProject.mutate({
+                  id: projectId,
+                  niche: editNicheForm.niche || undefined,
+                  businessContext: editNicheForm.businessContext || undefined,
+                });
+              }}
+              disabled={updateProject.isPending}
+            >
+              {updateProject.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : null}
+              Salvar
             </Button>
           </DialogFooter>
         </DialogContent>

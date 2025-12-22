@@ -945,9 +945,9 @@ news (notícias)
 ### 1. Nicho Visível e Editável
 - [x] Adicionar campo niche e businessContext na tabela projects
 - [x] Exibir nicho na lista de projetos (Projects.tsx)
-- [ ] Exibir nicho no topo do ProjectDetail
-- [ ] Adicionar botão "Editar Nicho" no projeto
-- [ ] Modal de edição de nicho do projeto
+- [x] Exibir nicho no topo do ProjectDetail
+- [x] Adicionar botão "Editar Nicho" no projeto
+- [x] Modal de edição de nicho do projeto
 - [x] Rota backend projects.update para atualizar nicho do projeto
 - [ ] Adicionar botão "Editar Nicho" no influenciador
 - [ ] Modal de edição de nicho do influenciador
