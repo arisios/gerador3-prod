@@ -72,6 +72,8 @@ export default function InfluencerContentCreate() {
   const [newProductApproaches, setNewProductApproaches] = useState("");
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [selectedProductForModal, setSelectedProductForModal] = useState<any>(null);
+  const [selectedContextId, setSelectedContextId] = useState<number | null>(null);
+  const [selectedContextType, setSelectedContextType] = useState<'trend' | 'viral' | 'subject' | null>(null);
   
   // Estados da aba Assuntos
   const [searchQuery, setSearchQuery] = useState("");
@@ -169,26 +171,63 @@ export default function InfluencerContentCreate() {
     onError: (e) => toast.error("Erro: " + e.message),
   });
 
+  const generateContentWithProductMutation = trpc.influencers.products.generateContentWithProduct.useMutation({
+    onSuccess: (data) => {
+      setIsGenerating(false);
+      toast.success("Conteúdo gerado com sucesso!");
+      setLocation(`/influencer/${influencerId}/content/${data.contentId}`);
+    },
+    onError: (e) => {
+      setIsGenerating(false);
+      toast.error("Erro ao gerar conteúdo: " + e.message);
+    },
+  });
+
   const handleGenerate = () => {
-    if (mode === "soft-sell") {
-      if (!template) {
-        toast.error("Selecione um template");
-        return;
-      }
-      generateContent.mutate({
-        influencerId,
-        template,
-        product: product || undefined,
-      });
-    } else {
-      if (selectedItems.length === 0) {
-        toast.error("Selecione pelo menos um item");
-        return;
-      }
-      // Gerar conteúdos em sequência
-      setIsGenerating(true);
-      generateMultipleContents();
+    console.log("[DEBUG] handleGenerate called", { selectedProductIds, selectedContextId, selectedContextType });
+    // Validação A+B: 1 produto + 1 contexto (trend/viral/assunto)
+    if (selectedProductIds.length === 0) {
+      toast.error("Selecione pelo menos 1 produto (Grupo A)");
+      return;
     }
+    if (selectedProductIds.length > 1) {
+      toast.error("Selecione apenas 1 produto por vez");
+      return;
+    }
+    if (!selectedContextId || !selectedContextType) {
+      toast.error("Selecione 1 trend/viral/assunto (Grupo B)");
+      return;
+    }
+
+    // Buscar produto selecionado
+    const selectedProduct = products?.find(p => p.id === selectedProductIds[0]);
+    if (!selectedProduct) {
+      toast.error("Produto não encontrado");
+      return;
+    }
+
+    // Preparar payload
+    const payload: any = {
+      productId: selectedProduct.id,
+      influencerId,
+      contextType: selectedContextType === 'subject' ? 'none' : selectedContextType,
+    };
+
+    if (selectedContextType === 'trend') {
+      payload.trendId = selectedContextId;
+    } else if (selectedContextType === 'viral') {
+      payload.viralId = selectedContextId;
+    } else if (selectedContextType === 'subject') {
+      // Para assuntos, passar como freeSubject
+      const subject = searchResults.find(s => s.id === selectedContextId);
+      if (subject) {
+        payload.contextType = 'subject';
+        payload.freeSubject = `${subject.title} - ${subject.description}`;
+      }
+    }
+
+    setIsGenerating(true);
+    generateContentWithProductMutation.mutate(payload);
   };
 
   const generateMultipleContents = async () => {
@@ -275,6 +314,26 @@ export default function InfluencerContentCreate() {
       </header>
 
       <main className="container px-4 py-6 space-y-6">
+        {/* Botão Gerar Conteúdo - Sempre visível no topo */}
+        <Button 
+          className="w-full" 
+          size="lg" 
+          onClick={handleGenerate} 
+          disabled={generateContentWithProductMutation.isPending || isGenerating}
+        >
+          {(generateContentWithProductMutation.isPending || isGenerating) ? (
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          ) : (
+            <Zap className="w-4 h-4 mr-2" />
+          )}
+          {selectedProductIds.length > 0 && selectedContextId !== null
+            ? "Gerar Conteúdo" 
+            : selectedProductIds.length === 0
+            ? "Selecione 1 Produto"
+            : "Selecione 1 Trend/Viral/Assunto"
+          }
+        </Button>
+
         {/* Mode Selection */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
           <TabsList className="w-full grid grid-cols-4">
@@ -375,25 +434,42 @@ export default function InfluencerContentCreate() {
             {products && products.length > 0 ? (
               <div className="space-y-2">
                 {products.map((product) => (
-                  <Card key={product.id} className="p-4 hover:bg-accent/50 cursor-pointer">
+                  <Card 
+                    key={product.id} 
+                    className={`p-4 cursor-pointer transition-all ${
+                      selectedProductIds.includes(product.id)
+                        ? 'border-primary bg-primary/5'
+                        : 'hover:bg-accent/50'
+                    }`}
+                    onClick={() => {
+                      if (selectedProductIds.includes(product.id)) {
+                        setSelectedProductIds([]);
+                      } else {
+                        setSelectedProductIds([product.id]);
+                      }
+                    }}
+                  >
                     <div className="flex items-start gap-3">
-                      <Checkbox 
-                        id={`product-${product.id}`}
-                        className="mt-1"
-                        checked={selectedProductIds.includes(product.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedProductIds([...selectedProductIds, product.id]);
-                          } else {
-                            setSelectedProductIds(selectedProductIds.filter(id => id !== product.id));
-                          }
-                        }}
-                      />
                       <div className="flex-1">
-                        <label htmlFor={`product-${product.id}`} className="cursor-pointer">
+                        <div className="flex items-center gap-2">
                           <h4 className="font-medium">{product.name}</h4>
-                          <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
-                        </label>
+                          {product.idealClient && (
+                            <span className="text-xs bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full">
+                              ✓ Configurado
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
+                        {product.idealClient && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Cliente: {product.idealClient.substring(0, 50)}...
+                          </p>
+                        )}
+                        {product.pains && product.pains.length > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            {product.pains.length} dor(es) mapeada(s)
+                          </p>
+                        )}
                       </div>
                       <Button
                         size="sm"
@@ -429,12 +505,26 @@ export default function InfluencerContentCreate() {
                 {trends.slice(0, 10).map((trend: any) => (
                   <Card 
                     key={trend.id} 
-                    className={`cursor-pointer transition-all ${isItemSelected(trend.id) ? 'border-primary bg-primary/5' : ''}`}
-                    onClick={() => toggleItemWithType(trend.id, trend.name, 'trend', trend)}
+                    className={`cursor-pointer transition-all ${
+                      selectedContextId === trend.id && selectedContextType === 'trend'
+                        ? 'border-primary bg-primary/5' 
+                        : ''
+                    }`}
+                    onClick={() => {
+                      setSelectedContextId(trend.id);
+                      setSelectedContextType('trend');
+                    }}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-start gap-3">
-                        <Checkbox checked={isItemSelected(trend.id)} />
+                        <input 
+                          type="radio" 
+                          checked={selectedContextId === trend.id && selectedContextType === 'trend'}
+                          onChange={() => {
+                            setSelectedContextId(trend.id);
+                            setSelectedContextType('trend');
+                          }}
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-sm">{trend.name}</div>
                           <div className="text-xs text-muted-foreground">{trend.source} • {trend.category}</div>
@@ -528,12 +618,26 @@ export default function InfluencerContentCreate() {
                 {virals.slice(0, 10).map((viral: any) => (
                   <Card 
                     key={viral.id} 
-                    className={`cursor-pointer transition-all ${isItemSelected(viral.id) ? 'border-primary bg-primary/5' : ''}`}
-                    onClick={() => toggleItemWithType(viral.id, viral.title, 'viral', viral)}
+                    className={`cursor-pointer transition-all ${
+                      selectedContextId === viral.id && selectedContextType === 'viral'
+                        ? 'border-primary bg-primary/5' 
+                        : ''
+                    }`}
+                    onClick={() => {
+                      setSelectedContextId(viral.id);
+                      setSelectedContextType('viral');
+                    }}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-start gap-3">
-                        <Checkbox checked={isItemSelected(viral.id)} />
+                        <input 
+                          type="radio" 
+                          checked={selectedContextId === viral.id && selectedContextType === 'viral'}
+                          onChange={() => {
+                            setSelectedContextId(viral.id);
+                            setSelectedContextType('viral');
+                          }}
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-sm">{viral.title}</div>
                           <div className="text-xs text-muted-foreground">{viral.source} • {viral.category}</div>
@@ -638,12 +742,26 @@ export default function InfluencerContentCreate() {
                   {searchResults.map((news: any, index: number) => (
                     <Card 
                       key={index} 
-                      className={`cursor-pointer transition-all ${isItemSelected(`news-${index}`) ? 'border-primary bg-primary/5' : ''}`}
-                      onClick={() => toggleItemWithType(`news-${index}`, news.title, 'subject', news)}
+                      className={`cursor-pointer transition-all ${
+                        selectedContextId === index && selectedContextType === 'subject'
+                          ? 'border-primary bg-primary/5' 
+                          : ''
+                      }`}
+                      onClick={() => {
+                        setSelectedContextId(index);
+                        setSelectedContextType('subject');
+                      }}
                     >
                       <CardContent className="p-3">
                         <div className="flex items-start gap-3">
-                          <Checkbox checked={isItemSelected(`news-${index}`)} />
+                          <input 
+                            type="radio" 
+                            checked={selectedContextId === index && selectedContextType === 'subject'}
+                            onChange={() => {
+                              setSelectedContextId(index);
+                              setSelectedContextType('subject');
+                            }}
+                          />
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-sm">{news.title}</div>
                             <div className="text-xs text-muted-foreground mt-1">{news.description}</div>
@@ -722,25 +840,6 @@ export default function InfluencerContentCreate() {
           </Card>
         )}
       </main>
-
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-50">
-        <Button 
-          className="w-full" 
-          size="lg" 
-          onClick={handleGenerate} 
-          disabled={generateContent.isPending || isGenerating}
-        >
-          {(generateContent.isPending || isGenerating) ? (
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          ) : (
-            <Zap className="w-4 h-4 mr-2" />
-          )}
-          {mode === "produtos" || mode === "dores"
-            ? "Gerar Conteúdo" 
-            : `Gerar ${selectedItems.reduce((acc, item) => acc + item.quantity, 0)} Conteúdo(s)`
-          }
-        </Button>
-      </div>
 
       {/* Modal de Detalhes do Produto */}
       {selectedProductForModal && (

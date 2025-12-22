@@ -1356,3 +1356,18 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Implementar POV (primeira pessoa) + consistência visual
 - [x] Sortear referências aleatórias para variedade
 - [ ] Testar geração completa: produto + cliente + dor + trend (próximo)
+
+## Correções Críticas - Sistema de Produtos (22/12/2024)
+- [ ] Adicionar checkboxes para selecionar dores no modal
+- [ ] Adicionar botão "Salvar e Fechar" no modal do produto
+- [ ] Criar rota backend para salvar dor selecionada
+- [ ] Mostrar indicador visual no hub quando produto tem cliente+dor configurado
+- [ ] Implementar validação: 1 produto + 1 trend/viral/assunto
+- [ ] Conectar botão "Gerar Conteúdo" com seleções A+B
+- [ ] Testar fluxo completo: produto → cliente → dor → trend → gerar
+
+## Correção Sistema de Seleção (22/12/2024)
+- [ ] Remover checkboxes antigos dos cards de produtos
+- [ ] Usar apenas card clicável (rosa quando selecionado)
+- [ ] Garantir que seleção persista ao mudar de aba
+- [ ] Testar geração de conteúdo A+B funcionando
