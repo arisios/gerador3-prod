@@ -294,13 +294,14 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
             </Button>
             <span className="ml-2 font-medium truncate">{content.title || "Conteúdo"}</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {hasReferenceImage && (
               <Button 
                 size="sm" 
                 variant="outline"
                 onClick={handleGenerateAllImages}
                 disabled={generatingAll}
+                className="min-w-[120px]"
               >
                 {generatingAll ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -312,7 +313,7 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
             )}
             <Dialog>
               <DialogTrigger asChild>
-                <Button size="sm">
+                <Button size="sm" className="min-w-[100px]">
                   <Download className="w-4 h-4 mr-2" />
                   Baixar
                 </Button>

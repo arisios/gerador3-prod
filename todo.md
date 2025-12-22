@@ -1277,3 +1277,11 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Criar documento detalhado com todos os prompts (prompts-detalhados.md)
 - [x] Criar documento de código para limpar (codigo-para-limpar.md)
 - [x] Revisar e entregar documentação completa
+
+## Otimização de Layout Mobile (22/12/2024)
+- [x] Identificar páginas com botões cortados nas laterais
+- [x] Corrigir overflow horizontal em todas as páginas (CSS global)
+- [x] Ajustar botões "Gerar Todas" e "Baixar" para ficarem visíveis (flex-wrap + min-width)
+- [x] Corrigir contraste de cores (botões pretos em fundo preto) - regras de alto contraste
+- [x] Garantir que todos os botões sejam clicáveis em mobile (min-height: 44px)
+- [ ] Testar responsividade em diferentes tamanhos de tela

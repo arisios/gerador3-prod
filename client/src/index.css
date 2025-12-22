@@ -320,3 +320,182 @@
     gap: 0.5rem !important;
   }
 }
+
+/* Mobile Layout Fixes - Prevent Horizontal Overflow */
+@media (max-width: 640px) {
+  /* Prevent horizontal scroll */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Ensure all containers respect viewport width */
+  * {
+    max-width: 100%;
+  }
+
+  /* Fix button groups that overflow */
+  .flex.gap-2, .flex.gap-4, .space-x-2, .space-x-4 {
+    flex-wrap: wrap;
+  }
+
+  /* Make action buttons stack vertically on mobile */
+  .mobile-button-stack {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .mobile-button-stack > button {
+    width: 100%;
+  }
+
+  /* Header buttons - ensure visibility */
+  header button, [role="banner"] button {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Slide navigation buttons - make scrollable */
+  .slide-nav-buttons {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
+
+  .slide-nav-buttons::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ensure minimum contrast for all buttons */
+  button:not(.bg-transparent) {
+    min-height: 44px;
+    position: relative;
+  }
+
+  /* Fix for buttons that are too wide */
+  button {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Content edit page specific fixes */
+  .content-edit-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .content-edit-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  /* Ensure all interactive elements are touch-friendly */
+  button, a, [role="button"], input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* High Contrast Fixes - Ensure Buttons Are Always Visible */
+@layer components {
+  /* Primary buttons - always visible */
+  .btn-primary, button[class*="bg-primary"] {
+    background-color: oklch(0.65 0.22 285) !important; /* Roxo vibrante */
+    color: oklch(0.98 0.005 250) !important; /* Branco */
+    border: 1px solid oklch(0.7 0.18 210); /* Borda azul ciano */
+  }
+
+  .btn-primary:hover, button[class*="bg-primary"]:hover {
+    background-color: oklch(0.7 0.24 285) !important;
+  }
+
+  /* Secondary buttons - visible on dark backgrounds */
+  .btn-secondary, button[class*="bg-secondary"] {
+    background-color: oklch(0.3 0.06 240) !important; /* Azul médio */
+    color: oklch(0.98 0.005 250) !important; /* Branco */
+    border: 1px solid oklch(0.4 0.08 240);
+  }
+
+  /* Outline buttons - always have visible border */
+  button[class*="variant-outline"], .btn-outline {
+    background-color: transparent !important;
+    border: 2px solid oklch(0.7 0.18 210) !important; /* Azul ciano */
+    color: oklch(0.98 0.005 250) !important; /* Branco */
+  }
+
+  button[class*="variant-outline"]:hover, .btn-outline:hover {
+    background-color: oklch(0.2 0.04 240) !important;
+  }
+
+  /* Ghost buttons - subtle but visible */
+  button[class*="variant-ghost"], .btn-ghost {
+    background-color: oklch(0.2 0.04 240) !important;
+    color: oklch(0.98 0.005 250) !important;
+  }
+
+  button[class*="variant-ghost"]:hover, .btn-ghost:hover {
+    background-color: oklch(0.25 0.05 240) !important;
+  }
+
+  /* Destructive buttons - red but visible */
+  button[class*="variant-destructive"], .btn-destructive {
+    background-color: oklch(0.55 0.22 25) !important; /* Vermelho */
+    color: oklch(0.98 0.005 250) !important; /* Branco */
+  }
+
+  /* Ensure disabled buttons are still visible but dimmed */
+  button:disabled, button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: oklch(0.25 0.05 240) !important;
+    color: oklch(0.5 0.02 240) !important;
+  }
+
+  /* Icon buttons - ensure they have visible background on dark */
+  button[class*="size-icon"], .btn-icon {
+    background-color: oklch(0.25 0.05 240) !important;
+    color: oklch(0.98 0.005 250) !important;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Specific Page Fixes */
+@media (max-width: 640px) {
+  /* InfluencerContentEdit - Header buttons */
+  [data-page="content-edit"] .header-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem;
+  }
+
+  [data-page="content-edit"] .header-actions button {
+    width: 100%;
+  }
+
+  /* Slide editor - action buttons */
+  .slide-editor-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .slide-editor-actions button {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+  }
+}
