@@ -1425,3 +1425,9 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 ## Bug Crítico (22/12/2024 - 19:56)
 - [x] **CRÍTICO:** Erro ao gerar conteúdo: "Failed query: insert into influencerContents" - faltam valores padrão para campos obrigatórios - CORRIGIDO
 - [x] createInfluencerContent precisa fornecer valores para todos os campos obrigatórios da tabela - CORRIGIDO: campo source agora é obrigatório e usa 'softsell' como padrão
+
+
+## Bug Crítico (22/12/2024 - 20:02)
+- [x] **CRÍTICO:** Erro ao gerar conteúdo sem produto: "Cannot read properties of null (reading 'name')" - CORRIGIDO
+- [ ] Código tenta acessar propriedade .name de produto que é null quando não há produto selecionado
+- [ ] Adicionar validação para quando productId for undefined/null

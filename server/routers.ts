@@ -2287,9 +2287,27 @@ ${input.type === 'carousel' ? 'Gere entre 5-8 slides com textos curtos e impacta
                 : null;
 
               // Prompt de imagem com POV e realismo
-              const imagePrompt = `POV (primeira pessoa): ${influencer.name} mostrando ${product.name}.\n\nCena: ${s.text}\n\n${randomRef ? `Referência do produto: [usar imagem anexada como base visual]` : `Produto: ${product.description}`}\n\nAmbiente: ${influencer.niche === 'fitness' ? 'Academia, pessoas treinando ao fundo' : influencer.niche === 'tech' ? 'Escritório moderno, equipamentos tech ao fundo' : 'Ambiente casual, pessoas ao fundo'}\n\nPessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genéricos variados, NÃO usar referência do influenciador)\n\nEstilo: Selfie autêntica, luz natural, realista, imperfeicões naturais\nÂngulo: Câmera frontal, braço estendido, NÃO mostrar celular tirando foto\n\nIMPORTANTE: Manter características físicas do influenciador (usar foto de referência)`;
+              let imagePrompt;
+              if (product) {
+                const produtoInfo = randomRef 
+                  ? 'Referencia do produto: [usar imagem anexada como base visual]'
+                  : `Produto: ${product.description}`;
+                const ambiente = influencer.niche === 'fitness' 
+                  ? 'Academia, pessoas treinando ao fundo' 
+                  : influencer.niche === 'tech' 
+                    ? 'Escritorio moderno, equipamentos tech ao fundo' 
+                    : 'Ambiente casual, pessoas ao fundo';
+                imagePrompt = `POV (primeira pessoa): ${influencer.name} mostrando ${product.name}. Cena: ${s.text}. ${produtoInfo}. Ambiente: ${ambiente}. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: Manter caracteristicas fisicas do influenciador (usar foto de referencia)`;
+              } else {
+                const ambiente = influencer.niche === 'fitness' 
+                  ? 'Academia, pessoas treinando ao fundo' 
+                  : influencer.niche === 'tech' 
+                    ? 'Escritorio moderno, equipamentos tech ao fundo' 
+                    : 'Ambiente casual, pessoas ao fundo';
+                imagePrompt = `POV (primeira pessoa): ${influencer.name} no contexto de ${influencer.niche}. Cena: ${s.text}. Ambiente: ${ambiente}. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: Manter caracteristicas fisicas do influenciador (usar foto de referencia)`;
+              }
 
-              // Gerar imagem com referências
+              // Gerar imagem com referencias
               let imageUrl = null;
               try {
                 const originalImages = [];
