@@ -2297,14 +2297,14 @@ ${input.type === 'carousel' ? 'Gere entre 5-8 slides com textos curtos e impacta
                   : influencer.niche === 'tech' 
                     ? 'Escritorio moderno, equipamentos tech ao fundo' 
                     : 'Ambiente casual, pessoas ao fundo';
-                imagePrompt = `POV (primeira pessoa): ${influencer.name} mostrando ${product.name}. Cena: ${s.text}. ${produtoInfo}. Ambiente: ${ambiente}. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: Manter caracteristicas fisicas do influenciador (usar foto de referencia)`;
+                imagePrompt = `POV (primeira pessoa): ${influencer.name} mostrando ${product.name}. Cena: ${s.text}. ${produtoInfo}. Ambiente: ${ambiente}. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: Manter caracteristicas fisicas do influenciador (usar foto de referencia). CRITICAL: NO TEXT, NO WORDS, NO LETTERS, NO WRITING in the image - pure photographic content only`;
               } else {
                 const ambiente = influencer.niche === 'fitness' 
                   ? 'Academia, pessoas treinando ao fundo' 
                   : influencer.niche === 'tech' 
                     ? 'Escritorio moderno, equipamentos tech ao fundo' 
                     : 'Ambiente casual, pessoas ao fundo';
-                imagePrompt = `POV (primeira pessoa): ${influencer.name} no contexto de ${influencer.niche}. Cena: ${s.text}. Ambiente: ${ambiente}. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: Manter caracteristicas fisicas do influenciador (usar foto de referencia)`;
+                imagePrompt = `POV (primeira pessoa): ${influencer.name} no contexto de ${influencer.niche}. Cena: ${s.text}. Ambiente: ${ambiente}. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: Manter caracteristicas fisicas do influenciador (usar foto de referencia). CRITICAL: NO TEXT, NO WORDS, NO LETTERS, NO WRITING in the image - pure photographic content only`;
               }
 
               // Gerar imagem com referencias

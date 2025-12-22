@@ -1431,3 +1431,8 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] **CRÍTICO:** Erro ao gerar conteúdo sem produto: "Cannot read properties of null (reading 'name')" - CORRIGIDO
 - [ ] Código tenta acessar propriedade .name de produto que é null quando não há produto selecionado
 - [ ] Adicionar validação para quando productId for undefined/null
+
+
+## Melhorias (22/12/2024 - 20:10)
+- [x] Reforçar no prompt de geração de imagem que NÃO deve incluir texto, letras ou palavras escritas - IMPLEMENTADO
+- [x] Adicionar instruções explícitas: "NO TEXT, NO WORDS, NO LETTERS in the image" - IMPLEMENTADO
