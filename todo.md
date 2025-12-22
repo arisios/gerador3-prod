@@ -1067,3 +1067,10 @@ news (notícias)
 - [x] Atualizar generateContentWithProduct para salvar source como "produto"
 - [x] Exibir badge colorido na lista de conteúdos mostrando a origem
 - [x] Badges com cores distintas: Produto (roxo), Soft Sell (azul), Trend (verde), Viral (laranja), Assunto (ciano)
+
+## Remover Página Intermediária de Geração (22/12/2024)
+- [x] Fazer InfluencerContentCreate abrir na aba correta baseado no parâmetro type
+- [x] Botão Trends abre direto na aba Trends (não mais em Soft Sell)
+- [x] Botão Virais abre direto na aba Virais
+- [x] Botão Assuntos abre direto na aba Dores (assuntos)
+- [x] Elimina necessidade de clicar duas vezes no mesmo botão

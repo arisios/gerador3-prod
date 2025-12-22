@@ -40,10 +40,19 @@ interface SelectedItem {
 
 export default function InfluencerContentCreate() {
   const { id } = useParams<{ id: string }>();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const influencerId = parseInt(id || "0");
 
-  const [mode, setMode] = useState<"soft-sell" | "dores" | "trends" | "virals">("soft-sell");
+  // Detectar tipo da URL (?type=trend, ?type=viral, ?type=subject)
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const typeParam = urlParams.get('type');
+  const initialMode = 
+    typeParam === 'trend' ? 'trends' :
+    typeParam === 'viral' ? 'virals' :
+    typeParam === 'subject' ? 'dores' :
+    'soft-sell';
+
+  const [mode, setMode] = useState<"soft-sell" | "dores" | "trends" | "virals">(initialMode);
   const [template, setTemplate] = useState("");
   const [product, setProduct] = useState("");
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
