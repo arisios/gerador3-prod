@@ -1514,3 +1514,10 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Procedure generateBulkContentExpress não está registrada no router - CORRIGIDO: alterado frontend para influencers.products.generateBulkContentExpress
 - [x] **CRÍTICO:** "Objects are not valid as a React child (found: object with keys {title, description, variant})" - CORRIGIDO
 - [x] Tentando renderizar objeto diretamente no React em vez de string - CORRIGIDO: alterado para toast.success() e toast.error()
+
+
+## Bugs Críticos Modo Express (23/12/2024 - 07:24)
+- [ ] **CRÍTICO:** Erro ao salvar slides: "Failed query: insert into influencerSlides" - faltam valores obrigatórios
+- [ ] Slides sendo salvos sem imageUrl, imagePrompt, imageBank, selectedImageIndex, style
+- [ ] Procedure generateBulkContentExpress precisa gerar imagens automaticamente antes de salvar
+- [ ] Texto intermediário está vazando para UI (não deveria mostrar texto gerado)

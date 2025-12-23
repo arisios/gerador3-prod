@@ -2577,10 +2577,13 @@ Gere ${item.type === 'carousel' ? '5-7 slides' : item.type === 'video' ? 'roteir
           // Salvar slides
           if (contentData.slides && Array.isArray(contentData.slides)) {
             const slidesData = contentData.slides.map((slide: any, slideIndex: number) => ({
-              slideNumber: slideIndex + 1,
+              order: slideIndex + 1,
               text: slide.text || '',
               imagePrompt: slide.imagePrompt || '',
               imageUrl: null,
+              imageBank: null,
+              selectedImageIndex: 0,
+              style: null,
             }));
             await db.createInfluencerSlides(contentId, slidesData);
           }
