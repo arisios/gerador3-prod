@@ -221,7 +221,7 @@ export function MobileSlideEditor({
     };
 
     addElement(newElement);
-  }, [editorState.elements, addElement]);
+  }, [editorState, addElement]);
 
   // Adicionar texto
   const addText = useCallback(() => {
@@ -229,12 +229,12 @@ export function MobileSlideEditor({
       id: `text-${Date.now()}`,
       type: 'text',
       x: 50,
-      y: 300,
-      width: 300,
-      height: 80,
+      y: 50,
+      width: 200,
+      height: 50,
       rotation: 0,
-      content: 'Novo texto',
-      fontSize: 28,
+      content: 'Novo Texto',
+      fontSize: 24,
       fontFamily: 'Inter',
       fontWeight: 600,
       fill: '#000000',
@@ -243,7 +243,7 @@ export function MobileSlideEditor({
       opacity: 1,
     };
     addElement(newText);
-  }, [editorState.elements.length, addElement]);
+  }, [editorState, addElement]);
 
   // Elemento selecionado
   const selectedElement = editorState.elements.find(

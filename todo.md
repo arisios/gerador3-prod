@@ -2011,3 +2011,11 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Causa: Código salva automaticamente a cada mudança
 - [x] Solução: Remover auto-save, salvar APENAS ao clicar OK ou navegar
 - [x] RESOLVIDO: Comentado debouncedSave() em 3 lugares (updateElement, addElement, deleteElement)
+
+
+### 9. Site quebrou completamente - TypeError reading 'elements' (CRÍTICO)
+- [x] Problema: "TypeError: Cannot read properties of undefined (reading 'elements')"
+- [x] Causa: Ao remover debouncedSave, dependências dos useCallback ficaram vazias []
+- [x] Funções afetadas: duplicateElement (linha 224), addText (linha 246)
+- [x] Solução: Corrigir dependências de [] para [editorState, addElement]
+- [x] RESOLVIDO: Site voltou a funcionar, home page carrega normalmente
