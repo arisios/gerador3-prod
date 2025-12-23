@@ -453,6 +453,13 @@ export async function getInfluencerSlidesByContent(contentId: number): Promise<I
   return db.select().from(influencerSlides).where(eq(influencerSlides.contentId, contentId)).orderBy(influencerSlides.order);
 }
 
+export async function getInfluencerSlideById(id: number): Promise<InfluencerSlide | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(influencerSlides).where(eq(influencerSlides.id, id)).limit(1);
+  return result[0];
+}
+
 export async function updateInfluencerSlide(id: number, data: Partial<Omit<InfluencerSlide, "id" | "contentId" | "createdAt">>): Promise<void> {
   const db = await getDb();
   if (!db) return;
