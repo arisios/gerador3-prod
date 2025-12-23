@@ -1878,3 +1878,30 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Preview = Editor aberto = Editor com texto selecionado (WYSIWYG) - GARANTIDO
 
 **Prioridade:** MÁXIMA - Editor inutilizável se canvas é cortado durante edição
+
+
+## 🚨 CRÍTICO: Preview Totalmente Diferente do Editor
+
+**Contexto:** Preview mostra uma coisa, Editor mostra outra COMPLETAMENTE diferente.
+
+**Problema:**
+- Preview carrega dados do BANCO (slide salvo com texto, posição, tamanho, cor, background)
+- Editor INICIALIZA com estado PADRÃO/VAZIO ao invés de carregar os dados reais
+- Resultado: Preview ≠ Editor (viola WYSIWYG)
+
+**Causa raiz:**
+- MobileSlideEditor não está recebendo/usando os dados reais do slide
+- Estado inicial do editor é hardcoded ou vazio
+- Editor não carrega: texto atual, posição, fontSize, cor, background, etc.
+
+**Solução:**
+- [x] Investigar como preview carrega dados (query do banco) - INVESTIGADO
+- [x] Investigar como MobileSlideEditor inicializa estado - INVESTIGADO
+- [x] Criar procedure influencers.updateSlide que salva style - CRIADO
+- [x] Passar initialStyle (elements salvos) para MobileSlideEditor - IMPLEMENTADO
+- [x] Inicializar editorState com dados reais do campo style - IMPLEMENTADO
+- [x] Salvar elements completos no campo style ao editar - IMPLEMENTADO
+- [x] Garantir que ao abrir editor, ele mostra EXATAMENTE o que está no preview - GARANTIDO
+- [x] Após salvar, preview deve refetch e mostrar edições - JÁ EXISTIA
+
+**Prioridade:** MÁXIMA - Editor inutilizável se não mostra o que está sendo editado

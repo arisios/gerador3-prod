@@ -10,6 +10,7 @@ import { trpc } from "@/lib/trpc";
 import SlideComposer, { SlideStyle } from "@/components/SlideComposer";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { MobileSlideEditor } from "@/components/MobileSlideEditor";
+import { PreviewCanvas } from "@/components/mobile-editor/PreviewCanvas";
 import { VideoGeneratorSelectorWithCredits } from "@/components/VideoGeneratorSelectorWithCredits";
 import { downloadCarouselSlide, downloadSingleImage, downloadAllSlidesWithText, downloadAllSlidesWithoutText } from "@/lib/downloadSlide";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Video, Upload } from "lucide-react";
@@ -64,7 +65,7 @@ export default function InfluencerContentEdit() {
   const { data: influencer } = trpc.influencers.get.useQuery({ id: influencerId });
   const utils = trpc.useUtils();
 
-  const updateSlide = trpc.slides.update.useMutation({
+  const updateSlide = trpc.influencers.updateSlide.useMutation({
     onSuccess: () => {
       refetch();
       setEditingText(false);
@@ -385,62 +386,78 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
         ) : (
           <Card className="aspect-[4/5] relative overflow-hidden group cursor-pointer" onClick={handleImageClick}>
             <CardContent className="p-0 h-full">
-              {currentSlide?.imageUrl ? (
+              {/* Se tem style salvo, renderizar com PreviewCanvas */}
+              {currentSlide?.style && Array.isArray(currentSlide.style) && currentSlide.style.length > 0 ? (
+                <div className="w-full h-full relative">
+                  <PreviewCanvas
+                    elements={currentSlide.style as any[]}
+                    backgroundImageUrl={currentSlide.imageUrl}
+                    backgroundColor="#ffffff"
+                    canvasWidth={400}
+                    canvasHeight={500}
+                  />
+                </div>
+              ) : (
+                // Fallback: renderização antiga (sem style salvo)
                 <>
-                  <img src={currentSlide.imageUrl} alt="" className="w-full h-full object-cover" />
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="icon" variant="secondary" className="bg-black/50 hover:bg-black/70">
-                      <Maximize2 className="w-4 h-4 text-white" />
-                    </Button>
+                  {currentSlide?.imageUrl ? (
+                    <>
+                      <img src={currentSlide.imageUrl} alt="" className="w-full h-full object-cover" />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button size="icon" variant="secondary" className="bg-black/50 hover:bg-black/70">
+                          <Maximize2 className="w-4 h-4 text-white" />
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-b from-primary/20 to-background flex flex-col items-center justify-center gap-4">
+                      <Image className="w-16 h-16 text-muted-foreground" />
+                      {hasReferenceImage && (
+                        <Button 
+                          variant="secondary"
+                          onClick={(e) => { e.stopPropagation(); handleGenerateImage(); }}
+                          disabled={generatingImage}
+                        >
+                          {generatingImage ? (
+                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          ) : (
+                            <Plus className="w-4 h-4 mr-2" />
+                          )}
+                          Gerar Imagem
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    {editingText ? (
+                      <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+                        <Textarea
+                          value={slideText}
+                          onChange={(e) => setSlideText(e.target.value)}
+                          className="bg-black/50 border-white/20 text-white"
+                          rows={4}
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={handleSaveText} disabled={updateSlide.isPending}>
+                            <Check className="w-4 h-4 mr-1" /> Salvar
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => setEditingText(false)}>
+                            <X className="w-4 h-4 mr-1" /> Cancelar
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-white">
+                        <p className="text-lg font-bold leading-tight">{currentSlide?.text || "Sem texto"}</p>
+                        <Button size="sm" variant="ghost" className="mt-2 text-white/80" onClick={(e) => { e.stopPropagation(); setEditingText(true); }}>
+                          <Edit2 className="w-4 h-4 mr-1" /> Editar
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </>
-              ) : (
-                <div className="w-full h-full bg-gradient-to-b from-primary/20 to-background flex flex-col items-center justify-center gap-4">
-                  <Image className="w-16 h-16 text-muted-foreground" />
-                  {hasReferenceImage && (
-                    <Button 
-                      variant="secondary"
-                      onClick={(e) => { e.stopPropagation(); handleGenerateImage(); }}
-                      disabled={generatingImage}
-                    >
-                      {generatingImage ? (
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      ) : (
-                        <Plus className="w-4 h-4 mr-2" />
-                      )}
-                      Gerar Imagem
-                    </Button>
-                  )}
-                </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                {editingText ? (
-                  <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-                    <Textarea
-                      value={slideText}
-                      onChange={(e) => setSlideText(e.target.value)}
-                      className="bg-black/50 border-white/20 text-white"
-                      rows={4}
-                    />
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={handleSaveText} disabled={updateSlide.isPending}>
-                        <Check className="w-4 h-4 mr-1" /> Salvar
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => setEditingText(false)}>
-                        <X className="w-4 h-4 mr-1" /> Cancelar
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-white">
-                    <p className="text-lg font-bold leading-tight">{currentSlide?.text || "Sem texto"}</p>
-                    <Button size="sm" variant="ghost" className="mt-2 text-white/80" onClick={(e) => { e.stopPropagation(); setEditingText(true); }}>
-                      <Edit2 className="w-4 h-4 mr-1" /> Editar
-                    </Button>
-                  </div>
-                )}
-              </div>
             </CardContent>
           </Card>
         )}
@@ -612,12 +629,13 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
           slideId={currentSlide.id}
           initialText={currentSlide.text || ""}
           initialImageUrl={currentSlide.imageUrl}
+          initialStyle={currentSlide.style as any}
           onSave={(text, elements) => {
-            // Salvar no backend e forçar atualização do preview
+            // Salvar no backend com elements completos
             updateSlide.mutate({
               id: currentSlide.id,
               text,
-              // TODO: salvar elements no banco
+              style: elements, // Salvar elements no campo style
             }, {
               onSuccess: () => {
                 // Forçar refetch para sincronizar preview

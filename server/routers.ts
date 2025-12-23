@@ -1755,6 +1755,35 @@ Lembre-se: Esta foto será postada como se fosse do próprio influenciador, ent�
         return { success: true };
       }),
 
+    // Atualizar slide do influenciador
+    updateSlide: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        text: z.string().optional(),
+        imageUrl: z.string().optional(),
+        style: z.any().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const slide = await db.getInfluencerSlideById(input.id);
+        if (!slide) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        const content = await db.getInfluencerContentById(slide.contentId);
+        if (!content) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        const influencer = await db.getInfluencerById(content.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        await db.updateInfluencerSlide(input.id, {
+          text: input.text,
+          imageUrl: input.imageUrl,
+          style: input.style,
+        });
+        return { success: true };
+      }),
+
     // Deletar conteúdo do influenciador
     deleteContent: protectedProcedure
       .input(z.object({ id: z.number() }))

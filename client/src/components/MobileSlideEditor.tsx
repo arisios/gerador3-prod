@@ -11,6 +11,7 @@ interface MobileSlideEditorProps {
   slideId: number;
   initialText: string;
   initialImageUrl: string | null;
+  initialStyle?: EditorElement[];
   onSave: (text: string, elements: EditorElement[]) => void;
   onClose: () => void;
 }
@@ -19,6 +20,7 @@ export function MobileSlideEditor({
   slideId,
   initialText,
   initialImageUrl,
+  initialStyle,
   onSave,
   onClose,
 }: MobileSlideEditorProps) {
@@ -26,33 +28,49 @@ export function MobileSlideEditor({
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
   // Estado do editor
-  const [editorState, setEditorState] = useState<EditorState>(() => ({
-    elements: [
-      {
-        id: 'text-1',
-        type: 'text',
-        x: 50,
-        y: 200,
-        width: 300,
-        height: 100,
-        rotation: 0,
-        content: initialText || 'Toque para editar',
-        fontSize: 32,
-        fontFamily: 'Inter',
-        fontWeight: 700,
-        fill: '#000000',
-        textAlign: 'center',
-        zIndex: 1,
-        opacity: 1,
-      },
-    ],
-    selectedElementId: null,
-    zoom: 1,
-    history: [],
-    historyIndex: -1,
-    backgroundImageUrl: initialImageUrl,
-    backgroundColor: '#ffffff',
-  }));
+  const [editorState, setEditorState] = useState<EditorState>(() => {
+    // Se tem initialStyle salvo, usar ele
+    if (initialStyle && initialStyle.length > 0) {
+      return {
+        elements: initialStyle,
+        selectedElementId: null,
+        zoom: 1,
+        history: [],
+        historyIndex: -1,
+        backgroundImageUrl: initialImageUrl,
+        backgroundColor: '#ffffff',
+      };
+    }
+    
+    // Senão, criar elemento padrão com initialText
+    return {
+      elements: [
+        {
+          id: 'text-1',
+          type: 'text',
+          x: 50,
+          y: 200,
+          width: 300,
+          height: 100,
+          rotation: 0,
+          content: initialText || 'Toque para editar',
+          fontSize: 32,
+          fontFamily: 'Inter',
+          fontWeight: 700,
+          fill: '#000000',
+          textAlign: 'center',
+          zIndex: 1,
+          opacity: 1,
+        },
+      ],
+      selectedElementId: null,
+      zoom: 1,
+      history: [],
+      historyIndex: -1,
+      backgroundImageUrl: initialImageUrl,
+      backgroundColor: '#ffffff',
+    };
+  });
 
   const [hasChanges, setHasChanges] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
