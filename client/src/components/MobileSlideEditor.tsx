@@ -5,6 +5,7 @@ import { EditorState, EditorElement } from '../types/mobileEditor';
 import { PreviewCanvas } from './mobile-editor/PreviewCanvas';
 import { ToolbarBottom } from './mobile-editor/ToolbarBottom';
 import { ContextualControls } from './mobile-editor/ContextualControls';
+import { useGestures } from '../hooks/useGestures';
 
 interface MobileSlideEditorProps {
   slideId: number;
@@ -21,6 +22,13 @@ export function MobileSlideEditor({
   onSave,
   onClose,
 }: MobileSlideEditorProps) {
+  // Ref para o canvas
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Estado de zoom do canvas
+  const [canvasZoom, setCanvasZoom] = useState(1);
+  const [canvasScale, setCanvasScale] = useState(1);
+  
   // Estado do editor
   const [editorState, setEditorState] = useState<EditorState>(() => ({
     elements: [
@@ -152,6 +160,52 @@ export function MobileSlideEditor({
     el => el.id === editorState.selectedElementId
   );
 
+  // Gestos de toque
+  useGestures(canvasContainerRef, {
+    // Pinça: zoom do canvas
+    onPinch: useCallback((scale: number) => {
+      setCanvasScale(prevScale => {
+        const newScale = Math.max(0.5, Math.min(2, prevScale * scale));
+        return newScale;
+      });
+    }, []),
+
+    // Rotação com 2 dedos: rotacionar elemento selecionado
+    onRotate: useCallback((angleDelta: number) => {
+      setEditorState(prev => {
+        if (!prev.selectedElementId) return prev;
+        
+        const element = prev.elements.find(el => el.id === prev.selectedElementId);
+        if (!element) return prev;
+        
+        const newRotation = (element.rotation + angleDelta) % 360;
+        // Snap a cada 15° para facilitar alinhamento
+        const snappedRotation = Math.round(newRotation / 15) * 15;
+        
+        return {
+          ...prev,
+          elements: prev.elements.map(el =>
+            el.id === prev.selectedElementId
+              ? { ...el, rotation: snappedRotation }
+              : el
+          ),
+        };
+      });
+    }, []),
+
+    // Toque duplo: focar no input de texto
+    onDoubleTap: useCallback((point: { x: number; y: number }) => {
+      if (selectedElement && selectedElement.type === 'text') {
+        // Focar no input de texto (será implementado no ContextualControls)
+        const textInput = document.getElementById('text-content') as HTMLInputElement;
+        if (textInput) {
+          textInput.focus();
+          textInput.select();
+        }
+      }
+    }, [selectedElement]),
+  });
+
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Header */}
@@ -182,13 +236,28 @@ export function MobileSlideEditor({
       </div>
 
       {/* Preview Canvas */}
-      <div className="flex-1 overflow-hidden">
+      <div 
+        ref={canvasContainerRef}
+        className="flex-1 overflow-hidden"
+        style={{
+          transform: `scale(${canvasScale})`,
+          transformOrigin: 'center center',
+          transition: 'transform 0.1s ease-out',
+        }}
+      >
         <PreviewCanvas
           editorState={editorState}
           onUpdateElement={updateElement}
           onSelectElement={selectElement}
         />
       </div>
+      
+      {/* Indicador de Zoom */}
+      {canvasScale !== 1 && (
+        <div className="absolute top-20 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-semibold">
+          {Math.round(canvasScale * 100)}%
+        </div>
+      )}
 
       {/* Toolbar Bottom */}
       <div className="flex-shrink-0 border-t border-border">

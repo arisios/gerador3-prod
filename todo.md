@@ -1755,3 +1755,60 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Testado no navegador - FUNCIONANDO
 
 **Prioridade:** MÁXIMA - Afeta experiência do usuário diretamente
+
+
+## 📱 Gestos de Toque Responsivos no Editor Mobile
+
+**Contexto:** Editor mobile precisa de gestos nativos de toque para ser realmente fluido e intuitivo em smartphones/tablets.
+
+**Problemas:**
+- Falta pinça (pinch) para zoom in/out
+- Falta rotação com dois dedos
+- Falta toque duplo para editar texto rapidamente
+- Arrasto pode ser melhorado
+
+### Gestos a Implementar:
+
+1. **Pinça (Pinch) para Zoom** 🔍
+   - [x] Detectar dois dedos no canvas - IMPLEMENTADO
+   - [x] Calcular distância entre dedos (inicial vs atual) - IMPLEMENTADO
+   - [x] Aplicar zoom proporcional no canvas - IMPLEMENTADO
+   - [x] Limites: zoom mínimo 50%, máximo 200% - IMPLEMENTADO
+   - [x] Feedback visual: indicador de % de zoom - IMPLEMENTADO
+
+2. **Rotação com Dois Dedos** 🔄
+   - [x] Detectar dois dedos em elemento selecionado - IMPLEMENTADO
+   - [x] Calcular ângulo entre dedos (inicial vs atual) - IMPLEMENTADO
+   - [x] Aplicar rotação ao elemento selecionado - IMPLEMENTADO
+   - [x] Snap a cada 15° (0°, 15°, 30°, 45°, etc.) para facilitar alinhamento - IMPLEMENTADO
+   - [x] Feedback visual: rotação instantânea - IMPLEMENTADO
+
+3. **Toque Duplo para Editar Texto** ⚡
+   - [x] Detectar double tap em elemento de texto - IMPLEMENTADO
+   - [x] Abrir input de edição automaticamente - IMPLEMENTADO
+   - [x] Focar cursor e selecionar texto - IMPLEMENTADO
+   - [x] Feedback visual: input focado - IMPLEMENTADO
+
+4. **Melhorar Arrasto com Um Dedo** 👆
+   - [x] Reduzir delay de início do arrasto (threshold 5px) - IMPLEMENTADO
+   - [x] Prevenir scroll da página durante arrasto (passive: false) - IMPLEMENTADO
+   - [x] Arrasto já funcionava com react-moveable - MANTIDO
+   - [x] Feedback visual via Moveable - JÁ EXISTIA
+
+### Implementação Técnica:
+
+**Eventos nativos de touch:**
+- `touchstart`: Capturar início do toque
+- `touchmove`: Rastrear movimento
+- `touchend`: Finalizar gesto
+
+**Cálculos necessários:**
+- Distância entre dois pontos: `Math.hypot(x2-x1, y2-y1)`
+- Ângulo entre dois pontos: `Math.atan2(y2-y1, x2-x1) * 180 / Math.PI`
+- Detecção de double tap: timestamp < 300ms entre toques
+
+**Arquivos a modificar:**
+- `client/src/components/mobile-editor/EditorCanvas.tsx` - Adicionar event listeners de touch
+- `client/src/components/MobileSlideEditor.tsx` - Gerenciar estado de zoom e rotação
+
+**Prioridade:** ALTA - Melhora drasticamente UX mobile
