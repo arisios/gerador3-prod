@@ -2028,3 +2028,14 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Stack trace: rF, oh, Eh, pb, Ub, j5, Xh, zb, nC, Ec (código minificado)
 - [x] Correção: Adicionado `onDrag?: (delta: { x: number; y: number }) => void;` na interface
 - [x] RESOLVIDO: Interface agora declara todos os handlers usados no código
+
+
+## 🐛 BUG CRÍTICO - editorState.elements undefined ao salvar
+
+### 12. TypeError ao salvar no último slide
+- [x] Problema: Ao navegar entre slides e salvar no último, erro "Cannot read properties of undefined (reading 'elements')"
+- [x] Causa: Condição de corrida - useEffect reseta editorState enquanto botão OK tenta acessar elements
+- [x] Sintoma: Toast laranja em todos os slides (initialStyle null), erro ao salvar último slide
+- [x] Correção: Adicionadas validações `if (!editorState || !editorState.elements)` antes de acessar
+- [x] Localização: MobileSlideEditor.tsx linhas 378 e 401 (botões de navegação e OK)
+- [x] RESOLVIDO: Agora retorna early se editorState undefined, evitando crash

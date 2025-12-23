@@ -375,6 +375,11 @@ export function MobileSlideEditor({
             disabled={currentSlideIndex >= totalSlides - 1}
             onClick={async () => {
               // Salvar antes de navegar
+              if (!editorState || !editorState.elements) {
+                console.error('❌ editorState ou elements undefined');
+                onNavigate(currentSlideIndex + 1);
+                return;
+              }
               setIsSaving(true);
               const textElement = editorState.elements.find(el => el.type === 'text');
               await onSave(textElement?.content || '', editorState.elements);
@@ -393,6 +398,11 @@ export function MobileSlideEditor({
           className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4"
           disabled={isSaving}
           onClick={async () => {
+            if (!editorState || !editorState.elements) {
+              console.error('❌ editorState ou elements undefined ao salvar');
+              onClose();
+              return;
+            }
             setIsSaving(true);
             const textElement = editorState.elements.find(el => el.type === 'text');
             await onSave(textElement?.content || '', editorState.elements);
