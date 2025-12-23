@@ -250,88 +250,88 @@ export function MobileSlideEditor({
     el => el.id === editorState.selectedElementId
   );
 
-  // Gestos de toque
-  useGestures(canvasContainerRef, {
-    // Pinça: aumentar fontSize do texto selecionado
-    onPinch: useCallback((scale: number) => {
-      setEditorState(prev => {
-        if (!prev.selectedElementId) return prev;
-        
-        const element = prev.elements.find(el => el.id === prev.selectedElementId);
-        if (!element || element.type !== 'text' || !element.fontSize) return prev;
-        
-        // Se é o primeiro frame da pinça, salvar fontSize inicial
-        if (gestureInitialValuesRef.current.fontSize === 0) {
-          gestureInitialValuesRef.current.fontSize = element.fontSize;
-        }
-        
-        // Aplicar scale relativo ao fontSize INICIAL (não ao atual)
-        const newFontSize = Math.max(12, Math.min(120, 
-          Math.round(gestureInitialValuesRef.current.fontSize * scale)
-        ));
-        
-        return {
-          ...prev,
-          elements: prev.elements.map(el =>
-            el.id === prev.selectedElementId
-              ? { ...el, fontSize: newFontSize }
-              : el
-          ),
-        };
-      });
-    }, []),
+  // Gestos de toque DESABILITADOS temporariamente para debug
+  // useGestures(canvasContainerRef, {
+  //   // Pinça: aumentar fontSize do texto selecionado
+  //   onPinch: useCallback((scale: number) => {
+  //     setEditorState(prev => {
+  //       if (!prev.selectedElementId) return prev;
+  //       
+  //       const element = prev.elements.find(el => el.id === prev.selectedElementId);
+  //       if (!element || element.type !== 'text' || !element.fontSize) return prev;
+  //       
+  //       // Se é o primeiro frame da pinça, salvar fontSize inicial
+  //       if (gestureInitialValuesRef.current.fontSize === 0) {
+  //         gestureInitialValuesRef.current.fontSize = element.fontSize;
+  //       }
+  //       
+  //       // Aplicar scale relativo ao fontSize INICIAL (não ao atual)
+  //       const newFontSize = Math.max(12, Math.min(120, 
+  //         Math.round(gestureInitialValuesRef.current.fontSize * scale)
+  //       ));
+  //       
+  //       return {
+  //         ...prev,
+  //         elements: prev.elements.map(el =>
+  //           el.id === prev.selectedElementId
+  //             ? { ...el, fontSize: newFontSize }
+  //             : el
+  //         ),
+  //       };
+  //     });
+  //   }, []),
 
-    // Rotação com 2 dedos: rotacionar elemento selecionado
-    onRotate: useCallback((angleDelta: number) => {
-      setEditorState(prev => {
-        if (!prev.selectedElementId) return prev;
-        
-        const element = prev.elements.find(el => el.id === prev.selectedElementId);
-        if (!element) return prev;
-        
-        // Se é o primeiro frame da rotação, salvar rotation inicial
-        if (gestureInitialValuesRef.current.rotation === 0) {
-          gestureInitialValuesRef.current.rotation = element.rotation || 0;
-        }
-        
-        // Aplicar angleDelta relativo à rotation INICIAL (não à atual)
-        let newRotation = gestureInitialValuesRef.current.rotation + angleDelta;
-        
-        // Normalizar para 0-360°
-        newRotation = ((newRotation % 360) + 360) % 360;
-        
-        // Snap a cada 15° para facilitar alinhamento
-        const snappedRotation = Math.round(newRotation / 15) * 15;
-        
-        return {
-          ...prev,
-          elements: prev.elements.map(el =>
-            el.id === prev.selectedElementId
-              ? { ...el, rotation: snappedRotation }
-              : el
-          ),
-        };
-      });
-    }, []),
+  //   // Rotação com 2 dedos: rotacionar elemento selecionado
+  //   onRotate: useCallback((angleDelta: number) => {
+  //     setEditorState(prev => {
+  //       if (!prev.selectedElementId) return prev;
+  //       
+  //       const element = prev.elements.find(el => el.id === prev.selectedElementId);
+  //       if (!element) return prev;
+  //       
+  //       // Se é o primeiro frame da rotação, salvar rotation inicial
+  //       if (gestureInitialValuesRef.current.rotation === 0) {
+  //         gestureInitialValuesRef.current.rotation = element.rotation || 0;
+  //       }
+  //       
+  //       // Aplicar angleDelta relativo à rotation INICIAL (não à atual)
+  //       let newRotation = gestureInitialValuesRef.current.rotation + angleDelta;
+  //       
+  //       // Normalizar para 0-360°
+  //       newRotation = ((newRotation % 360) + 360) % 360;
+  //       
+  //       // Snap a cada 15° para facilitar alinhamento
+  //       const snappedRotation = Math.round(newRotation / 15) * 15;
+  //       
+  //       return {
+  //         ...prev,
+  //         elements: prev.elements.map(el =>
+  //           el.id === prev.selectedElementId
+  //             ? { ...el, rotation: snappedRotation }
+  //             : el
+  //         ),
+  //       };
+  //     });
+  //   }, []),
 
-    // Gesto terminou: resetar valores iniciais
-    onGestureEnd: useCallback(() => {
-      gestureInitialValuesRef.current.fontSize = 0;
-      gestureInitialValuesRef.current.rotation = 0;
-    }, []),
+  //   // Gesto terminou: resetar valores iniciais
+  //   onGestureEnd: useCallback(() => {
+  //     gestureInitialValuesRef.current.fontSize = 0;
+  //     gestureInitialValuesRef.current.rotation = 0;
+  //   }, []),
 
-    // Toque duplo: focar no input de texto
-    onDoubleTap: useCallback((point: { x: number; y: number }) => {
-      if (selectedElement && selectedElement.type === 'text') {
-        // Focar no input de texto (será implementado no ContextualControls)
-        const textInput = document.getElementById('text-content') as HTMLInputElement;
-        if (textInput) {
-          textInput.focus();
-          textInput.select();
-        }
-      }
-    }, [selectedElement]),
-  });
+  //   // Toque duplo: focar no input de texto
+  //   onDoubleTap: useCallback((point: { x: number; y: number }) => {
+  //     if (selectedElement && selectedElement.type === 'text') {
+  //       // Focar no input de texto (será implementado no ContextualControls)
+  //       const textInput = document.getElementById('text-content') as HTMLInputElement;
+  //       if (textInput) {
+  //         textInput.focus();
+  //         textInput.select();
+  //       }
+  //     }
+  //   }, [selectedElement]),
+  // });
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">

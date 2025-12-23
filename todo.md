@@ -2034,8 +2034,10 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 
 ### 12. TypeError ao salvar no último slide
 - [x] Problema: Ao navegar entre slides e salvar no último, erro "Cannot read properties of undefined (reading 'elements')"
-- [x] Causa: Condição de corrida - useEffect reseta editorState enquanto botão OK tenta acessar elements
-- [x] Sintoma: Toast laranja em todos os slides (initialStyle null), erro ao salvar último slide
-- [x] Correção: Adicionadas validações `if (!editorState || !editorState.elements)` antes de acessar
-- [x] Localização: MobileSlideEditor.tsx linhas 378 e 401 (botões de navegação e OK)
-- [x] RESOLVIDO: Agora retorna early se editorState undefined, evitando crash
+- [x] Causa REAL: useGestures processa touch events de forma diferente no mobile real vs desktop
+- [x] Desktop (mouse events): Funciona perfeitamente
+- [x] Mobile (touch events): Quebra com TypeError ao acessar elements
+- [x] Solução TEMPORÁRIA: Desabilitado useGestures completamente (linha 254)
+- [x] Localização: MobileSlideEditor.tsx linha 254 (useGestures comentado)
+- [x] RESOLVIDO PARCIALMENTE: Editor funciona sem gestos avançados (pinça, rotação)
+- [ ] TODO: Reimplementar useGestures de forma segura após confirmar que funciona
