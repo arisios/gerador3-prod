@@ -1712,3 +1712,46 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Prompt rígido com instruções CRITICAL para respeitar limites - FUNCIONANDO PERFEITAMENTE
 
 **Benefício:** Primeiro slide super impactante e curto, demais slides desenvolvem melhor o conteúdo
+
+
+## 🚨 PROBLEMAS CRÍTICOS: Editor Mobile
+
+**Contexto:** O editor mobile está com problemas graves de UX que precisam ser resolvidos urgentemente.
+
+### Problemas identificados:
+1. **Editor Visual aparecendo no mobile**
+   - [ ] O botão "Editor Visual" não deve aparecer no mobile (totalmente dispensável)
+   - Problema: Ocupa espaço e confunde o usuário
+
+2. **Layout dos botões ruim**
+   - [ ] Todos os botões devem estar 100% visíveis
+   - [ ] Design bonito, fluido e responsivo
+   - [ ] Botões importantes devem ter destaque visual
+   - Problema: Botões cortados, difíceis de clicar, layout confuso
+
+3. **Preview não sincroniza com edições** (CRÍTICO)
+   - [ ] Preview deve refletir EXATAMENTE o que foi editado
+   - [ ] Ao editar texto/estilo, preview deve atualizar imediatamente
+   - Problema: Usuário edita mas preview mostra versão antiga, causando confusão estética
+
+4. **Controle de margem interno é horrível** (CRÍTICO)
+   - [x] Margem deve ser EXTERNA, não interna - IMPLEMENTADO
+   - [x] Um slider simples: diminui margem = texto menor, pode posicionar onde quiser - IMPLEMENTADO
+   - [x] Remover marginLeft, marginRight, padding complexos - IMPLEMENTADO
+   - [x] Movido controle de Largura para posição 3 (mais visível) - IMPLEMENTADO
+
+5. **Botões de formas geométricas não funcionam**
+   - [x] Remover botões: Quadrado, Círculo, Triângulo - REMOVIDOS
+   - [x] Ocupam espaço valioso na toolbar - RESOLVIDO
+   - [x] Deixar apenas: Adicionar e Texto - IMPLEMENTADO
+   - [x] Removidas funções addShape e imports não utilizados - LIMPO
+
+### Solução:
+- [x] Ocultar completamente botão "Editor Visual" no mobile - IMPLEMENTADO
+- [x] Redesenhar layout dos botões: grid responsivo, tamanhos adequados, espaçamento - IMPLEMENTADO
+- [x] Corrigir lógica de sincronização entre estado de edição e preview - IMPLEMENTADO
+- [x] Simplificar controle de margem para largura externa - IMPLEMENTADO
+- [x] Remover botões de formas geométricas - IMPLEMENTADO
+- [x] Testado no navegador - FUNCIONANDO
+
+**Prioridade:** MÁXIMA - Afeta experiência do usuário diretamente

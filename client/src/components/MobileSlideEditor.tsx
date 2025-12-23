@@ -147,26 +147,6 @@ export function MobileSlideEditor({
     addElement(newText);
   }, [editorState.elements.length, addElement]);
 
-  // Adicionar forma
-  const addShape = useCallback((shapeType: 'circle' | 'square' | 'triangle') => {
-    const newShape: EditorElement = {
-      id: `shape-${Date.now()}`,
-      type: 'shape',
-      shapeType,
-      x: 150,
-      y: 400,
-      width: 100,
-      height: 100,
-      rotation: 0,
-      fill: '#FFD700',
-      stroke: '#000000',
-      strokeWidth: 2,
-      opacity: 1,
-      zIndex: editorState.elements.length + 1,
-    };
-    addElement(newShape);
-  }, [editorState.elements.length, addElement]);
-
   // Elemento selecionado
   const selectedElement = editorState.elements.find(
     el => el.id === editorState.selectedElementId
@@ -214,7 +194,6 @@ export function MobileSlideEditor({
       <div className="flex-shrink-0 border-t border-border">
         <ToolbarBottom
           onAddText={addText}
-          onAddShape={addShape}
         />
       </div>
 

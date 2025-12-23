@@ -14,6 +14,7 @@ import { VideoGeneratorSelectorWithCredits } from "@/components/VideoGeneratorSe
 import { downloadCarouselSlide, downloadSingleImage, downloadAllSlidesWithText, downloadAllSlidesWithoutText } from "@/lib/downloadSlide";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Video, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/useMobile";
 
 const DEFAULT_STYLE: SlideStyle = {
   showText: true,
@@ -57,6 +58,7 @@ export default function InfluencerContentEdit() {
   const [lightboxImageIndex, setLightboxImageIndex] = useState<number | null>(null);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingAll, setGeneratingAll] = useState(false);
+  const isMobile = useIsMobile();
 
   const { data: content, isLoading, refetch } = trpc.influencers.getContent.useQuery({ id: cId });
   const { data: influencer } = trpc.influencers.get.useQuery({ id: influencerId });
@@ -490,11 +492,16 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
             </Button>
           </label>
 
-          <div className="grid grid-cols-2 gap-3">
+          {/* Grid responsivo: 1 coluna no mobile, 2 no desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" disabled={!hasReferenceImage}>
-                  <Plus className="w-4 h-4 mr-2" />
+                <Button 
+                  variant="outline" 
+                  disabled={!hasReferenceImage}
+                  className="w-full h-12 text-base"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
                   Gerar Imagem
                 </Button>
               </SheetTrigger>
@@ -526,12 +533,25 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
               </div>
             </SheetContent>
           </Sheet>
-            <Button onClick={() => setShowComposer(!showComposer)}>
-              <Edit2 className="w-4 h-4 mr-2" />
-              {showComposer ? "Fechar Editor" : "Editar Visual"}
-            </Button>
-            <Button onClick={() => setShowMobileEditor(true)} variant="secondary">
-              <Edit2 className="w-4 h-4 mr-2" />
+            
+            {/* Ocultar "Editar Visual" no mobile - totalmente dispensável */}
+            {!isMobile && (
+              <Button 
+                onClick={() => setShowComposer(!showComposer)}
+                className="w-full h-12 text-base"
+              >
+                <Edit2 className="w-5 h-5 mr-2" />
+                {showComposer ? "Fechar Editor" : "Editar Visual"}
+              </Button>
+            )}
+            
+            {/* Botão Editor Mobile - sempre visível e destacado */}
+            <Button 
+              onClick={() => setShowMobileEditor(true)} 
+              variant="secondary"
+              className="w-full h-12 text-base font-semibold"
+            >
+              <Edit2 className="w-5 h-5 mr-2" />
               Editor Mobile
             </Button>
           </div>
@@ -593,14 +613,23 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
           initialText={currentSlide.text || ""}
           initialImageUrl={currentSlide.imageUrl}
           onSave={(text, elements) => {
-            // Salvar no backend
+            // Salvar no backend e forçar atualização do preview
             updateSlide.mutate({
               id: currentSlide.id,
               text,
               // TODO: salvar elements no banco
+            }, {
+              onSuccess: () => {
+                // Forçar refetch para sincronizar preview
+                refetch();
+              }
             });
           }}
-          onClose={() => setShowMobileEditor(false)}
+          onClose={() => {
+            // Fechar editor e garantir que preview está atualizado
+            setShowMobileEditor(false);
+            refetch();
+          }}
         />
       )}
     </div>

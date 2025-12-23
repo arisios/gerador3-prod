@@ -60,6 +60,22 @@ export function ContextualControls({
           />
         </div>
         
+        {/* Largura do Texto (Margem Externa) - MOVIDO PARA CÁ */}
+        <div className="space-y-2">
+          <Label>Largura do Texto: {Math.round((selectedElement.width || 300) / 400 * 100)}%</Label>
+          <Slider
+            value={[selectedElement.width || 300]}
+            onValueChange={([value]) => onUpdateElement(selectedElement.id, { width: value })}
+            min={150}
+            max={400}
+            step={10}
+            className="py-4"
+          />
+          <p className="text-xs text-muted-foreground">
+            💡 Diminua a largura para posicionar o texto onde quiser
+          </p>
+        </div>
+        
         {/* Cor */}
         <div className="space-y-2">
           <Label>Cor do Texto</Label>
@@ -195,19 +211,6 @@ export function ContextualControls({
               Grosso
             </Button>
           </div>
-        </div>
-        
-        {/* Padding/Margem */}
-        <div className="space-y-2">
-          <Label>Margem Interna: {selectedElement.padding || 0}px</Label>
-          <Slider
-            value={[selectedElement.padding || 0]}
-            onValueChange={([value]) => onUpdateElement(selectedElement.id, { padding: value })}
-            min={0}
-            max={40}
-            step={4}
-            className="py-4"
-          />
         </div>
         
         {/* Espaçamento entre Linhas */}
