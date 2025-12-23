@@ -655,6 +655,7 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
       {/* Mobile Editor */}
       {showMobileEditor && currentSlide && (
         <MobileSlideEditor
+          key={currentSlide.id}
           slideId={currentSlide.id}
           initialText={currentSlide.text || ""}
           initialImageUrl={currentSlide.imageUrl}

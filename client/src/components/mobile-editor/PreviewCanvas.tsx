@@ -126,9 +126,9 @@ export function PreviewCanvas({
 
   return (
     <div className="relative w-full h-full flex items-center justify-center bg-gray-200 p-4">
-      {/* Canvas Outer (com margem cinza) */}
+      {/* Canvas Outer (com margem cinza touch-friendly) */}
       <div
-        className="relative bg-gray-300 shadow-lg p-5"
+        className="relative bg-gray-300 shadow-lg p-8"
         style={{
           width: 'min(90vw, 440px)',
         }}

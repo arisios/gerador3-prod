@@ -1961,3 +1961,18 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] RESOLVIDO: Canvas outer (440px) com padding 20px cinza (bg-gray-300), canvas inner (400x500px 4:5) branco, imagem object-cover preenchendo área
 
 **Prioridade:** MÁXIMA - Usuário frustrado, problemas recorrentes
+
+
+### 3. Salvamento AINDA não persiste (CRÍTICO)
+- [x] Problema: Mostra "Salvando..." mas ao reabrir editor, edições desaparecem
+- [x] Causa provável: invalidate() não está recarregando cache do tRPC corretamente
+- [x] Causa REAL: Componente não era recriado ao mudar de slide (key faltando)
+- [x] Solução: Adicionado key={currentSlide.id} forçando recriação completa
+- [x] Comportamento esperado: Editar → OK → fechar → reabrir → edições persistem
+- [x] RESOLVIDO: key={currentSlide.id} no MobileSlideEditor (linha 658)
+
+### 4. Margem do canvas não é touch-friendly
+- [x] Problema: Difícil arrastar elementos próximos às bordas do canvas
+- [x] Solução: Aumentar margem cinza para facilitar toque nas bordas
+- [x] Comportamento esperado: Margem maior permite arrastar elementos nas extremidades
+- [x] RESOLVIDO: Margem aumentada de p-5 (20px) para p-8 (32px) no canvas outer
