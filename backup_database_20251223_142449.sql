@@ -1,0 +1,52 @@
+mysqldump: [Warning] Using a password on the command line interface can be insecure.
+-- MySQL dump 10.13  Distrib 8.0.43, for Linux (x86_64)
+--
+-- Host: gateway02.us-east-1.prod.aws.tidbcloud.com    Database: 8KSL4ZTiyER4x52xANnJF9
+-- ------------------------------------------------------
+-- Server version	8.0.11-TiDB-v7.5.2-serverless
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Current Database: `8KSL4ZTiyER4x52xANnJF9`
+--
+
+CREATE DATABASE IF NOT EXISTS `8KSL4ZTiyER4x52xANnJF9` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
+
+USE `8KSL4ZTiyER4x52xANnJF9`;
+
+--
+-- Table structure for table `__drizzle_migrations`
+--
+
+DROP TABLE IF EXISTS `__drizzle_migrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `__drizzle_migrations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `hash` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=2257635;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `__drizzle_migrations`
+--
+
+LOCK TABLES `__drizzle_migrations` WRITE;
+/*!40000 ALTER TABLE `__drizzle_migrations` DISABLE KEYS */;
+INSERT INTO `__drizzle_migrations` VALUES (1,'814a08e40d7fc2bcfd458759d18319198ca8ae394f2fa15617a78678e9c9c93b',1766053832132),(1477058,'c64c5d1514c2daa808cd7801a916d33b632f5eab1cfa1095671c2815f5d0ecb0',1766055835357),(1570919,'6088440db6644f01321c933bcdc26b5470b278a9d6f5abb98c4ab68ad50051e6',1766056598006),(1743125,'e6c98993d2cf87b057eb02b5ec51dda33fd0e4289790b9257f56abe83a9f06fa',1766071613894),(1787096,'edd20d4ac4410a8638ffeef5c34430bcdf4565023d1d56831b1261750cdca533',1766081936970),(1825990,'079e3c3ad5cd76fb8257efa92f487dc8234b526da1f65f500ece16e27a53d2f8',1766161634666),(1999516,'6126feed5d26d5b1ad4cf4055a012383dc574b9f86c3427ec7536edcdcca7e87',1766166126673),(2029516,'c2653d55c170d717eacf7aee7382d1f404c367a78bd0e701f9aa06cc00db4ab3',1766170420556),(2059516,'bd57bba63837a481f5914b5ec3bc3155e22c053e8b2ca2b5c60e2232d5a7e324',1766226344551),(2137635,'1f0e4488b2d97bb173c8e74f1902aee0e423f271d6672049c63e07d2f5173e62',1766235182107),(2167635,'2615779fea775eb9e096c96c9a8670b91eefa36421efca4b82561e5ac60212bd',1766343853851),(2167636,'3209dd7dd028ab80f6684c345f99cecfc7b3969ff3a36f63f2d2076214caeaf8',1766345517231),(2197635,'65d9328c75d48040a781a2bcb774e7c4b66198e997888f50498d7789f15a6762',1766365170992),(2227635,'5ccb23d7a67635f2898b8d37bb47d4065a8c05242582fde9c193a5c413f13ea9',1766366243153);
+mysqldump: Couldn't execute 'ROLLBACK TO SAVEPOINT sp': SAVEPOINT sp does not exist (1305)
+/*!40000 ALTER TABLE `__drizzle_migrations` ENABLE KEYS */;
+UNLOCK TABLES;
