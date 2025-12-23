@@ -602,13 +602,24 @@ export default function InfluencerDetail() {
         {/* Header de Conteúdos */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Conteúdos</h2>
-          <Button 
-            size="sm"
-            onClick={() => setLocation(`/influencer/${influencerId}/content/new`)}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Gerar Novo Conteúdo
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              size="sm"
+              variant="outline"
+              onClick={() => setLocation(`/influencer/${influencerId}/express`)}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 hover:from-purple-600 hover:to-pink-600"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Modo Express
+            </Button>
+            <Button 
+              size="sm"
+              onClick={() => setLocation(`/influencer/${influencerId}/content/new`)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Gerar Novo Conteúdo
+            </Button>
+          </div>
         </div>
 
         {/* Lista de Conteúdos */}

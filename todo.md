@@ -1489,3 +1489,15 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] UI: Select de plataforma + Radio buttons de tamanho (mudam conforme plataforma) - IMPLEMENTADO
 - [x] Backend: campo textLength no input tRPC - IMPLEMENTADO
 - [x] Prompt: 4 variações de limite de caracteres - IMPLEMENTADO
+
+
+## Feature IMPORTANTE (23/12/2024 - 06:20)
+### Modo Express - Geração Automática em Massa
+- [x] Backend: procedure `generateBulkContentExpress` que recebe assunto + quantidades - IMPLEMENTADO
+- [x] IA escolhe automaticamente templates diferentes para cada conteúdo - IMPLEMENTADO
+- [x] IA cria abordagens/ângulos diferentes do mesmo assunto - IMPLEMENTADO
+- [x] Frontend: página `/influencer/:id/express` com interface ultra simples - IMPLEMENTADO
+- [x] Inputs: Influenciador + Assunto + Quantidade (carrosséis/vídeos/imagens) - IMPLEMENTADO
+- [x] Botão "Modo Express" na página de detalhes do influenciador - IMPLEMENTADO
+- [ ] Geração em paralelo de múltiplos conteúdos - PENDENTE (usando loop sequencial por enquanto)
+- [x] Zero decisões do usuário - IA decide tudo automaticamente - IMPLEMENTADO

@@ -2408,6 +2408,191 @@ ${input.type === 'carousel' ? 'Gere entre 5-8 slides com textos curtos e impacta
 
         return { contentId };
       }),
+
+    // Modo Express: Geração automática em massa
+    generateBulkContentExpress: protectedProcedure
+      .input(z.object({
+        influencerId: z.number(),
+        mainSubject: z.string(), // Assunto principal
+        carouselCount: z.number().min(0).max(10).default(0),
+        videoCount: z.number().min(0).max(10).default(0),
+        imageCount: z.number().min(0).max(10).default(0),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const influencer = await db.getInfluencerById(input.influencerId);
+        if (!influencer || influencer.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN' });
+        }
+
+        const totalCount = input.carouselCount + input.videoCount + input.imageCount;
+        if (totalCount === 0) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Selecione pelo menos 1 conteúdo para gerar' });
+        }
+        if (totalCount > 10) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Máximo de 10 conteúdos por vez' });
+        }
+
+        // Passo 1: IA escolhe templates e cria abordagens diferentes
+        const planningResponse = await invokeLLM({
+          messages: [
+            {
+              role: 'system',
+              content: `Você é um especialista em estratégia de conteúdo para redes sociais.
+Sua tarefa é criar um plano de conteúdo variado sobre um assunto principal.`
+            },
+            {
+              role: 'user',
+              content: `Influenciador: ${influencer.name}
+Nicho: ${influencer.niche}
+Assunto Principal: ${input.mainSubject}
+
+Crie um plano para:
+- ${input.carouselCount} carrosséis
+- ${input.videoCount} vídeos
+- ${input.imageCount} imagens únicas
+
+Para cada conteúdo:
+1. Escolha um TEMPLATE diferente (varie entre: Antes e Depois, Storytelling, Lista/Dicas, Passo a Passo, Mitos e Verdades, Problema e Solução, Rotina do Dia-a-Dia, Testemunho/Depoimento, Comparação, Tutorial, Curiosidades, Transformação)
+2. Crie um ÂNGULO/ABORDAGEM diferente do assunto principal
+3. Defina um TÍTULO específico
+
+Exemplo:
+Assunto: "treino em casa"
+- Carrossel 1: Template "Passo a Passo", Ângulo "5 exercícios para iniciantes", Título "Começando do zero em casa"
+- Carrossel 2: Template "Mitos e Verdades", Ângulo "treino em casa vs academia", Título "Treino em casa funciona mesmo?"
+- Vídeo 1: Template "Tutorial", Ângulo "técnica correta de agachamento", Título "Agachamento perfeito em 60 segundos"`
+            }
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'content_plan',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  contents: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        type: { type: 'string', enum: ['carousel', 'video', 'image'] },
+                        template: { type: 'string' },
+                        angle: { type: 'string' },
+                        title: { type: 'string' }
+                      },
+                      required: ['type', 'template', 'angle', 'title'],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ['contents'],
+                additionalProperties: false
+              }
+            }
+          }
+        });
+
+        const plan = JSON.parse(planningResponse.choices[0].message.content!);
+        const contentPlan = plan.contents.slice(0, totalCount);
+
+        // Passo 2: Gerar conteúdos em paralelo (simplificado - sem map tool por enquanto)
+        const generatedContents = [];
+
+        for (const item of contentPlan) {
+          // Gerar conteúdo usando procedure existente
+          const contentResponse = await invokeLLM({
+            messages: [
+              {
+                role: 'system',
+                content: `Você é ${influencer.name}, ${influencer.description || 'influenciador de ' + influencer.niche}.
+
+Crie conteúdo seguindo:
+- Template: ${item.template}
+- Ângulo: ${item.angle}
+- Título: ${item.title}
+- Nicho: ${influencer.niche}
+- Assunto: ${input.mainSubject}
+
+Controles de copywriting (padrões otimizados):
+- Plataforma: Instagram Longo (400-600 caracteres por slide)
+- Pessoa: PRIMEIRA pessoa (EU, MEU, MINHA)
+- Tom: Descontraído e casual
+- Objetivo: CRESCIMENTO (engajamento, compartilhamento)
+- Sem clickbait - seja direto e transparente
+
+Gere ${item.type === 'carousel' ? '5-7 slides' : item.type === 'video' ? 'roteiro de vídeo' : '1 imagem com texto'}.`
+              },
+              {
+                role: 'user',
+                content: `Crie o conteúdo agora.`
+              }
+            ],
+            response_format: {
+              type: 'json_schema',
+              json_schema: {
+                name: 'content_output',
+                strict: true,
+                schema: {
+                  type: 'object',
+                  properties: {
+                    title: { type: 'string' },
+                    description: { type: 'string' },
+                    hook: { type: 'string' },
+                    slides: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          text: { type: 'string' },
+                          imagePrompt: { type: 'string' }
+                        },
+                        required: ['text', 'imagePrompt'],
+                        additionalProperties: false
+                      }
+                    }
+                  },
+                  required: ['title', 'description', 'hook', 'slides'],
+                  additionalProperties: false
+                }
+              }
+            }
+          });
+
+          const contentData = JSON.parse(contentResponse.choices[0].message.content!);
+
+          // Salvar no banco
+          const contentId = await db.createInfluencerContent({
+            influencerId: input.influencerId,
+            userId: ctx.user.id,
+            type: item.type as 'carousel' | 'image' | 'video',
+            template: item.template,
+            title: contentData.title,
+            description: contentData.description,
+            hook: contentData.hook,
+            status: 'draft',
+            source: 'assunto'
+          });
+
+          // Salvar slides
+          if (contentData.slides && Array.isArray(contentData.slides)) {
+            const slidesData = contentData.slides.map((slide: any, slideIndex: number) => ({
+              slideNumber: slideIndex + 1,
+              text: slide.text || '',
+              imagePrompt: slide.imagePrompt || '',
+              imageUrl: null,
+            }));
+            await db.createInfluencerSlides(contentId, slidesData);
+          }
+
+          generatedContents.push({ contentId, type: item.type, title: contentData.title });
+        }
+
+        return { 
+          generatedContents,
+          total: generatedContents.length
+        };
+      }),
     }),
   }),
 

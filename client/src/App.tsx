@@ -21,6 +21,7 @@ import InfluencerCreate from "./pages/InfluencerCreate";
 import InfluencerCreateByPhoto from "./pages/InfluencerCreateByPhoto";
 import InfluencerDetail from "./pages/InfluencerDetail";
 import InfluencerContentCreate from "./pages/InfluencerContentCreate";
+import InfluencerExpressCreate from "./pages/InfluencerExpressCreate";
 import InfluencerContentEdit from "./pages/InfluencerContentEdit";
 import Trends from "./pages/Trends";
 import Virals from "./pages/Virals";
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/influencer/new" component={InfluencerCreate} />
       <Route path="/influencer/new/photo" component={InfluencerCreateByPhoto} />
       <Route path="/influencer/:id" component={InfluencerDetail} />
+      <Route path="/influencer/:id/express" component={InfluencerExpressCreate} />
       <Route path="/influencer/:id/content/new" component={InfluencerContentCreate} />
       <Route path="/influencer/:id/content/:contentId" component={InfluencerContentEdit} />
       <Route path="/trends" component={Trends} />
