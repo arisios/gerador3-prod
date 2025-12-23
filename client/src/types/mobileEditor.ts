@@ -28,7 +28,12 @@ export interface EditorElement {
   fontSize?: number;          // Tamanho da fonte (texto)
   fontFamily?: string;        // Fonte (texto)
   textAlign?: TextAlign;      // Alinhamento (texto)
-  fontWeight?: number;        // Peso da fonte
+  fontWeight?: number | string; // Peso da fonte (normal, bold, 100-900)
+  fontStyle?: string;         // Estilo da fonte (normal, italic)
+  textDecoration?: string;    // Decoração (none, underline, line-through)
+  textShadow?: string;        // Sombra do texto (CSS text-shadow)
+  textStroke?: string;        // Contorno do texto (-webkit-text-stroke)
+  padding?: number;           // Padding interno (texto)
   
   // Ordem (z-index)
   zIndex: number;

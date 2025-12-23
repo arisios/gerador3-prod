@@ -1641,3 +1641,29 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
    - [x] Mudança de cor funciona - TESTADO: texto mudou de preto para verde
    - [x] Resize com dedos funciona - FUNCIONANDO
    - [x] onUpdateElement está sendo chamado corretamente - VERIFICADO
+
+
+## 🐛 Novos Problemas Identificados (23/12/2024 - 07:07)
+
+### 1. Botões de formas não funcionam
+- [x] Quando clica em Círculo/Quadrado/Triângulo, nada acontece - CORRIGIDO: formas sendo adicionadas
+- [x] Deveria adicionar a forma no canvas - FUNCIONANDO
+- [x] Verificar se onAddShape está sendo chamado corretamente - VERIFICADO: funcionando
+- [x] Verificar se addElement para formas está criando elemento corretamente - VERIFICADO: tipos corretos
+
+### 2. Controles essenciais de texto
+
+**Já tinha (funcionando):**
+- [x] Cor do texto
+- [x] Tamanho (fontSize)
+- [x] Alinhamento (esquerda, centro, direita)
+
+**Implementados e testados:**
+- [x] **Sombra** (text-shadow) - 3 níveis: Nenhuma, Leve, Forte - FUNCIONANDO
+- [x] **Borda/Contorno** (-webkit-text-stroke) - 3 níveis: Nenhum, Fino (1px), Grosso (2px) - FUNCIONANDO
+- [x] **Negrito** (fontWeight: bold) - Toggle on/off - TESTADO: funcionando
+- [x] **Sublinhado** (text-decoration: underline) - Toggle on/off - FUNCIONANDO
+- [x] **Margem/Padding** (padding interno) - Slider 0-40px - FUNCIONANDO
+- [x] **Itálico** (fontStyle: italic) - Toggle on/off - FUNCIONANDO
+
+**Observação:** Contorno melhorado com -webkit-text-stroke, testado e funcionando perfeitamente

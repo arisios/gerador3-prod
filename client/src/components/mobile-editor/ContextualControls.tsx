@@ -1,5 +1,5 @@
 import { EditorElement } from '../../types/mobileEditor';
-import { Trash2, Copy } from 'lucide-react';
+import { Trash2, Copy, Bold, Italic, Underline } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -105,6 +105,109 @@ export function ContextualControls({
               Direita
             </Button>
           </div>
+        </div>
+        
+        {/* Estilos de Texto */}
+        <div className="space-y-2">
+          <Label>Estilos</Label>
+          <div className="flex gap-2">
+            <Button
+              variant={selectedElement.fontWeight === 'bold' || selectedElement.fontWeight === 700 ? 'default' : 'outline'}
+              className="flex-1 h-12"
+              onClick={() => onUpdateElement(selectedElement.id, { 
+                fontWeight: selectedElement.fontWeight === 'bold' || selectedElement.fontWeight === 700 ? 'normal' : 'bold' 
+              })}
+            >
+              <Bold className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={selectedElement.fontStyle === 'italic' ? 'default' : 'outline'}
+              className="flex-1 h-12"
+              onClick={() => onUpdateElement(selectedElement.id, { 
+                fontStyle: selectedElement.fontStyle === 'italic' ? 'normal' : 'italic' 
+              })}
+            >
+              <Italic className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={selectedElement.textDecoration === 'underline' ? 'default' : 'outline'}
+              className="flex-1 h-12"
+              onClick={() => onUpdateElement(selectedElement.id, { 
+                textDecoration: selectedElement.textDecoration === 'underline' ? 'none' : 'underline' 
+              })}
+            >
+              <Underline className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Sombra */}
+        <div className="space-y-2">
+          <Label>Sombra</Label>
+          <div className="flex gap-2">
+            <Button
+              variant={!selectedElement.textShadow ? 'default' : 'outline'}
+              className="flex-1 h-10"
+              onClick={() => onUpdateElement(selectedElement.id, { textShadow: undefined })}
+            >
+              Nenhuma
+            </Button>
+            <Button
+              variant={selectedElement.textShadow === '2px 2px 4px rgba(0,0,0,0.5)' ? 'default' : 'outline'}
+              className="flex-1 h-10"
+              onClick={() => onUpdateElement(selectedElement.id, { textShadow: '2px 2px 4px rgba(0,0,0,0.5)' })}
+            >
+              Leve
+            </Button>
+            <Button
+              variant={selectedElement.textShadow === '4px 4px 8px rgba(0,0,0,0.7)' ? 'default' : 'outline'}
+              className="flex-1 h-10"
+              onClick={() => onUpdateElement(selectedElement.id, { textShadow: '4px 4px 8px rgba(0,0,0,0.7)' })}
+            >
+              Forte
+            </Button>
+          </div>
+        </div>
+        
+        {/* Contorno/Borda */}
+        <div className="space-y-2">
+          <Label>Contorno</Label>
+          <div className="flex gap-2">
+            <Button
+              variant={!selectedElement.textStroke ? 'default' : 'outline'}
+              className="flex-1 h-10"
+              onClick={() => onUpdateElement(selectedElement.id, { textStroke: undefined })}
+            >
+              Nenhum
+            </Button>
+            <Button
+              variant={selectedElement.textStroke === '1px #000000' ? 'default' : 'outline'}
+              className="flex-1 h-10"
+              onClick={() => onUpdateElement(selectedElement.id, { textStroke: '1px #000000' })}
+            >
+              Fino
+            </Button>
+            <Button
+              variant={selectedElement.textStroke === '2px #000000' ? 'default' : 'outline'}
+              className="flex-1 h-10"
+              onClick={() => onUpdateElement(selectedElement.id, { textStroke: '2px #000000' })}
+            >
+              Grosso
+            </Button>
+          </div>
+        </div>
+        
+        {/* Padding/Margem */}
+        <div className="space-y-2">
+          <Label>Margem Interna: {selectedElement.padding || 0}px</Label>
+          <Slider
+            value={[selectedElement.padding || 0]}
+            onValueChange={([value]) => onUpdateElement(selectedElement.id, { padding: value })}
+            min={0}
+            max={40}
+            step={4}
+            className="py-4"
+          />
         </div>
         
         {/* Ações */}
