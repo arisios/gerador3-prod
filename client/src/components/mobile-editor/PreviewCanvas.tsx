@@ -16,6 +16,15 @@ export function PreviewCanvas({
   const canvasRef = useRef<HTMLDivElement>(null);
   const [targetElement, setTargetElement] = useState<HTMLElement | SVGElement | null>(null);
 
+  // Validação defensiva: se editorState ou elements undefined, retornar early
+  if (!editorState || !editorState.elements) {
+    return (
+      <div className="relative w-full h-full flex items-center justify-center bg-gray-200">
+        <p className="text-gray-500">Carregando...</p>
+      </div>
+    );
+  }
+
   const selectedElement = editorState.elements.find(
     el => el.id === editorState.selectedElementId
   );
