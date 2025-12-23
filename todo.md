@@ -1939,3 +1939,25 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Implementar: Mudado overflow-y-auto para overflow-hidden (linha 269)
 
 **Prioridade:** MÁXIMA - Revisar TODO o código com calma antes de fazer qualquer mudança
+
+
+## 🚨 BUGS CRÍTICOS - Editor Mobile (Sessão Nova)
+
+**Reportado pelo usuário em 23/12/2024:**
+
+### 1. Salvamento NÃO aguarda (CRÍTICO)
+- [x] Problema: Clica OK → vai pro próximo slide → volta sem salvar
+- [x] Causa: async/await implementado mas não está bloqueando navegação
+- [x] Solução necessária: Loading state VISÍVEL que bloqueia navegação até salvamento completar
+- [x] Comportamento esperado: Clicar OK → mostrar "Salvando..." → aguardar → ir pro próximo slide
+- [x] RESOLVIDO: Adicionado await em todos os botões (OK, setas ← →), estado isSaving, botão desabilitado durante salvamento, texto "Salvando..." visível
+
+### 2. Canvas cortando imagem (CRÍTICO)
+- [x] Problema: object-contain deixou imagem MENOR dentro do canvas
+- [x] Usuário quer: Canvas MAIOR com margem em volta da área 4:5 (como Canva)
+- [x] NÃO quer: Imagem menor com margem preta em cima/embaixo
+- [x] Quer: Canvas com padding/margem cinza em volta, imagem 4:5 completa visível
+- [x] Exemplo: Canva mostra área de trabalho + margem cinza ao redor
+- [x] RESOLVIDO: Canvas outer (440px) com padding 20px cinza (bg-gray-300), canvas inner (400x500px 4:5) branco, imagem object-cover preenchendo área
+
+**Prioridade:** MÁXIMA - Usuário frustrado, problemas recorrentes

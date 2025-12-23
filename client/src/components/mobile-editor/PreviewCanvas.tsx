@@ -125,24 +125,31 @@ export function PreviewCanvas({
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-muted/20 p-4">
-      {/* Canvas Container (4:5 aspect ratio) */}
+    <div className="relative w-full h-full flex items-center justify-center bg-gray-200 p-4">
+      {/* Canvas Outer (com margem cinza) */}
       <div
-        ref={canvasRef}
-        onClick={() => onSelectElement(null)}
-        className="relative bg-white shadow-lg"
+        className="relative bg-gray-300 shadow-lg p-5"
         style={{
-          width: 'min(90vw, 400px)',
-          aspectRatio: '4/5',
-          overflow: 'hidden',
+          width: 'min(90vw, 440px)',
         }}
       >
+        {/* Canvas Inner (área de trabalho 4:5) */}
+        <div
+          ref={canvasRef}
+          onClick={() => onSelectElement(null)}
+          className="relative bg-white"
+          style={{
+            width: '100%',
+            aspectRatio: '4/5',
+            overflow: 'hidden',
+          }}
+        >
         {/* Background Image */}
         {editorState.backgroundImageUrl && (
           <img
             src={editorState.backgroundImageUrl}
             alt="Background"
-            className="absolute inset-0 w-full h-full object-contain"
+            className="absolute inset-0 w-full h-full object-cover"
           />
         )}
 
@@ -160,6 +167,7 @@ export function PreviewCanvas({
           if (element.type === 'shape') return renderShape(element);
           return null;
         })}
+        </div>
       </div>
 
       {/* Moveable */}

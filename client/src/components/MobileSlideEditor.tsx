@@ -30,6 +30,9 @@ export function MobileSlideEditor({
   onNavigate,
   onClose,
 }: MobileSlideEditorProps) {
+  // Estado de salvamento
+  const [isSaving, setIsSaving] = useState(false);
+  
   // Ref para o canvas
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
@@ -339,10 +342,12 @@ export function MobileSlideEditor({
             size="icon"
             className="h-8 w-8"
             disabled={currentSlideIndex === 0}
-            onClick={() => {
+            onClick={async () => {
               // Salvar antes de navegar
+              setIsSaving(true);
               const textElement = editorState.elements.find(el => el.type === 'text');
-              onSave(textElement?.content || '', editorState.elements);
+              await onSave(textElement?.content || '', editorState.elements);
+              setIsSaving(false);
               onNavigate(currentSlideIndex - 1);
             }}
           >
@@ -358,10 +363,12 @@ export function MobileSlideEditor({
             size="icon"
             className="h-8 w-8"
             disabled={currentSlideIndex >= totalSlides - 1}
-            onClick={() => {
+            onClick={async () => {
               // Salvar antes de navegar
+              setIsSaving(true);
               const textElement = editorState.elements.find(el => el.type === 'text');
-              onSave(textElement?.content || '', editorState.elements);
+              await onSave(textElement?.content || '', editorState.elements);
+              setIsSaving(false);
               onNavigate(currentSlideIndex + 1);
             }}
           >
@@ -374,9 +381,12 @@ export function MobileSlideEditor({
           variant="default"
           size="sm"
           className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4"
-          onClick={() => {
+          disabled={isSaving}
+          onClick={async () => {
+            setIsSaving(true);
             const textElement = editorState.elements.find(el => el.type === 'text');
-            onSave(textElement?.content || '', editorState.elements);
+            await onSave(textElement?.content || '', editorState.elements);
+            setIsSaving(false);
             // Se for o último slide, fechar. Senão, ir para o próximo
             if (currentSlideIndex >= totalSlides - 1) {
               onClose();
@@ -386,7 +396,7 @@ export function MobileSlideEditor({
           }}
         >
           <Check className="w-4 h-4 mr-1" />
-          OK
+          {isSaving ? 'Salvando...' : 'OK'}
         </Button>
       </div>
 
