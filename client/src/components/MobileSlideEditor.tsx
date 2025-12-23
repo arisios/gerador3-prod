@@ -27,6 +27,12 @@ export function MobileSlideEditor({
   // Ref para o canvas
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
+  // Ref para salvar valores iniciais dos gestos (pinça e rotação)
+  const gestureInitialValuesRef = useRef<{
+    fontSize: number;
+    rotation: number;
+  }>({ fontSize: 0, rotation: 0 });
+  
   // Estado do editor
   const [editorState, setEditorState] = useState<EditorState>(() => {
     // Se tem initialStyle salvo, usar ele
@@ -184,8 +190,15 @@ export function MobileSlideEditor({
         const element = prev.elements.find(el => el.id === prev.selectedElementId);
         if (!element || element.type !== 'text' || !element.fontSize) return prev;
         
-        // Aumentar fontSize proporcionalmente (min: 12px, max: 120px)
-        const newFontSize = Math.max(12, Math.min(120, Math.round(element.fontSize * scale)));
+        // Se é o primeiro frame da pinça, salvar fontSize inicial
+        if (gestureInitialValuesRef.current.fontSize === 0) {
+          gestureInitialValuesRef.current.fontSize = element.fontSize;
+        }
+        
+        // Aplicar scale relativo ao fontSize INICIAL (não ao atual)
+        const newFontSize = Math.max(12, Math.min(120, 
+          Math.round(gestureInitialValuesRef.current.fontSize * scale)
+        ));
         
         return {
           ...prev,
@@ -206,7 +219,17 @@ export function MobileSlideEditor({
         const element = prev.elements.find(el => el.id === prev.selectedElementId);
         if (!element) return prev;
         
-        const newRotation = (element.rotation + angleDelta) % 360;
+        // Se é o primeiro frame da rotação, salvar rotation inicial
+        if (gestureInitialValuesRef.current.rotation === 0) {
+          gestureInitialValuesRef.current.rotation = element.rotation || 0;
+        }
+        
+        // Aplicar angleDelta relativo à rotation INICIAL (não à atual)
+        let newRotation = gestureInitialValuesRef.current.rotation + angleDelta;
+        
+        // Normalizar para 0-360°
+        newRotation = ((newRotation % 360) + 360) % 360;
+        
         // Snap a cada 15° para facilitar alinhamento
         const snappedRotation = Math.round(newRotation / 15) * 15;
         
@@ -219,6 +242,12 @@ export function MobileSlideEditor({
           ),
         };
       });
+    }, []),
+
+    // Gesto terminou: resetar valores iniciais
+    onGestureEnd: useCallback(() => {
+      gestureInitialValuesRef.current.fontSize = 0;
+      gestureInitialValuesRef.current.rotation = 0;
     }, []),
 
     // Toque duplo: focar no input de texto
@@ -266,7 +295,7 @@ export function MobileSlideEditor({
       {/* Preview Canvas - Container com scroll, canvas mantém tamanho natural */}
       <div 
         ref={canvasContainerRef}
-        className="flex-shrink-0 max-h-[55vh] overflow-y-auto flex items-center justify-center bg-muted/10"
+        className="flex-shrink-0 max-h-[55vh] overflow-hidden flex items-center justify-center bg-muted/10"
       >
         <PreviewCanvas
           editorState={editorState}

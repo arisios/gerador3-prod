@@ -1905,3 +1905,37 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Após salvar, preview deve refetch e mostrar edições - JÁ EXISTIA
 
 **Prioridade:** MÁXIMA - Editor inutilizável se não mostra o que está sendo editado
+
+
+## 🚨 PROBLEMAS CRÍTICOS RELATADOS PELO USUÁRIO
+
+**Contexto:** Após implementar sincronização preview/editor e gestos de toque, múltiplos problemas surgiram.
+
+### 1. Preview AINDA diferente do Editor
+- [x] Causa identificada: Slides antigos têm style: null
+- [x] Solução: Carrosséis NOVOS já salvam style corretamente
+- [x] Decisão: NÃO fazer migração automática de slides antigos
+- **Status:** RESOLVIDO para carrosséis novos
+
+### 2. Pinça (Pinch) MUITO sensível
+- [x] Causa identificada: Scale aplicado ao fontSize ATUAL (exponencial)
+- [x] Solução: Salvar initialFontSize e aplicar scale relativo
+- [x] Implementar: Adicionado gestureInitialValuesRef para salvar fontSize inicial
+- [x] Implementar: Modificado callback onPinch para usar fontSize inicial
+- [x] Implementar: Adicionado onGestureEnd para resetar valores
+- [x] Implementar: Hook useGestures chama onGestureEnd quando gesto termina
+
+### 3. Rotação MUITO sensível
+- [x] Causa identificada: AngleDelta somado à rotation ATUAL (exponencial)
+- [x] Solução: Salvar initialRotation e aplicar angleDelta relativo
+- [x] Implementar: Adicionado gestureInitialValuesRef para salvar rotation inicial
+- [x] Implementar: Modificado callback onRotate para usar rotation inicial
+- [x] Implementar: onGestureEnd reseta rotation (já implementado na correção 2)
+- [x] Bônus: Snap a cada 15° para facilitar alinhamento - MANTIDO
+
+### 4. Imagem rolando para cima/baixo (NOVO problema)
+- [x] Causa identificada: overflow-y-auto no container do canvas
+- [x] Solução: Mudar para overflow-hidden
+- [x] Implementar: Mudado overflow-y-auto para overflow-hidden (linha 269)
+
+**Prioridade:** MÁXIMA - Revisar TODO o código com calma antes de fazer qualquer mudança

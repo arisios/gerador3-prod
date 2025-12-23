@@ -2,9 +2,9 @@ import { useEffect, useRef, RefObject } from 'react';
 
 interface GestureHandlers {
   onPinch?: (scale: number, center: { x: number; y: number }) => void;
-  onRotate?: (angle: number) => void;
+  onRotate?: (angleDelta: number, center: { x: number; y: number }) => void;
   onDoubleTap?: (point: { x: number; y: number }) => void;
-  onDrag?: (delta: { x: number; y: number }) => void;
+  onGestureEnd?: () => void;
 }
 
 interface TouchPoint {
@@ -147,10 +147,20 @@ export function useGestures(
         // Todos os dedos levantados: reset
         state.isDragging = false;
         state.lastTouchPoint = null;
+        
+        // Avisar que o gesto terminou
+        if (handlers.onGestureEnd) {
+          handlers.onGestureEnd();
+        }
       } else if (e.touches.length === 1) {
         // Voltou para um dedo: reset pinch/rotate
         state.initialDistance = 0;
         state.initialAngle = 0;
+        
+        // Avisar que o gesto terminou
+        if (handlers.onGestureEnd) {
+          handlers.onGestureEnd();
+        }
       }
     };
 
