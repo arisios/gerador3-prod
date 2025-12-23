@@ -2014,4 +2014,7 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Causa: Closure stale + dependências circulares no debouncedSave
 - [x] Solução: REMOVIDO salvamento automático completamente
 - [x] Implementação: Comentado debouncedSave, salva apenas ao clicar OK ou navegar
+- [x] Bug crítico mobile: ReferenceError: debouncedSave is not defined (linha 207)
+- [x] Causa: deleteElement ainda chamava debouncedSave não comentado
+- [x] Correção final: Removida última chamada em deleteElement linha 207
 - [x] RESOLVIDO: Desktop e mobile agora funcionam IGUAL (salvamento manual)

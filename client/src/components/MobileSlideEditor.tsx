@@ -204,8 +204,8 @@ export function MobileSlideEditor({
       selectedElementId: null,
     }));
     setHasChanges(true);
-    debouncedSave();
-  }, [debouncedSave]);
+    // debouncedSave(); // REMOVIDO - salva apenas ao clicar OK
+  }, []);
 
   // Duplicar elemento
   const duplicateElement = useCallback((id: string) => {
