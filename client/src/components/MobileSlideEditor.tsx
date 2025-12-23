@@ -160,10 +160,21 @@ export function MobileSlideEditor({
     }
     setHasChanges(false);
   }, [slideId, initialText, initialImageUrl, initialStyle]);
-  // REMOVIDO: Salvamento automático a cada 800ms causava 16+ erros
-  // Agora salva APENAS ao clicar OK ou navegar entre slides
-  // const saveTimeoutRef = useRef<NodeJS.Timeout>();
-  // const debouncedSave = useCallback(() => { ... }, [editorState.elements, onSave]);
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Debounce para salvamento automático
+  const debouncedSave = useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      setHasChanges(false);
+      // Salvar no backend (silencioso)
+      const textElement = editorState.elements.find(el => el.type === 'text');
+      onSave(textElement?.content || '', editorState.elements);
+    }, 800);
+  }, [editorState.elements, onSave]);
 
   // Atualizar elemento
   const updateElement = useCallback((id: string, updates: Partial<EditorElement>) => {
@@ -174,8 +185,8 @@ export function MobileSlideEditor({
       ),
     }));
     setHasChanges(true);
-    // debouncedSave(); // REMOVIDO: salvamento automático
-  }, []);
+    debouncedSave();
+  }, [debouncedSave]);
 
   // Adicionar elemento
   const addElement = useCallback((element: EditorElement) => {
@@ -185,8 +196,8 @@ export function MobileSlideEditor({
       selectedElementId: element.id,
     }));
     setHasChanges(true);
-    // debouncedSave(); // REMOVIDO: salvamento automático
-  }, []);
+    debouncedSave();
+  }, [debouncedSave]);
 
   // Selecionar elemento
   const selectElement = useCallback((id: string | null) => {
@@ -204,8 +215,8 @@ export function MobileSlideEditor({
       selectedElementId: null,
     }));
     setHasChanges(true);
-    // debouncedSave(); // REMOVIDO: salvamento automático
-  }, []);
+    debouncedSave();
+  }, [debouncedSave]);
 
   // Duplicar elemento
   const duplicateElement = useCallback((id: string) => {
@@ -221,7 +232,7 @@ export function MobileSlideEditor({
     };
 
     addElement(newElement);
-  }, [editorState, addElement]);
+  }, [editorState.elements, addElement]);
 
   // Adicionar texto
   const addText = useCallback(() => {
@@ -229,12 +240,12 @@ export function MobileSlideEditor({
       id: `text-${Date.now()}`,
       type: 'text',
       x: 50,
-      y: 50,
-      width: 200,
-      height: 50,
+      y: 300,
+      width: 300,
+      height: 80,
       rotation: 0,
-      content: 'Novo Texto',
-      fontSize: 24,
+      content: 'Novo texto',
+      fontSize: 28,
       fontFamily: 'Inter',
       fontWeight: 600,
       fill: '#000000',
@@ -243,7 +254,7 @@ export function MobileSlideEditor({
       opacity: 1,
     };
     addElement(newText);
-  }, [editorState, addElement]);
+  }, [editorState.elements.length, addElement]);
 
   // Elemento selecionado
   const selectedElement = editorState.elements.find(
