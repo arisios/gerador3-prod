@@ -661,17 +661,23 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
           initialStyle={currentSlide.style as any}
           currentSlideIndex={currentSlideIndex}
           totalSlides={slides.length}
-          onSave={(text, elements) => {
+          onSave={async (text, elements) => {
             // Salvar no backend com elements completos
-            updateSlide.mutate({
-              id: currentSlide.id,
-              text,
-              style: elements, // Salvar elements no campo style
-            }, {
-              onSuccess: () => {
-                // Invalidar cache para forçar recarregamento dos dados
-                utils.influencers.getContent.invalidate({ id: cId });
-              }
+            await new Promise<void>((resolve) => {
+              updateSlide.mutate({
+                id: currentSlide.id,
+                text,
+                style: elements, // Salvar elements no campo style
+              }, {
+                onSuccess: async () => {
+                  // Invalidar cache e AGUARDAR recarregamento
+                  await utils.influencers.getContent.invalidate({ id: cId });
+                  resolve();
+                },
+                onError: () => {
+                  resolve(); // Resolver mesmo com erro para não travar
+                }
+              });
             });
           }}
           onNavigate={(newIndex) => {

@@ -142,7 +142,7 @@ export function PreviewCanvas({
           <img
             src={editorState.backgroundImageUrl}
             alt="Background"
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-contain"
           />
         )}
 
