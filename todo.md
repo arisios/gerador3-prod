@@ -1667,3 +1667,11 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] **Itálico** (fontStyle: italic) - Toggle on/off - FUNCIONANDO
 
 **Observação:** Contorno melhorado com -webkit-text-stroke, testado e funcionando perfeitamente
+
+## 📝 Controles de Espaçamento Faltantes (23/12/2024 - 07:35)
+
+### Controles essenciais implementados:
+- [x] **Espaçamento entre linhas** (line-height) - Slider 0.8-3.0 - FUNCIONANDO
+- [x] **Espaçamento entre caracteres** (letter-spacing) - Slider -2px a 10px - FUNCIONANDO
+
+**Observação:** Ambos sliders testados e visíveis no editor mobile

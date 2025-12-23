@@ -59,6 +59,8 @@ export function PreviewCanvas({
           textShadow: element.textShadow,
           WebkitTextStroke: element.textStroke,
           padding: element.padding ? `${element.padding}px` : undefined,
+          lineHeight: element.lineHeight,
+          letterSpacing: element.letterSpacing ? `${element.letterSpacing}px` : undefined,
           opacity: element.opacity,
           zIndex: element.zIndex,
           cursor: 'move',

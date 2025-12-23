@@ -34,6 +34,8 @@ export interface EditorElement {
   textShadow?: string;        // Sombra do texto (CSS text-shadow)
   textStroke?: string;        // Contorno do texto (-webkit-text-stroke)
   padding?: number;           // Padding interno (texto)
+  lineHeight?: number;        // Espaçamento entre linhas (1.0 - 3.0)
+  letterSpacing?: number;     // Espaçamento entre caracteres (px)
   
   // Ordem (z-index)
   zIndex: number;

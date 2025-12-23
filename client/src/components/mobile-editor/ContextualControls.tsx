@@ -210,6 +210,32 @@ export function ContextualControls({
           />
         </div>
         
+        {/* Espaçamento entre Linhas */}
+        <div className="space-y-2">
+          <Label>Espaçamento entre Linhas: {(selectedElement.lineHeight || 1.2).toFixed(1)}</Label>
+          <Slider
+            value={[selectedElement.lineHeight || 1.2]}
+            onValueChange={([value]) => onUpdateElement(selectedElement.id, { lineHeight: value })}
+            min={0.8}
+            max={3.0}
+            step={0.1}
+            className="py-4"
+          />
+        </div>
+        
+        {/* Espaçamento entre Caracteres */}
+        <div className="space-y-2">
+          <Label>Espaçamento entre Caracteres: {selectedElement.letterSpacing || 0}px</Label>
+          <Slider
+            value={[selectedElement.letterSpacing || 0]}
+            onValueChange={([value]) => onUpdateElement(selectedElement.id, { letterSpacing: value })}
+            min={-2}
+            max={10}
+            step={0.5}
+            className="py-4"
+          />
+        </div>
+        
         {/* Ações */}
         <div className="flex gap-2 pt-4 border-t border-border">
           <Button
