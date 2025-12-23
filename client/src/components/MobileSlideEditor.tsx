@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { ArrowLeft, Check, Plus, Type, Square, Circle, Triangle } from 'lucide-react';
+import { ArrowLeft, Check, Plus, Type, Square, Circle, Triangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { EditorState, EditorElement } from '../types/mobileEditor';
 import { PreviewCanvas } from './mobile-editor/PreviewCanvas';
@@ -12,7 +12,10 @@ interface MobileSlideEditorProps {
   initialText: string;
   initialImageUrl: string | null;
   initialStyle?: EditorElement[];
+  currentSlideIndex: number;
+  totalSlides: number;
   onSave: (text: string, elements: EditorElement[]) => void;
+  onNavigate: (newIndex: number) => void;
   onClose: () => void;
 }
 
@@ -21,7 +24,10 @@ export function MobileSlideEditor({
   initialText,
   initialImageUrl,
   initialStyle,
+  currentSlideIndex,
+  totalSlides,
   onSave,
+  onNavigate,
   onClose,
 }: MobileSlideEditorProps) {
   // Ref para o canvas
@@ -56,12 +62,12 @@ export function MobileSlideEditor({
           id: 'text-1',
           type: 'text',
           x: 24, // Margem esquerda 24px
-          y: 400, // Parte de baixo (canvas 540px altura)
+          y: 360, // Ajustado para ficar mais em cima (igual ao preview)
           width: 352, // Largura total menos margens (400 - 48)
-          height: 116, // Altura suficiente para texto
+          height: 140, // Altura aumentada para texto maior
           rotation: 0,
           content: initialText || 'Toque para editar',
-          fontSize: 18, // text-lg do Tailwind
+          fontSize: 24, // Aumentado para ficar igual ao preview
           fontFamily: 'Inter',
           fontWeight: 700,
           fill: '#FFFFFF', // Texto branco (sem overlay, precisa contrastar)
@@ -269,7 +275,7 @@ export function MobileSlideEditor({
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 h-14 border-b border-border flex items-center justify-between px-4">
+      <div className="flex-shrink-0 h-14 border-b border-border flex items-center justify-between px-4 gap-2">
         <Button
           variant="ghost"
           size="sm"
@@ -278,20 +284,61 @@ export function MobileSlideEditor({
           <ArrowLeft className="w-5 h-5" />
         </Button>
         
-        <h2 className="text-sm font-semibold truncate">
-          Editar Slide
-        </h2>
+        {/* Navegação de slides */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            disabled={currentSlideIndex === 0}
+            onClick={() => {
+              // Salvar antes de navegar
+              const textElement = editorState.elements.find(el => el.type === 'text');
+              onSave(textElement?.content || '', editorState.elements);
+              onNavigate(currentSlideIndex - 1);
+            }}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          
+          <span className="text-sm font-medium min-w-[60px] text-center">
+            {currentSlideIndex + 1} / {totalSlides}
+          </span>
+          
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            disabled={currentSlideIndex >= totalSlides - 1}
+            onClick={() => {
+              // Salvar antes de navegar
+              const textElement = editorState.elements.find(el => el.type === 'text');
+              onSave(textElement?.content || '', editorState.elements);
+              onNavigate(currentSlideIndex + 1);
+            }}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
         
+        {/* Botão de salvar maior e mais visível */}
         <Button
-          variant="ghost"
+          variant="default"
           size="sm"
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4"
           onClick={() => {
             const textElement = editorState.elements.find(el => el.type === 'text');
             onSave(textElement?.content || '', editorState.elements);
-            onClose();
+            // Se for o último slide, fechar. Senão, ir para o próximo
+            if (currentSlideIndex >= totalSlides - 1) {
+              onClose();
+            } else {
+              onNavigate(currentSlideIndex + 1);
+            }
           }}
         >
-          <Check className="w-5 h-5 text-green-600" />
+          <Check className="w-4 h-4 mr-1" />
+          OK
         </Button>
       </div>
 

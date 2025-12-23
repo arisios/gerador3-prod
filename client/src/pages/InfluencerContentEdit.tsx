@@ -659,6 +659,8 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
           initialText={currentSlide.text || ""}
           initialImageUrl={currentSlide.imageUrl}
           initialStyle={currentSlide.style as any}
+          currentSlideIndex={currentSlideIndex}
+          totalSlides={slides.length}
           onSave={(text, elements) => {
             // Salvar no backend com elements completos
             updateSlide.mutate({
@@ -671,6 +673,10 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
                 refetch();
               }
             });
+          }}
+          onNavigate={(newIndex) => {
+            // Trocar de slide dentro do editor
+            setCurrentSlideIndex(newIndex);
           }}
           onClose={() => {
             // Fechar editor e garantir que preview está atualizado

@@ -1643,8 +1643,9 @@ REGRAS PRIMORDIAIS (NÃO ALTERAR):
 1. IMAGEM REAL SEM NENHUM TEXTO - Não inclua letras, palavras, números ou qualquer elemento textual
 2. FOTO EM PRIMEIRA PESSOA - A foto FINAL já pronta, como se você estivesse vendo o resultado de uma selfie ou foto casual. NÃO mostre a pessoa segurando celular, NÃO mostre o ato de tirar a foto, NÃO mostre braços estendidos com celular. Apenas o resultado: selfie no espelho, foto casual, retrato natural.
 3. CONSISTÊNCIA FÍSICA - A pessoa na foto DEVE ser idêntica à imagem de referência (mesmas características físicas, rosto, corpo, cabelo)
-4. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores. Foco no rosto e expressão, não no equipamento.
-5. QUALIDADE - Foto de alta qualidade mas natural, não muito produzida
+4. TATUAGENS - Preserve tatuagens EXATAMENTE como mostrado na imagem de referência. NÃO adicione, remova ou modifique tatuagens. Se a pessoa tem tatuagens na referência, mantenha-as idênticas. Se não tem, NÃO invente.
+5. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores. Foco no rosto e expressão, não no equipamento.
+6. QUALIDADE - Foto de alta qualidade mas natural, não muito produzida
 
 Estilo da foto:
 - Selfie casual ou foto tirada por amigo
@@ -1700,8 +1701,9 @@ REGRAS PRIMORDIAIS (NÃO ALTERAR):
 1. IMAGEM REAL SEM NENHUM TEXTO - Não inclua letras, palavras, números ou qualquer elemento textual
 2. FOTO EM PRIMEIRA PESSOA - A foto FINAL já pronta, como se você estivesse vendo o resultado de uma selfie ou foto casual. NÃO mostre a pessoa segurando celular, NÃO mostre o ato de tirar a foto, NÃO mostre braços estendidos com celular. Apenas o resultado: selfie no espelho, foto casual, retrato natural.
 3. CONSISTÊNCIA FÍSICA - A pessoa na foto DEVE ser idêntica à imagem de referência (mesmas características físicas, rosto, corpo, cabelo)
-4. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores. Foco no rosto e expressão, não no equipamento.
-5. QUALIDADE - Foto de alta qualidade mas natural, não muito produzida
+4. TATUAGENS - Preserve tatuagens EXATAMENTE como mostrado na imagem de referência. NÃO adicione, remova ou modifique tatuagens. Se a pessoa tem tatuagens na referência, mantenha-as idênticas. Se não tem, NÃO invente.
+5. NATURALIDADE - A foto deve parecer real, espontânea, como posts reais de influenciadores. Foco no rosto e expressão, não no equipamento.
+6. QUALIDADE - Foto de alta qualidade mas natural, não muito produzida
 
 Estilo da foto:
 - Selfie casual ou foto tirada por amigo
@@ -2378,7 +2380,7 @@ ${input.type === 'carousel' ? 'Gere entre 5-8 slides com textos curtos e impacta
                   : influencer.niche === 'tech'
                     ? 'roupa casual moderna (camiseta, camisa ou moletom)'
                     : 'roupa casual apropriada para a cena';
-                imagePrompt = `POV (primeira pessoa): ${influencer.name} mostrando ${product.name}. Cena: ${s.text}. ${produtoInfo}. Ambiente: ${ambiente}. Roupa: ${roupa} - VARY clothing based on scene context. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: KEEP facial features, tattoos (only on exposed skin, NOT on clothes), body type, hairstyle from reference photo - VARY only clothing. CRITICAL: NO TEXT, NO WORDS, NO LETTERS, NO WRITING in the image - pure photographic content only`;
+                imagePrompt = `POV (primeira pessoa): ${influencer.name} mostrando ${product.name}. Cena: ${s.text}. ${produtoInfo}. Ambiente: ${ambiente}. Roupa: ${roupa} - VARY clothing based on scene context. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: KEEP facial features, body type, hairstyle from reference photo - VARY only clothing. TATTOOS: preserve tattoos EXACTLY as shown in reference image - do NOT add, remove, or modify any tattoos. CRITICAL: NO TEXT, NO WORDS, NO LETTERS, NO WRITING in the image - pure photographic content only`;
               } else {
                 const ambiente = influencer.niche === 'fitness' 
                   ? 'Academia, pessoas treinando ao fundo' 
@@ -2390,7 +2392,7 @@ ${input.type === 'carousel' ? 'Gere entre 5-8 slides com textos curtos e impacta
                   : influencer.niche === 'tech'
                     ? 'roupa casual moderna (camiseta, camisa ou moletom)'
                     : 'roupa casual apropriada para a cena';
-                imagePrompt = `POV (primeira pessoa): ${influencer.name} no contexto de ${influencer.niche}. Cena: ${s.text}. Ambiente: ${ambiente}. Roupa: ${roupa} - VARY clothing based on scene context. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: KEEP facial features, tattoos (only on exposed skin, NOT on clothes), body type, hairstyle from reference photo - VARY only clothing. CRITICAL: NO TEXT, NO WORDS, NO LETTERS, NO WRITING in the image - pure photographic content only`;
+                imagePrompt = `POV (primeira pessoa): ${influencer.name} no contexto de ${influencer.niche}. Cena: ${s.text}. Ambiente: ${ambiente}. Roupa: ${roupa} - VARY clothing based on scene context. Pessoas ao fundo: 2-3 pessoas DIFERENTES (rostos genericos variados, NAO usar referencia do influenciador). Estilo: Selfie autentica, luz natural, realista, imperfeicoes naturais. Angulo: Camera frontal, braco estendido, NAO mostrar celular tirando foto. IMPORTANTE: KEEP facial features, body type, hairstyle from reference photo - VARY only clothing. TATTOOS: preserve tattoos EXACTLY as shown in reference image - do NOT add, remove, or modify any tattoos. CRITICAL: NO TEXT, NO WORDS, NO LETTERS, NO WRITING in the image - pure photographic content only`;
               }
 
               // Gerar imagem com referencias
