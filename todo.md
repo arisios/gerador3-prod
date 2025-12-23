@@ -2005,3 +2005,13 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Toast VERDE aparecendo ("Carregando edições salvas")
 - [x] Dados persistindo no banco (coluna `style` com JSON)
 - [x] Edições mantidas após fechar e reabrir editor
+
+
+## 🐛 BUG - Mobile não salva (timeout muito curto)
+
+### 10. Salvamento automático falha no mobile
+- [x] Problema: Desktop salva automaticamente (800ms), mobile não salva
+- [x] Causa: Closure stale + dependências circulares no debouncedSave
+- [x] Solução: REMOVIDO salvamento automático completamente
+- [x] Implementação: Comentado debouncedSave, salva apenas ao clicar OK ou navegar
+- [x] RESOLVIDO: Desktop e mobile agora funcionam IGUAL (salvamento manual)
