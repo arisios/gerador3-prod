@@ -2417,6 +2417,7 @@ ${input.type === 'carousel' ? 'Gere entre 5-8 slides com textos curtos e impacta
         carouselCount: z.number().min(0).max(10).default(0),
         videoCount: z.number().min(0).max(10).default(0),
         imageCount: z.number().min(0).max(10).default(0),
+        maxCharsPerSlide: z.number().min(50).max(300).default(150), // Limite de caracteres por slide
       }))
       .mutation(async ({ input, ctx }) => {
         const influencer = await db.getInfluencerById(input.influencerId);
@@ -2515,11 +2516,16 @@ Crie conteúdo seguindo:
 - Assunto: ${input.mainSubject}
 
 Controles de copywriting (padrões otimizados):
-- Plataforma: Instagram Longo (400-600 caracteres por slide)
+- Plataforma: Instagram Longo
 - Pessoa: PRIMEIRA pessoa (EU, MEU, MINHA)
 - Tom: Descontraído e casual
 - Objetivo: CRESCIMENTO (engajamento, compartilhamento)
 - Sem clickbait - seja direto e transparente
+
+📝 LIMITE DE CARACTERES:
+- MÁXIMO ${input.maxCharsPerSlide} caracteres por slide
+- PRIMEIRO SLIDE: MÁXIMO ${Math.min(input.maxCharsPerSlide, 100)} caracteres (seja CURTO e IMPACTANTE)
+- Textos longos afastam o público - seja CONCISO e DIRETO
 
 🎯 REGRAS CRÍTICAS PARA imagePrompt:
 1. SEMPRE use POV (Point of View) em PRIMEIRA PESSOA

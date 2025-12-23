@@ -1,0 +1,25 @@
+{
+  "query": "SELECT `order`, LENGTH(text) as char_count, text FROM influencerSlides WHERE contentId = 1410001 ORDER BY `order` LIMIT 3",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT `order`, LENGTH(text) as char_count, text FROM influencerSlides WHERE contentId = 1410001 ORDER BY `order` LIMIT 3",
+  "rows": [
+    {
+      "order": "1",
+      "char_count": "69",
+      "text": "Seu carro VAI FERVER? 5 Mitos de Verão que o João Bobão Acreditava"
+    },
+    {
+      "order": "2",
+      "char_count": "77",
+      "text": "MITO 1: Ligar o ar-condicionado faz o motor ferver mais rápido no trânsito."
+    },
+    {
+      "order": "3",
+      "char_count": "135",
+      "text": "VERDADE: Se o sistema de arrefecimento estiver OK, o A/C não causa superaquecimento. Se ferver, o problema é outro (radiador, água)."
+    }
+  ],
+  "messages": [],
+  "stdout": "order\tchar_count\ttext\n1\t69\tSeu carro VAI FERVER? 5 Mitos de Verão que o João Bobão Acreditava\n2\t77\tMITO 1: Ligar o ar-condicionado faz o motor ferver mais rápido no trânsito.\n3\t135\tVERDADE: Se o sistema de arrefecimento estiver OK, o A/C não causa superaquecimento. Se ferver, o problema é outro (radiador, água).\n",
+  "stderr": "",
+  "execution_time_ms": 122
+}

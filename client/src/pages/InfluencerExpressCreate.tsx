@@ -23,6 +23,7 @@ export default function InfluencerExpressCreate() {
   const [carouselCount, setCarouselCount] = useState(3);
   const [videoCount, setVideoCount] = useState(0);
   const [imageCount, setImageCount] = useState(0);
+  const [maxCharsPerSlide, setMaxCharsPerSlide] = useState(150); // Limite de caracteres por slide
 
   // Mutation
   const generateMutation = trpc.influencers.products.generateBulkContentExpress.useMutation({
@@ -61,6 +62,7 @@ export default function InfluencerExpressCreate() {
       carouselCount,
       videoCount,
       imageCount,
+      maxCharsPerSlide,
     });
   };
 
@@ -135,6 +137,27 @@ export default function InfluencerExpressCreate() {
             />
             <p className="text-xs text-muted-foreground">
               A IA vai criar diferentes abordagens e ângulos sobre este assunto
+            </p>
+          </div>
+
+          {/* Limite de Caracteres */}
+          <div className="space-y-2">
+            <Label htmlFor="maxCharsPerSlide" className="text-base font-semibold">
+              Limite de Caracteres por Slide: {maxCharsPerSlide}
+            </Label>
+            <input
+              id="maxCharsPerSlide"
+              type="range"
+              min="50"
+              max="300"
+              step="10"
+              value={maxCharsPerSlide}
+              onChange={(e) => setMaxCharsPerSlide(parseInt(e.target.value))}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+              disabled={generateMutation.isPending}
+            />
+            <p className="text-xs text-muted-foreground">
+              Textos mais curtos (50-100) são ideais para o primeiro slide. Textos longos (200-300) podem afastar o público.
             </p>
           </div>
 

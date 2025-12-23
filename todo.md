@@ -1675,3 +1675,22 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] **Espaçamento entre caracteres** (letter-spacing) - Slider -2px a 10px - FUNCIONANDO
 
 **Observação:** Ambos sliders testados e visíveis no editor mobile
+
+
+## 📏 Controle de Limite de Caracteres - Modo Express (23/12/2024 - 07:50)
+
+### Problema:
+- [x] Textos gerados no Modo Express estão muito grandes - RESOLVIDO
+- [x] Primeira página com texto grande afasta o público - RESOLVIDO
+- [x] Falta controle para usuário definir tamanho ideal do texto - RESOLVIDO
+
+### Solução:
+- [x] Adicionar slider "Limite de Caracteres por Slide" no formulário do Modo Express (50-300 caracteres) - IMPLEMENTADO
+- [x] Definir limite padrão 150 caracteres, primeiro slide máximo 100 - IMPLEMENTADO
+- [x] Atualizar prompt da IA para respeitar esses limites - IMPLEMENTADO
+- [x] Instruir IA a ser mais concisa e impactante no primeiro slide - IMPLEMENTADO
+
+**Teste realizado:**
+- Conteúdo gerado com limite 150 caracteres
+- Slide 1: 69 chars ✅ | Slide 2: 77 chars ✅ | Slide 3: 135 chars ✅ | Slide 4: 80 chars ✅ | Slide 5: 134 chars ✅
+- **TODOS os slides respeitaram o limite!** Primeiro slide especialmente curto e impactante.
