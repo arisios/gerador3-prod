@@ -1473,3 +1473,10 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Instagram: textos mais longos e profundos, storytelling completo, hashtags estratégicas - IMPLEMENTADO
 - [x] TikTok: textos curtos e diretos, máximo impacto, muito chamativo - IMPLEMENTADO
 - [x] Integrar plataforma no prompt do LLM com instruções específicas - IMPLEMENTADO
+
+
+## Bug Reportado (23/12/2024 - 06:00)
+- [x] Campo plataforma (TikTok) não está gerando textos curtos como esperado - CORRIGIDO
+- [x] Verificar se platform está sendo enviado corretamente no payload - VERIFICADO: estava sendo enviado
+- [x] Ajustar prompt para ser mais específico sobre limitação de caracteres - IMPLEMENTADO: MÁXIMO 150 caracteres por slide
+- [x] TikTok deve gerar textos de 50-150 caracteres, não 500+ - CORRIGIDO com regra crítica no prompt

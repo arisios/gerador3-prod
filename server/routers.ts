@@ -2235,7 +2235,7 @@ NÃO faça o conteúdo ser apenas sobre o produto. O produto é um COMPLEMENTO d
 ` : ''}
 
 CONTROLES DE COPYWRITING:
-- PLATAFORMA: ${input.platform === 'instagram' ? 'INSTAGRAM - Textos mais longos e profundos, storytelling completo, primeira linha chamativa para preview, hashtags estratégicas' : 'TIKTOK - Textos CURTOS e DIRETOS, máximo impacto em poucas palavras, MUITO chamativo, hook inicial forte'}
+- PLATAFORMA: ${input.platform === 'instagram' ? 'INSTAGRAM - Textos de 300-500 caracteres por slide, storytelling completo, primeira linha chamativa para preview, hashtags estratégicas no final' : 'TIKTOK - Textos ULTRA CURTOS: MÁXIMO 150 caracteres por slide (2-3 linhas), direto ao ponto, hook inicial FORTE, sem enrolação'}
 - PESSOA: ${input.person === 'first' ? 'PRIMEIRA pessoa (EU, MEU, MINHA)' : input.person === 'second' ? 'SEGUNDA pessoa (VOCÊ, SEU, SUA)' : 'TERCEIRA pessoa (ELE/ELA, DELE/DELA)'}
 - TOM DE VOZ: ${input.voiceTone === 'motivacional' ? 'Motivacional e inspirador' : input.voiceTone === 'tecnico' ? 'Técnico e detalhado' : input.voiceTone === 'descontraido' ? 'Descontraído e casual' : input.voiceTone === 'educacional' ? 'Educacional e didático' : 'Inspirador e aspiracional'}
 - OBJETIVO: ${input.objective === 'sale' ? 'VENDA (CTA claro, senso de urgência)' : input.objective === 'authority' ? 'AUTORIDADE (educar, demonstrar expertise)' : 'CRESCIMENTO (engajamento, compartilhamento)'}
@@ -2248,7 +2248,8 @@ REGRAS DE REALISMO:
 2. TOM: Mantenha tom ${input.voiceTone} em todos os slides
 3. AUTÊNCIA: Parecer natural, conversacional, não vendedor demais
 4. NICHO: Conteúdo DEVE estar relacionado ao nicho do influenciador
-${contextInfo ? `5. FOCO NO TEMA: O conteúdo é SOBRE o tema/trend/viral, não apenas sobre o produto` : ''}
+5. ⚠️ TAMANHO DO TEXTO: ${input.platform === 'tiktok' ? 'CADA SLIDE DEVE TER NO MÁXIMO 150 CARACTERES (2-3 linhas curtas). Seja EXTREMAMENTE conciso.' : 'Cada slide deve ter 300-500 caracteres para storytelling completo.'}
+${contextInfo ? `6. FOCO NO TEMA: O conteúdo é SOBRE o tema/trend/viral, não apenas sobre o produto` : ''}
 
 O conteúdo deve parecer que ${influencer.name} está compartilhando uma experiência pessoal real${contextInfo ? ' relacionada ao tema principal' : ''}.`
             },
