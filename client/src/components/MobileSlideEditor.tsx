@@ -160,21 +160,10 @@ export function MobileSlideEditor({
     }
     setHasChanges(false);
   }, [slideId, initialText, initialImageUrl, initialStyle]);
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
-
-  // Debounce para salvamento automático
-  const debouncedSave = useCallback(() => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    
-    saveTimeoutRef.current = setTimeout(() => {
-      setHasChanges(false);
-      // Salvar no backend (silencioso)
-      const textElement = editorState.elements.find(el => el.type === 'text');
-      onSave(textElement?.content || '', editorState.elements);
-    }, 800);
-  }, [editorState.elements, onSave]);
+  // REMOVIDO: Salvamento automático a cada 800ms causava 16+ erros
+  // Agora salva APENAS ao clicar OK ou navegar entre slides
+  // const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  // const debouncedSave = useCallback(() => { ... }, [editorState.elements, onSave]);
 
   // Atualizar elemento
   const updateElement = useCallback((id: string, updates: Partial<EditorElement>) => {
@@ -185,8 +174,8 @@ export function MobileSlideEditor({
       ),
     }));
     setHasChanges(true);
-    debouncedSave();
-  }, [debouncedSave]);
+    // debouncedSave(); // REMOVIDO: salvamento automático
+  }, []);
 
   // Adicionar elemento
   const addElement = useCallback((element: EditorElement) => {
@@ -196,8 +185,8 @@ export function MobileSlideEditor({
       selectedElementId: element.id,
     }));
     setHasChanges(true);
-    debouncedSave();
-  }, [debouncedSave]);
+    // debouncedSave(); // REMOVIDO: salvamento automático
+  }, []);
 
   // Selecionar elemento
   const selectElement = useCallback((id: string | null) => {
@@ -215,8 +204,8 @@ export function MobileSlideEditor({
       selectedElementId: null,
     }));
     setHasChanges(true);
-    debouncedSave();
-  }, [debouncedSave]);
+    // debouncedSave(); // REMOVIDO: salvamento automático
+  }, []);
 
   // Duplicar elemento
   const duplicateElement = useCallback((id: string) => {

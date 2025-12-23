@@ -1995,3 +1995,19 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
   - ✅ Verde: "Carregando edições salvas" (se initialStyle existe)
   - ⚠️ Laranja: "Criando slide novo" (se initialStyle vazio)
 - [x] Aguardando teste do usuário para ver qual mensagem aparece
+
+
+## 🚨 BUG CRÍTICO - Função Inexistente
+
+### 7. Salvamento falhando - função não existe (CRÍTICO)
+- [x] Problema: Erro "db.getInfluencerSlideById is not a function"
+- [x] Causa: Nome da função ERRADO no código
+- [x] Função chamada: `getInfluencerSlideById` (NÃO EXISTIA)
+- [x] Solução: CRIADA função `getInfluencerSlideById` no db.ts linha 456
+- [x] RESOLVIDO: Função agora existe e salvamento deve funcionar
+
+### 8. Salvamento automático excessivo
+- [x] Problema: Salva a cada 800ms (16 erros acumulados)
+- [x] Causa: Código salva automaticamente a cada mudança
+- [x] Solução: Remover auto-save, salvar APENAS ao clicar OK ou navegar
+- [x] RESOLVIDO: Comentado debouncedSave() em 3 lugares (updateElement, addElement, deleteElement)
