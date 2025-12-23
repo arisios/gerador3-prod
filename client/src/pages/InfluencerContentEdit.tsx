@@ -50,6 +50,7 @@ export default function InfluencerContentEdit() {
   const influencerId = parseInt(id || "0");
   const cId = parseInt(contentId || "0");
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [pendingSave, setPendingSave] = useState(false);
   const [editingText, setEditingText] = useState(false);
   const [slideText, setSlideText] = useState("");
   const [tempPrompt, setTempPrompt] = useState("");
@@ -464,7 +465,16 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
 
         {/* Slide Navigation */}
         <div className="flex items-center justify-between">
-          <Button variant="outline" size="icon" disabled={currentSlideIndex === 0} onClick={() => setCurrentSlideIndex(currentSlideIndex - 1)}>
+          <Button variant="outline" size="icon" disabled={currentSlideIndex === 0} onClick={() => {
+            // Fechar editor mobile se estiver aberto (salva automaticamente)
+            if (showMobileEditor) {
+              setShowMobileEditor(false);
+              // Aguardar salvamento antes de trocar slide
+              setTimeout(() => setCurrentSlideIndex(currentSlideIndex - 1), 300);
+            } else {
+              setCurrentSlideIndex(currentSlideIndex - 1);
+            }
+          }}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <div className="flex gap-2 flex-wrap justify-center">
@@ -476,13 +486,31 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
-                onClick={() => setCurrentSlideIndex(index)}
+                onClick={() => {
+                  // Fechar editor mobile se estiver aberto (salva automaticamente)
+                  if (showMobileEditor) {
+                    setShowMobileEditor(false);
+                    // Aguardar salvamento antes de trocar slide
+                    setTimeout(() => setCurrentSlideIndex(index), 300);
+                  } else {
+                    setCurrentSlideIndex(index);
+                  }
+                }}
               >
                 {index + 1}
               </button>
             ))}
           </div>
-          <Button variant="outline" size="icon" disabled={currentSlideIndex >= slides.length - 1} onClick={() => setCurrentSlideIndex(currentSlideIndex + 1)}>
+          <Button variant="outline" size="icon" disabled={currentSlideIndex >= slides.length - 1} onClick={() => {
+            // Fechar editor mobile se estiver aberto (salva automaticamente)
+            if (showMobileEditor) {
+              setShowMobileEditor(false);
+              // Aguardar salvamento antes de trocar slide
+              setTimeout(() => setCurrentSlideIndex(currentSlideIndex + 1), 300);
+            } else {
+              setCurrentSlideIndex(currentSlideIndex + 1);
+            }
+          }}>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>

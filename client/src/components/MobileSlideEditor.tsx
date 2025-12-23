@@ -49,24 +49,27 @@ export function MobileSlideEditor({
     }
     
     // Senão, criar elemento padrão com initialText
+    // Layout padrão: imagem FULL + texto embaixo à esquerda (SEM overlay)
     return {
       elements: [
         {
           id: 'text-1',
           type: 'text',
-          x: 50,
-          y: 200,
-          width: 300,
-          height: 100,
+          x: 24, // Margem esquerda 24px
+          y: 400, // Parte de baixo (canvas 540px altura)
+          width: 352, // Largura total menos margens (400 - 48)
+          height: 116, // Altura suficiente para texto
           rotation: 0,
           content: initialText || 'Toque para editar',
-          fontSize: 32,
+          fontSize: 28,
           fontFamily: 'Inter',
           fontWeight: 700,
-          fill: '#000000',
-          textAlign: 'center',
+          fill: '#FFFFFF', // Texto branco (sem overlay, precisa contrastar)
+          textAlign: 'left', // Alinhado à esquerda
+          textShadow: '2px 2px 4px rgba(0,0,0,0.8)', // Sombra para legibilidade
           zIndex: 1,
           opacity: 1,
+          lineHeight: 1.2,
         },
       ],
       selectedElementId: null,
