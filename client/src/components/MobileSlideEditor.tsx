@@ -61,7 +61,7 @@ export function MobileSlideEditor({
           height: 116, // Altura suficiente para texto
           rotation: 0,
           content: initialText || 'Toque para editar',
-          fontSize: 28,
+          fontSize: 18, // text-lg do Tailwind
           fontFamily: 'Inter',
           fontWeight: 700,
           fill: '#FFFFFF', // Texto branco (sem overlay, precisa contrastar)

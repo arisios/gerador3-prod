@@ -12,7 +12,7 @@ import { ImageLightbox } from "@/components/ImageLightbox";
 import { MobileSlideEditor } from "@/components/MobileSlideEditor";
 import { PreviewCanvas } from "@/components/mobile-editor/PreviewCanvas";
 import { VideoGeneratorSelectorWithCredits } from "@/components/VideoGeneratorSelectorWithCredits";
-import { downloadCarouselSlide, downloadSingleImage, downloadAllSlidesWithText, downloadAllSlidesWithoutText } from "@/lib/downloadSlide";
+import { downloadCarouselSlide, downloadSingleImage, downloadAllSlidesWithText, downloadAllSlidesWithoutText, downloadSlideWithStyle } from "@/lib/downloadSlide";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Video, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -215,11 +215,11 @@ export default function InfluencerContentEdit() {
     if (!currentSlide || !currentSlide.imageUrl) return;
     try {
       if (withText) {
-        await downloadCarouselSlide(
+        await downloadSlideWithStyle(
           currentSlide.imageUrl,
           currentSlide.text || "",
           `${content?.title || "slide"}_${currentSlideIndex + 1}.png`,
-          currentSlideIndex === 0
+          currentSlide.style as any[] // Usar edições salvas
         );
       } else {
         await downloadSingleImage(
@@ -246,6 +246,7 @@ export default function InfluencerContentEdit() {
           url: s.imageUrl,
           text: s.text || "",
           isFirst: index === 0,
+          style: s.style, // Passar edições salvas
         }));
         toast.info(`Baixando ${slidesData.length} slides...`);
         await downloadAllSlidesWithText(slidesData, content?.title || "carrossel", (current, total) => {
@@ -429,7 +430,7 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
                       )}
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  {/* Overlay removido - texto com sombra para legibilidade */}
                   <div className="absolute bottom-0 left-0 right-0 p-6">
                     {editingText ? (
                       <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
@@ -450,7 +451,7 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
                       </div>
                     ) : (
                       <div className="text-white">
-                        <p className="text-lg font-bold leading-tight">{currentSlide?.text || "Sem texto"}</p>
+                        <p className="text-lg font-bold leading-tight" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>{currentSlide?.text || "Sem texto"}</p>
                         <Button size="sm" variant="ghost" className="mt-2 text-white/80" onClick={(e) => { e.stopPropagation(); setEditingText(true); }}>
                           <Edit2 className="w-4 h-4 mr-1" /> Editar
                         </Button>
