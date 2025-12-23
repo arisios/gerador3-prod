@@ -134,7 +134,6 @@ export function PreviewCanvas({
         style={{
           width: 'min(90vw, 400px)',
           aspectRatio: '4/5',
-          maxHeight: '45vh',
           overflow: 'hidden',
         }}
       >

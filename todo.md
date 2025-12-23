@@ -1812,3 +1812,38 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - `client/src/components/MobileSlideEditor.tsx` - Gerenciar estado de zoom e rotação
 
 **Prioridade:** ALTA - Melhora drasticamente UX mobile
+
+
+## 🚨 CRÍTICO: Zoom e Canvas Errados no Editor Mobile
+
+**Contexto:** Implementação atual de gestos está ERRADA e inutiliza o editor.
+
+**Problemas identificados:**
+
+1. **Pinça (zoom) está errada** ❌
+   - Atual: Zoom do canvas inteiro (tudo aumenta/diminui)
+   - Correto: Pinça deve aumentar fontSize do TEXTO SELECIONADO
+   - Exemplo Canva: Dois dedos no texto = texto fica maior/menor
+
+2. **Canvas não está 4:5** ❌
+   - Atual: Canvas cortado, não mostra tudo que será baixado
+   - Correto: Canvas SEMPRE 4:5, mostrando EXATAMENTE o que será exportado
+   - Sem cortes, sem surpresas no download
+
+3. **Canvas não fica fixo** ❌
+   - Atual: Canvas se move/aumenta com zoom
+   - Correto: Canvas FIXO, PARADO, como no Canva
+   - Só os elementos dentro se movem/editam
+
+### Solução:
+
+- [x] Remover zoom do canvas (setCanvasScale) - REMOVIDO
+- [x] Remover transform: scale() do container do canvas - REMOVIDO
+- [x] Remover indicador de % de zoom - REMOVIDO
+- [x] Modificar onPinch para aumentar fontSize do elemento selecionado - IMPLEMENTADO (12-120px)
+- [x] Garantir canvas sempre 4:5 (aspectRatio: '4/5') - GARANTIDO
+- [x] Remover maxHeight que cortava o canvas - REMOVIDO
+- [x] Canvas deve ficar centralizado e fixo na tela - IMPLEMENTADO
+- [x] Preview = Download (WYSIWYG - What You See Is What You Get) - GARANTIDO
+
+**Prioridade:** MÁXIMA - Editor está inutilizável sem isso

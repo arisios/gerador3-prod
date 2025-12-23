@@ -25,10 +25,6 @@ export function MobileSlideEditor({
   // Ref para o canvas
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
-  // Estado de zoom do canvas
-  const [canvasZoom, setCanvasZoom] = useState(1);
-  const [canvasScale, setCanvasScale] = useState(1);
-  
   // Estado do editor
   const [editorState, setEditorState] = useState<EditorState>(() => ({
     elements: [
@@ -162,11 +158,25 @@ export function MobileSlideEditor({
 
   // Gestos de toque
   useGestures(canvasContainerRef, {
-    // Pinça: zoom do canvas
+    // Pinça: aumentar fontSize do texto selecionado
     onPinch: useCallback((scale: number) => {
-      setCanvasScale(prevScale => {
-        const newScale = Math.max(0.5, Math.min(2, prevScale * scale));
-        return newScale;
+      setEditorState(prev => {
+        if (!prev.selectedElementId) return prev;
+        
+        const element = prev.elements.find(el => el.id === prev.selectedElementId);
+        if (!element || element.type !== 'text' || !element.fontSize) return prev;
+        
+        // Aumentar fontSize proporcionalmente (min: 12px, max: 120px)
+        const newFontSize = Math.max(12, Math.min(120, Math.round(element.fontSize * scale)));
+        
+        return {
+          ...prev,
+          elements: prev.elements.map(el =>
+            el.id === prev.selectedElementId
+              ? { ...el, fontSize: newFontSize }
+              : el
+          ),
+        };
       });
     }, []),
 
@@ -238,12 +248,7 @@ export function MobileSlideEditor({
       {/* Preview Canvas */}
       <div 
         ref={canvasContainerRef}
-        className="flex-1 overflow-hidden"
-        style={{
-          transform: `scale(${canvasScale})`,
-          transformOrigin: 'center center',
-          transition: 'transform 0.1s ease-out',
-        }}
+        className="flex-1 overflow-hidden flex items-center justify-center"
       >
         <PreviewCanvas
           editorState={editorState}
@@ -251,13 +256,6 @@ export function MobileSlideEditor({
           onSelectElement={selectElement}
         />
       </div>
-      
-      {/* Indicador de Zoom */}
-      {canvasScale !== 1 && (
-        <div className="absolute top-20 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-semibold">
-          {Math.round(canvasScale * 100)}%
-        </div>
-      )}
 
       {/* Toolbar Bottom */}
       <div className="flex-shrink-0 border-t border-border">
