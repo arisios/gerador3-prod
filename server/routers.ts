@@ -2521,6 +2521,21 @@ Controles de copywriting (padrões otimizados):
 - Objetivo: CRESCIMENTO (engajamento, compartilhamento)
 - Sem clickbait - seja direto e transparente
 
+🎯 REGRAS CRÍTICAS PARA imagePrompt:
+1. SEMPRE use POV (Point of View) em PRIMEIRA PESSOA
+2. NUNCA mencione o nome do influenciador (${influencer.name})
+3. NUNCA coloque o influenciador como "mecânico", "profissional" ou terceira pessoa
+4. Use descrições como: "POV: Eu tirando selfie...", "Minha mão segurando...", "Foto minha no espelho..."
+5. Contexto do nicho (${influencer.niche}) deve ser o CENÁRIO, não a profissão
+6. CRITICAL: NO TEXT, NO WORDS, NO LETTERS in the image - pure photographic content only
+
+Exemplo CORRETO de imagePrompt:
+"POV: Eu tirando selfie no espelho da oficina, mostrando o carro ao fundo, roupa casual, expressão confiante"
+
+Exemplo ERRADO (NÃO FAÇA ISSO):
+"João Bobão como mecânico consertando carro" ❌
+"Mecânico profissional na oficina" ❌
+
 Gere ${item.type === 'carousel' ? '5-7 slides' : item.type === 'video' ? 'roteiro de vídeo' : '1 imagem com texto'}.`
               },
               {

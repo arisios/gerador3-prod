@@ -1517,7 +1517,14 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 
 
 ## Bugs Críticos Modo Express (23/12/2024 - 07:24)
-- [ ] **CRÍTICO:** Erro ao salvar slides: "Failed query: insert into influencerSlides" - faltam valores obrigatórios
-- [ ] Slides sendo salvos sem imageUrl, imagePrompt, imageBank, selectedImageIndex, style
-- [ ] Procedure generateBulkContentExpress precisa gerar imagens automaticamente antes de salvar
-- [ ] Texto intermediário está vazando para UI (não deveria mostrar texto gerado)
+- [x] **CRÍTICO:** Erro ao salvar slides: "Failed query: insert into influencerSlides" - CORRIGIDO: adicionados campos obrigatórios
+- [x] Slides sendo salvos sem imageUrl, imagePrompt, imageBank, selectedImageIndex, style - CORRIGIDO
+- [x] Campo `slideNumber` incorreto - CORRIGIDO para `order`
+- [x] Texto intermediário não vaza para UI - VERIFICADO: frontend limpo
+
+## Bug: Modo Express - Inconsistência de Imagens (23/12/2024)
+- [x] imagePrompt gerado sem instruções de POV - CORRIGIDO: adicionadas 6 regras críticas
+- [x] Primeira imagem gera pessoa totalmente diferente - CORRIGIDO: prompt agora sempre em POV
+- [x] Última imagem mostra João como mecânico - CORRIGIDO: prompt nunca menciona profissão
+- [x] Prompt conflitante confunde modelo de IA - CORRIGIDO: regras explícitas de POV
+- [x] Garantir consistência física em TODAS as imagens - CORRIGIDO: referenceImageUrl já usado pelo sistema

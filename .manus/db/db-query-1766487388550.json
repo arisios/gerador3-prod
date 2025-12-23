@@ -1,0 +1,38 @@
+{
+  "query": "SELECT `order`, LEFT(text, 50) as text_preview, imagePrompt FROM influencerSlides WHERE contentId = 1380004 ORDER BY `order`",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user jBC2ktSCzeC14Eh.491f207d3e9c --database 8KSL4ZTiyER4x52xANnJF9 --execute SELECT `order`, LEFT(text, 50) as text_preview, imagePrompt FROM influencerSlides WHERE contentId = 1380004 ORDER BY `order`",
+  "rows": [
+    {
+      "order": "1",
+      "text_preview": "MITO 1: 'Óleo sintético dura o dobro da quilometra",
+      "imagePrompt": "POV: Eu, baixinho e gordinho desajeitado, de boné, olhando desconfiado para um galão de óleo de motor, com a mão na cintura, em uma garagem bagunçada. Foco na minha expressão de 'eu sei de algo que você não sabe'."
+    },
+    {
+      "order": "2",
+      "text_preview": "MITO 2: 'Se o óleo está clarinho, não precisa troc",
+      "imagePrompt": "POV: Minha mão segurando a vareta do óleo, mostrando o óleo escuro, com um sorriso de canto. A luz está ruim e o fundo é a lateral de um motor sujo. A foto é tirada de cima para baixo, destacando o contraste do óleo."
+    },
+    {
+      "order": "3",
+      "text_preview": "MITO 3: 'Completar o nível resolve o problema da t",
+      "imagePrompt": "POV: Eu, com minha cara de nordestino, fazendo um sinal de 'não' com o dedo, enquanto estou agachado ao lado da roda de um carro. Estou usando uma camisa polo amassada. O foco está na minha expressão de desaprovação."
+    },
+    {
+      "order": "4",
+      "text_preview": "MITO 4: 'Posso usar qualquer óleo 20W50, é tudo ig",
+      "imagePrompt": "POV: Uma foto close-up da minha mão gordinha e desajeitada apontando para as especificações de um rótulo de óleo, tentando ler as letras miúdas. O fundo está desfocado, mas parece ser uma prateleira de autopeças."
+    },
+    {
+      "order": "5",
+      "text_preview": "MITO 5: 'Trocar o filtro de óleo é opcional a cada",
+      "imagePrompt": "POV: Eu segurando um filtro de óleo novo (limpo) em uma mão e um filtro de óleo velho (sujo) na outra, olhando diretamente para a câmera com uma expressão de 'tá vendo a diferença?'. Estou usando uma camiseta simples."
+    }
+  ],
+  "messages": [
+    "6\tRESUMO DO BOBÃO:",
+    "Não confie em lenda! Siga sempre\tPOV: Eu tirando uma selfie no espelho do carro, com minha careca no cucuruco refletida e os cabelos ralos dos lados. Estou fazendo um joinha e sorrindo de forma descontraída, parecendo satisfeito com o conhecimento compartilhado."
+  ],
+  "stdout": "order\ttext_preview\timagePrompt\n1\tMITO 1: 'Óleo sintético dura o dobro da quilometra\tPOV: Eu, baixinho e gordinho desajeitado, de boné, olhando desconfiado para um galão de óleo de motor, com a mão na cintura, em uma garagem bagunçada. Foco na minha expressão de 'eu sei de algo que você não sabe'.\n2\tMITO 2: 'Se o óleo está clarinho, não precisa troc\tPOV: Minha mão segurando a vareta do óleo, mostrando o óleo escuro, com um sorriso de canto. A luz está ruim e o fundo é a lateral de um motor sujo. A foto é tirada de cima para baixo, destacando o contraste do óleo.\n3\tMITO 3: 'Completar o nível resolve o problema da t\tPOV: Eu, com minha cara de nordestino, fazendo um sinal de 'não' com o dedo, enquanto estou agachado ao lado da roda de um carro. Estou usando uma camisa polo amassada. O foco está na minha expressão de desaprovação.\n4\tMITO 4: 'Posso usar qualquer óleo 20W50, é tudo ig\tPOV: Uma foto close-up da minha mão gordinha e desajeitada apontando para as especificações de um rótulo de óleo, tentando ler as letras miúdas. O fundo está desfocado, mas parece ser uma prateleira de autopeças.\n5\tMITO 5: 'Trocar o filtro de óleo é opcional a cada\tPOV: Eu segurando um filtro de óleo novo (limpo) em uma mão e um filtro de óleo velho (sujo) na outra, olhando diretamente para a câmera com uma expressão de 'tá vendo a diferença?'. Estou usando uma camiseta simples.\n6\tRESUMO DO BOBÃO:\n\nNão confie em lenda! Siga sempre\tPOV: Eu tirando uma selfie no espelho do carro, com minha careca no cucuruco refletida e os cabelos ralos dos lados. Estou fazendo um joinha e sorrindo de forma descontraída, parecendo satisfeito com o conhecimento compartilhado.\n",
+  "stderr": "",
+  "execution_time_ms": 718
+}
