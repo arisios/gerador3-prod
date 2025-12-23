@@ -65,7 +65,7 @@ export function MobileSlideEditor({
           id: 'text-1',
           type: 'text',
           x: 24, // Margem esquerda 24px
-          y: 380, // Ajustado para ficar visível e próximo do preview // bottom-0 + p-6 do preview (500 - 24 - altura texto)
+          y: 200, // Posicionado no meio-centro (visível e editável)
           width: 352, // right-0 left-0 p-6 (400 - 48)
           height: 100, // Altura para text-lg
           rotation: 0,
@@ -94,8 +94,22 @@ export function MobileSlideEditor({
 
   // Recarregar editor quando slideId mudar (navegação entre slides)
   useEffect(() => {
+    console.log('=== MOBILE EDITOR CARREGANDO ===');
+    console.log('slideId:', slideId);
+    console.log('initialText:', initialText);
+    console.log('initialImageUrl:', initialImageUrl);
+    console.log('initialStyle:', initialStyle);
+    console.log('initialStyle.length:', initialStyle?.length);
+    
     // Se tem initialStyle salvo, usar ele
     if (initialStyle && initialStyle.length > 0) {
+      console.log('✅ CARREGANDO STYLE SALVO:', initialStyle);
+      // Toast visual para mobile
+      const toast = document.createElement('div');
+      toast.textContent = '✅ Carregando edições salvas';
+      toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.3)';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
       setEditorState({
         elements: initialStyle,
         selectedElementId: null,
@@ -106,6 +120,13 @@ export function MobileSlideEditor({
         backgroundColor: '#ffffff',
       });
     } else {
+      console.log('⚠️ CRIANDO ELEMENTO PADRÃO (initialStyle vazio ou null)');
+      // Toast visual para mobile
+      const toast = document.createElement('div');
+      toast.textContent = '⚠️ Criando slide novo (sem edições salvas)';
+      toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#f59e0b;color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.3)';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
       // Senão, criar elemento padrão com initialText
       setEditorState({
         elements: [
@@ -113,7 +134,7 @@ export function MobileSlideEditor({
             id: 'text-1',
             type: 'text',
             x: 24,
-            y: 380, // Ajustado para ficar visível e próximo do preview // bottom-0 + p-6 do preview (500 - 24 - altura texto)
+            y: 200, // Posicionado no meio-centro (visível e editável)
             width: 352,
             height: 100,
             rotation: 0,

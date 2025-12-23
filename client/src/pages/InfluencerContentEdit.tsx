@@ -663,6 +663,11 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
           currentSlideIndex={currentSlideIndex}
           totalSlides={slides.length}
           onSave={async (text, elements) => {
+            console.log('=== SALVANDO SLIDE ===');
+            console.log('slideId:', currentSlide.id);
+            console.log('text:', text);
+            console.log('elements:', elements);
+            
             // Salvar no backend com elements completos
             await new Promise<void>((resolve) => {
               updateSlide.mutate({
@@ -671,11 +676,14 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
                 style: elements, // Salvar elements no campo style
               }, {
                 onSuccess: async () => {
+                  console.log('✅ SALVAMENTO SUCESSO');
                   // Invalidar cache e AGUARDAR recarregamento
                   await utils.influencers.getContent.invalidate({ id: cId });
+                  console.log('🔄 CACHE INVALIDADO');
                   resolve();
                 },
-                onError: () => {
+                onError: (error) => {
+                  console.error('❌ SALVAMENTO ERRO:', error);
                   resolve(); // Resolver mesmo com erro para não travar
                 }
               });

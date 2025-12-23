@@ -1976,3 +1976,22 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Solução: Aumentar margem cinza para facilitar toque nas bordas
 - [x] Comportamento esperado: Margem maior permite arrastar elementos nas extremidades
 - [x] RESOLVIDO: Margem aumentada de p-5 (20px) para p-8 (32px) no canvas outer
+
+
+## 🚨 BUGS CRÍTICOS - Sessão 23/12 Tarde
+
+### 5. Texto aparece FORA da tela no editor (CRÍTICO)
+- [x] Problema: Ao abrir editor, texto está abaixo da margem (invisível)
+- [x] Causa: Posição inicial do texto não corresponde ao preview (Y=380 fora da tela)
+- [x] Comportamento esperado: Texto aparecer na MESMA posição do preview
+- [x] RESOLVIDO: Mudado Y de 380 para 200 (meio-centro da tela, visível)
+
+### 6. Salvamento AINDA não persiste (CRÍTICO - RECORRENTE)
+- [x] Problema: Mostra "Salvando..." mas ao reabrir editor, volta ao padrão
+- [x] Tentativa 1 (await): ✅ Funcionou parcialmente (botão espera)
+- [x] Tentativa 2 (key): ❌ FALHOU (dados não recarregam)
+- [x] Tentativa 3 (toasts visuais): Adicionado mensagens na tela para debug mobile
+- [x] Mensagens visuais:
+  - ✅ Verde: "Carregando edições salvas" (se initialStyle existe)
+  - ⚠️ Laranja: "Criando slide novo" (se initialStyle vazio)
+- [x] Aguardando teste do usuário para ver qual mensagem aparece
