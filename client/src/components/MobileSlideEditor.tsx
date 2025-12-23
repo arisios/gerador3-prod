@@ -62,12 +62,12 @@ export function MobileSlideEditor({
           id: 'text-1',
           type: 'text',
           x: 24, // Margem esquerda 24px
-          y: 420, // Colado no fundo (500 - 24 padding - ~56 altura texto)
-          width: 352, // Largura total menos margens (400 - 48)
-          height: 140, // Altura aumentada para texto maior
+          y: 450, // bottom-0 + p-6 do preview (500 - 24 - altura texto)
+          width: 352, // right-0 left-0 p-6 (400 - 48)
+          height: 100, // Altura para text-lg
           rotation: 0,
           content: initialText || 'Toque para editar',
-          fontSize: 24, // Aumentado para ficar igual ao preview
+          fontSize: 18, // text-lg do Tailwind
           fontFamily: 'Inter',
           fontWeight: 700,
           fill: '#FFFFFF', // Texto branco (sem overlay, precisa contrastar)
@@ -110,12 +110,12 @@ export function MobileSlideEditor({
             id: 'text-1',
             type: 'text',
             x: 24,
-            y: 420, // Colado no fundo (500 - 24 padding - ~56 altura texto)
+            y: 450, // bottom-0 + p-6 do preview (500 - 24 - altura texto)
             width: 352,
-            height: 140,
+            height: 100,
             rotation: 0,
             content: initialText || 'Toque para editar',
-            fontSize: 24,
+            fontSize: 18, // text-lg do Tailwind
             fontFamily: 'Inter',
             fontWeight: 700,
             fill: '#FFFFFF',
