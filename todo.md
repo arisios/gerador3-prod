@@ -1443,3 +1443,10 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] MANTER características físicas permanentes: rosto, tatuagens, corpo, cabelo - IMPLEMENTADO
 - [x] Garantir que tatuagens apareçam apenas em pele exposta, não sobre roupas - IMPLEMENTADO: "tattoos (only on exposed skin, NOT on clothes)"
 - [x] Roupas devem ser apropriadas para o contexto (fitness = roupa de treino, tech = casual moderno, etc) - IMPLEMENTADO
+
+
+## Bug Crítico (22/12/2024 - 20:25)
+- [x] **CRÍTICO:** Trends/Virais/Assuntos estão sendo ignorados quando combinados com Produto - CORRIGIDO
+- [x] Sistema gera conteúdo apenas sobre produto, ignorando completamente a trend selecionada - CORRIGIDO
+- [x] Comportamento esperado: Usar trend como gancho principal e inserir produto naturalmente no contexto - IMPLEMENTADO
+- [x] Exemplo: Produto (Whey) + Trend (Morning Routine) = Conteúdo sobre rotina matinal que inclui Whey naturalmente - FUNCIONANDO

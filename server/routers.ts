@@ -2172,12 +2172,19 @@ Retorne array JSON de strings (apenas as dores, sem numeração).`;
         if (!influencer || influencer.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
 
         let contextInfo = '';
+        let contextData: any = null;
         if (input.contextType === 'trend' && input.trendId) {
           const trend = await db.getTrendById(input.trendId);
-          if (trend) contextInfo = `TREND: ${trend.name}`;
+          if (trend) {
+            contextData = trend;
+            contextInfo = `TREND: ${trend.name}${trend.description ? ` - ${trend.description}` : ''}`;
+          }
         } else if (input.contextType === 'viral' && input.viralId) {
           const viral = await db.getViralById(input.viralId);
-          if (viral) contextInfo = `VIRAL: ${viral.title}`;
+          if (viral) {
+            contextData = viral;
+            contextInfo = `VIRAL: ${viral.title}${viral.description ? ` - ${viral.description}` : ''}`;
+          }
         } else if (input.contextType === 'subject' && input.freeSubject) {
           contextInfo = `ASSUNTO: ${input.freeSubject}`;
         }
@@ -2206,16 +2213,27 @@ Nome: ${influencer.name}
 Descrição: ${influencer.description || "Influenciador digital"}
 Nicho: ${influencer.niche || "lifestyle"}
 Características físicas: Manter consistência visual (usar foto de referência)
+
+${contextInfo ? `🎯 TEMA PRINCIPAL DO CONTEÚDO:
+${contextInfo}
+
+⚠️ CRÍTICO: O conteúdo DEVE ser sobre este tema/trend/viral/assunto.
+NÃO ignore este contexto. Este é o FOCO PRINCIPAL do carrossel.
+` : ''}
+${productSection ? `💼 PRODUTO PARA INSERIR NATURALMENTE:
 ${productSection}
-${contextInfo ? `Contexto: ${contextInfo}` : ''}
+⚠️ IMPORTANTE: Mencione o produto de forma NATURAL e SUTIL dentro do contexto do tema principal.
+NÃO faça o conteúdo ser apenas sobre o produto. O produto é um COMPLEMENTO do tema.
+` : ''}
 
 REGRAS DE REALISMO:
 1. PRIMEIRA PESSOA: Todo conteúdo deve ser na perspectiva "EU" (não "você" ou "a gente")
 2. TOM PESSOAL: "Eu testei", "Olha o que descobri", "Minha experiência com"
 3. AUTÊNCIA: Parecer natural, conversacional, não vendedor demais
 4. NICHO: Conteúdo DEVE estar relacionado ao nicho do influenciador
+${contextInfo ? `5. FOCO NO TEMA: O conteúdo é SOBRE o tema/trend/viral, não apenas sobre o produto` : ''}
 
-O conteúdo deve parecer que ${influencer.name} está compartilhando uma experiência pessoal real.`
+O conteúdo deve parecer que ${influencer.name} está compartilhando uma experiência pessoal real${contextInfo ? ' relacionada ao tema principal' : ''}.`
             },
             { role: "user", content: `Gere um conteúdo de ${input.type === 'carousel' ? 'carrossel' : input.type === 'image' ? 'imagem única' : 'vídeo'} para Instagram na primeira pessoa.
 
