@@ -66,7 +66,7 @@ export default function InfluencerContentEdit() {
     onSuccess: () => {
       refetch();
       setEditingText(false);
-      toast.success("Slide atualizado");
+      // Toast removido: salvamento silencioso
     },
   });
 

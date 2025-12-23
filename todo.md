@@ -1613,3 +1613,31 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - Formas e extras: 1-2h
 - Testes e ajustes mobile: 1h
 **Total: 4-6 horas**
+
+
+## 🐛 Problemas Críticos do Editor Mobile (23/12/2024 - 07:07)
+
+### Problemas identificados pelo usuário após primeiro teste:
+
+1. **Toast "Slide atualizado" continua aparecendo**
+   - [x] Debounce não está impedindo o toast de aparecer - CORRIGIDO: toast removido completamente
+   - [x] Toast aparece a todo instante durante edição - CORRIGIDO
+   - [x] Precisa remover toast completamente ou só mostrar em salvamento manual - CORRIGIDO
+
+2. **Texto redimensiona com os dedos**
+   - [x] Usuário consegue mexer (arrastar) e alterar tamanho - FUNCIONANDO
+   - [x] Resize no Moveable ativado para elementos de texto - FUNCIONANDO
+   - [x] Handles de resize aparecem no texto - FUNCIONANDO
+   - [x] fontSize ajusta proporcionalmente ao redimensionar - IMPLEMENTADO
+
+3. **Controles cortam a imagem principal**
+   - [x] Quando clica para mexer no texto, controles aparecem e cortam preview - CORRIGIDO
+   - [x] Preview estava ocupando muito espaço vertical (60vh) - CORRIGIDO: reduzido para 45vh
+   - [x] Tem muita margem embaixo disponível para os controles - CORRIGIDO
+   - [x] Precisa reduzir altura do preview para dar espaço aos controles sem cortar - CORRIGIDO
+
+4. **Controles funcionando**
+   - [x] Slider de tamanho funciona - TESTADO: funcionando
+   - [x] Mudança de cor funciona - TESTADO: texto mudou de preto para verde
+   - [x] Resize com dedos funciona - FUNCIONANDO
+   - [x] onUpdateElement está sendo chamado corretamente - VERIFICADO

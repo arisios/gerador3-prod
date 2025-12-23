@@ -127,7 +127,7 @@ export function PreviewCanvas({
         style={{
           width: 'min(90vw, 400px)',
           aspectRatio: '4/5',
-          maxHeight: '60vh',
+          maxHeight: '45vh',
           overflow: 'hidden',
         }}
       >
@@ -187,12 +187,20 @@ export function PreviewCanvas({
           }}
           
           onResize={({ width, height, drag }) => {
-            onUpdateElement(selectedElement.id, {
+            const updates: Partial<EditorElement> = {
               width,
               height,
               x: drag.left,
               y: drag.top,
-            });
+            };
+            
+            // Se for texto, ajustar fontSize proporcionalmente
+            if (selectedElement.type === 'text' && selectedElement.fontSize) {
+              const widthRatio = width / selectedElement.width;
+              updates.fontSize = Math.round(selectedElement.fontSize * widthRatio);
+            }
+            
+            onUpdateElement(selectedElement.id, updates);
           }}
           
           onRotate={({ rotate }) => {
