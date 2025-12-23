@@ -245,10 +245,10 @@ export function MobileSlideEditor({
         </Button>
       </div>
 
-      {/* Preview Canvas */}
+      {/* Preview Canvas - Container com scroll, canvas mantém tamanho natural */}
       <div 
         ref={canvasContainerRef}
-        className="flex-1 overflow-hidden flex items-center justify-center"
+        className="flex-shrink-0 max-h-[55vh] overflow-y-auto flex items-center justify-center bg-muted/10"
       >
         <PreviewCanvas
           editorState={editorState}
@@ -264,8 +264,8 @@ export function MobileSlideEditor({
         />
       </div>
 
-      {/* Contextual Controls */}
-      <div className="flex-shrink-0 max-h-[40vh] overflow-y-auto border-t border-border">
+      {/* Contextual Controls - Scroll independente */}
+      <div className="flex-1 overflow-y-auto border-t border-border">
         <ContextualControls
           selectedElement={selectedElement}
           onUpdateElement={updateElement}

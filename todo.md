@@ -1847,3 +1847,34 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Preview = Download (WYSIWYG - What You See Is What You Get) - GARANTIDO
 
 **Prioridade:** MÁXIMA - Editor está inutilizável sem isso
+
+
+## 🚨 CRÍTICO: Canvas Cortado Quando Painel de Edição Abre
+
+**Contexto:** Canvas 4:5 está sendo cortado/empurrado quando painel de edição de texto abre.
+
+**Evidências (screenshots do usuário):**
+1. **Preview:** Canvas 4:5 completo, texto na parte inferior ✅
+2. **Editor aberto (sem seleção):** Canvas 4:5 completo ✅
+3. **Texto selecionado:** Canvas CORTADO NO TOPO ❌ - Painel "Editar Texto" empurra canvas para cima
+
+**Problema:**
+- Quando painel "Editar Texto" (ContextualControls) abre, ele ocupa espaço vertical
+- Canvas é empurrado para cima e **parte superior é cortada**
+- Usuário não vê a imagem completa durante edição
+- **Preview ≠ Editor** - viola princípio WYSIWYG
+
+**Causa raiz:**
+- Layout usa `flex flex-col` com `flex-1` no canvas
+- Painéis inferiores (Toolbar + ContextualControls) empurram canvas para cima
+- Canvas tenta caber no espaço restante e é cortado
+
+**Solução:**
+- [x] Canvas container com max-h-[55vh] ao invés de altura fixa - IMPLEMENTADO
+- [x] Canvas mantém tamanho natural (width: 90vw, aspect-ratio: 4/5) - GARANTIDO
+- [x] Container do canvas tem scroll próprio (overflow-y-auto) - IMPLEMENTADO
+- [x] Painéis inferiores (ContextualControls) com flex-1 e scroll independente - IMPLEMENTADO
+- [x] Canvas NUNCA muda de tamanho, independente de painéis abertos - GARANTIDO
+- [x] Preview = Editor aberto = Editor com texto selecionado (WYSIWYG) - GARANTIDO
+
+**Prioridade:** MÁXIMA - Editor inutilizável se canvas é cortado durante edição
