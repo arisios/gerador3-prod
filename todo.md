@@ -1480,3 +1480,12 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Verificar se platform está sendo enviado corretamente no payload - VERIFICADO: estava sendo enviado
 - [x] Ajustar prompt para ser mais específico sobre limitação de caracteres - IMPLEMENTADO: MÁXIMO 150 caracteres por slide
 - [x] TikTok deve gerar textos de 50-150 caracteres, não 500+ - CORRIGIDO com regra crítica no prompt
+
+
+## Feature (23/12/2024 - 06:10)
+- [x] Adicionar campo "Tamanho do Texto" com opções contextuais - IMPLEMENTADO
+- [x] TikTok: Extra Curto (80 chars) e Normal (150 chars) - IMPLEMENTADO
+- [x] Instagram: Curto (300 chars) e Longo (600 chars) - IMPLEMENTADO
+- [x] UI: Select de plataforma + Radio buttons de tamanho (mudam conforme plataforma) - IMPLEMENTADO
+- [x] Backend: campo textLength no input tRPC - IMPLEMENTADO
+- [x] Prompt: 4 variações de limite de caracteres - IMPLEMENTADO

@@ -2162,6 +2162,7 @@ Retorne array JSON de strings (apenas as dores, sem numeração).`;
         type: z.enum(['carousel', 'image', 'video']), // Tipo de conteúdo
         // Controles avançados de copywriting
         platform: z.enum(['instagram', 'tiktok']).optional().default('instagram'),
+        textLength: z.enum(['short', 'long']).optional().default('long'), // short=80/300, long=150/600 (depende da plataforma)
         clickbait: z.boolean().optional().default(false),
         person: z.enum(['first', 'second', 'third']).optional().default('first'),
         voiceTone: z.enum(['motivacional', 'tecnico', 'descontraido', 'educacional', 'inspirador']).optional().default('descontraido'),
@@ -2235,7 +2236,12 @@ NÃO faça o conteúdo ser apenas sobre o produto. O produto é um COMPLEMENTO d
 ` : ''}
 
 CONTROLES DE COPYWRITING:
-- PLATAFORMA: ${input.platform === 'instagram' ? 'INSTAGRAM - Textos de 300-500 caracteres por slide, storytelling completo, primeira linha chamativa para preview, hashtags estratégicas no final' : 'TIKTOK - Textos ULTRA CURTOS: MÁXIMO 150 caracteres por slide (2-3 linhas), direto ao ponto, hook inicial FORTE, sem enrolação'}
+- PLATAFORMA E TAMANHO: ${
+  input.platform === 'instagram' && input.textLength === 'short' ? 'INSTAGRAM CURTO - MÁXIMO 300 caracteres por slide, rápido e direto, ideal para posts informativos' :
+  input.platform === 'instagram' && input.textLength === 'long' ? 'INSTAGRAM LONGO - 400-600 caracteres por slide, storytelling completo, conexão emocional, primeira linha chamativa, hashtags estratégicas' :
+  input.platform === 'tiktok' && input.textLength === 'short' ? 'TIKTOK EXTRA CURTO - MÁXIMO 80 CARACTERES por slide (1-2 linhas), impacto máximo, sem enrolação' :
+  'TIKTOK NORMAL - MÁXIMO 150 caracteres por slide (2-3 linhas), direto ao ponto, hook forte'
+}
 - PESSOA: ${input.person === 'first' ? 'PRIMEIRA pessoa (EU, MEU, MINHA)' : input.person === 'second' ? 'SEGUNDA pessoa (VOCÊ, SEU, SUA)' : 'TERCEIRA pessoa (ELE/ELA, DELE/DELA)'}
 - TOM DE VOZ: ${input.voiceTone === 'motivacional' ? 'Motivacional e inspirador' : input.voiceTone === 'tecnico' ? 'Técnico e detalhado' : input.voiceTone === 'descontraido' ? 'Descontraído e casual' : input.voiceTone === 'educacional' ? 'Educacional e didático' : 'Inspirador e aspiracional'}
 - OBJETIVO: ${input.objective === 'sale' ? 'VENDA (CTA claro, senso de urgência)' : input.objective === 'authority' ? 'AUTORIDADE (educar, demonstrar expertise)' : 'CRESCIMENTO (engajamento, compartilhamento)'}
@@ -2248,7 +2254,12 @@ REGRAS DE REALISMO:
 2. TOM: Mantenha tom ${input.voiceTone} em todos os slides
 3. AUTÊNCIA: Parecer natural, conversacional, não vendedor demais
 4. NICHO: Conteúdo DEVE estar relacionado ao nicho do influenciador
-5. ⚠️ TAMANHO DO TEXTO: ${input.platform === 'tiktok' ? 'CADA SLIDE DEVE TER NO MÁXIMO 150 CARACTERES (2-3 linhas curtas). Seja EXTREMAMENTE conciso.' : 'Cada slide deve ter 300-500 caracteres para storytelling completo.'}
+5. ⚠️ TAMANHO DO TEXTO CRÍTICO: ${
+  input.platform === 'instagram' && input.textLength === 'short' ? 'CADA SLIDE: MÁXIMO 300 CARACTERES. Seja conciso mas informativo.' :
+  input.platform === 'instagram' && input.textLength === 'long' ? 'CADA SLIDE: 400-600 CARACTERES. Desenvolva storytelling completo.' :
+  input.platform === 'tiktok' && input.textLength === 'short' ? 'CADA SLIDE: MÁXIMO 80 CARACTERES (1-2 linhas). EXTREMAMENTE conciso.' :
+  'CADA SLIDE: MÁXIMO 150 CARACTERES (2-3 linhas). Seja direto e impactante.'
+}
 ${contextInfo ? `6. FOCO NO TEMA: O conteúdo é SOBRE o tema/trend/viral, não apenas sobre o produto` : ''}
 
 O conteúdo deve parecer que ${influencer.name} está compartilhando uma experiência pessoal real${contextInfo ? ' relacionada ao tema principal' : ''}.`

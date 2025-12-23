@@ -103,6 +103,7 @@ export default function InfluencerContentCreate() {
   
   // Controles avançados de copywriting (com padrões otimizados)
   const [platform, setPlatform] = useState<'instagram' | 'tiktok'>('instagram');
+  const [textLength, setTextLength] = useState<'short' | 'long'>('long'); // Padrão: Instagram Longo
   const [clickbait, setClickbait] = useState(false);
   const [person, setPerson] = useState<'first' | 'second' | 'third'>('first');
   const [voiceTone, setVoiceTone] = useState<'motivacional' | 'tecnico' | 'descontraido' | 'educacional' | 'inspirador'>('descontraido');
@@ -273,6 +274,7 @@ export default function InfluencerContentCreate() {
 
     // Adicionar controles avançados de copywriting
     payload.platform = platform;
+    payload.textLength = textLength;
     payload.clickbait = clickbait;
     payload.person = person;
     payload.voiceTone = voiceTone;
@@ -477,21 +479,85 @@ export default function InfluencerContentCreate() {
                     <Label className="text-sm font-medium">Controles Avançados (Opcional)</Label>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Plataforma */}
-                    <div className="space-y-2">
+                  {/* Plataforma e Tamanho */}
+                  <div className="space-y-3 mb-3">
+                    <div>
                       <Label className="text-xs text-muted-foreground">Plataforma</Label>
-                      <Select value={platform} onValueChange={(v: any) => setPlatform(v)}>
-                        <SelectTrigger className="h-9 text-xs">
+                      <Select value={platform} onValueChange={(v: any) => {
+                        setPlatform(v);
+                        // Ajustar padrão de tamanho ao trocar plataforma
+                        if (v === 'instagram') setTextLength('long');
+                        if (v === 'tiktok') setTextLength('long'); // TikTok Normal como padrão
+                      }}>
+                        <SelectTrigger className="h-9 text-xs mt-1">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="instagram">Instagram (texto longo)</SelectItem>
-                          <SelectItem value="tiktok">TikTok (texto curto)</SelectItem>
+                          <SelectItem value="instagram">Instagram</SelectItem>
+                          <SelectItem value="tiktok">TikTok</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Tamanho do Texto</Label>
+                      <div className="flex gap-2 mt-1">
+                        {platform === 'instagram' ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setTextLength('short')}
+                              className={`flex-1 px-3 py-2 text-xs rounded-md border transition-colors ${
+                                textLength === 'short'
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : 'bg-background hover:bg-accent border-input'
+                              }`}
+                            >
+                              Curto (300 chars)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTextLength('long')}
+                              className={`flex-1 px-3 py-2 text-xs rounded-md border transition-colors ${
+                                textLength === 'long'
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : 'bg-background hover:bg-accent border-input'
+                              }`}
+                            >
+                              Longo (600 chars)
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setTextLength('short')}
+                              className={`flex-1 px-3 py-2 text-xs rounded-md border transition-colors ${
+                                textLength === 'short'
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : 'bg-background hover:bg-accent border-input'
+                              }`}
+                            >
+                              Extra Curto (80 chars)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTextLength('long')}
+                              className={`flex-1 px-3 py-2 text-xs rounded-md border transition-colors ${
+                                textLength === 'long'
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : 'bg-background hover:bg-accent border-input'
+                              }`}
+                            >
+                              Normal (150 chars)
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
                     {/* Pessoa */}
                     <div className="space-y-2">
                       <Label className="text-xs text-muted-foreground">Pessoa</Label>
