@@ -1450,3 +1450,10 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Sistema gera conteúdo apenas sobre produto, ignorando completamente a trend selecionada - CORRIGIDO
 - [x] Comportamento esperado: Usar trend como gancho principal e inserir produto naturalmente no contexto - IMPLEMENTADO
 - [x] Exemplo: Produto (Whey) + Trend (Morning Routine) = Conteúdo sobre rotina matinal que inclui Whey naturalmente - FUNCIONANDO
+
+
+## Feature Importante (22/12/2024 - 20:45)
+- [x] Reimplementar controles avançados de copywriting que foram removidos - IMPLEMENTADO
+- [x] Adicionar campos no input tRPC: clickbait, pessoa (1ª/2ª/3ª), tom de voz, objetivo, tipo de hook, fórmula - IMPLEMENTADO
+- [x] Integrar controles no prompt do LLM para gerar texto personalizado - IMPLEMENTADO
+- [ ] Garantir que frontend está enviando esses valores para o backend - PENDENTE (frontend precisa ser atualizado)

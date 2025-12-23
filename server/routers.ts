@@ -2160,6 +2160,13 @@ Retorne array JSON de strings (apenas as dores, sem numeração).`;
         freeSubject: z.string().optional(),
         template: z.string(), // Template de copywriting
         type: z.enum(['carousel', 'image', 'video']), // Tipo de conteúdo
+        // Controles avançados de copywriting
+        clickbait: z.boolean().optional().default(false),
+        person: z.enum(['first', 'second', 'third']).optional().default('first'),
+        voiceTone: z.enum(['motivacional', 'tecnico', 'descontraido', 'educacional', 'inspirador']).optional().default('descontraido'),
+        objective: z.enum(['sale', 'authority', 'growth']).optional().default('growth'),
+        hookType: z.enum(['pergunta', 'estatistica', 'historia', 'promessa', 'provocacao']).optional(),
+        copyFormula: z.enum(['PAS', 'AIDA', 'BAB', 'FAB', '4Ps']).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         // Buscar produto apenas se fornecido (opcional)
@@ -2226,9 +2233,17 @@ ${productSection}
 NÃO faça o conteúdo ser apenas sobre o produto. O produto é um COMPLEMENTO do tema.
 ` : ''}
 
+CONTROLES DE COPYWRITING:
+- PESSOA: ${input.person === 'first' ? 'PRIMEIRA pessoa (EU, MEU, MINHA)' : input.person === 'second' ? 'SEGUNDA pessoa (VOCÊ, SEU, SUA)' : 'TERCEIRA pessoa (ELE/ELA, DELE/DELA)'}
+- TOM DE VOZ: ${input.voiceTone === 'motivacional' ? 'Motivacional e inspirador' : input.voiceTone === 'tecnico' ? 'Técnico e detalhado' : input.voiceTone === 'descontraido' ? 'Descontraído e casual' : input.voiceTone === 'educacional' ? 'Educacional e didático' : 'Inspirador e aspiracional'}
+- OBJETIVO: ${input.objective === 'sale' ? 'VENDA (CTA claro, senso de urgência)' : input.objective === 'authority' ? 'AUTORIDADE (educar, demonstrar expertise)' : 'CRESCIMENTO (engajamento, compartilhamento)'}
+- CLICKBAIT: ${input.clickbait ? 'SIM - Use títulos chamativos e curiosidade' : 'NÃO - Seja direto e transparente'}
+${input.hookType ? `- TIPO DE HOOK: ${input.hookType === 'pergunta' ? 'Comece com PERGUNTA instigante' : input.hookType === 'estatistica' ? 'Comece com ESTATÍSTICA impactante' : input.hookType === 'historia' ? 'Comece com HISÓRIA pessoal' : input.hookType === 'promessa' ? 'Comece com PROMESSA de resultado' : 'Comece com PROVOCAÇÃO polêmica'}` : ''}
+${input.copyFormula ? `- FÓRMULA: ${input.copyFormula === 'PAS' ? 'Problem-Agitate-Solve (Problema → Agravar → Solução)' : input.copyFormula === 'AIDA' ? 'Attention-Interest-Desire-Action (Atenção → Interesse → Desejo → Ação)' : input.copyFormula === 'BAB' ? 'Before-After-Bridge (Antes → Depois → Ponte)' : input.copyFormula === 'FAB' ? 'Features-Advantages-Benefits (Características → Vantagens → Benefícios)' : '4Ps (Picture-Promise-Prove-Push)'}` : ''}
+
 REGRAS DE REALISMO:
-1. PRIMEIRA PESSOA: Todo conteúdo deve ser na perspectiva "EU" (não "você" ou "a gente")
-2. TOM PESSOAL: "Eu testei", "Olha o que descobri", "Minha experiência com"
+1. PESSOA: Use ${input.person === 'first' ? 'PRIMEIRA pessoa consistentemente' : input.person === 'second' ? 'SEGUNDA pessoa consistentemente' : 'TERCEIRA pessoa consistentemente'}
+2. TOM: Mantenha tom ${input.voiceTone} em todos os slides
 3. AUTÊNCIA: Parecer natural, conversacional, não vendedor demais
 4. NICHO: Conteúdo DEVE estar relacionado ao nicho do influenciador
 ${contextInfo ? `5. FOCO NO TEMA: O conteúdo é SOBRE o tema/trend/viral, não apenas sobre o produto` : ''}
