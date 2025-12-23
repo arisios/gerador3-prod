@@ -101,6 +101,14 @@ export default function InfluencerContentCreate() {
   const [influencerContentType, setInfluencerContentType] = useState<'carousel' | 'image' | 'video' | null>(null);
   const [influencerCopyTemplate, setInfluencerCopyTemplate] = useState<string | null>(null);
   
+  // Controles avançados de copywriting (com padrões otimizados)
+  const [clickbait, setClickbait] = useState(false);
+  const [person, setPerson] = useState<'first' | 'second' | 'third'>('first');
+  const [voiceTone, setVoiceTone] = useState<'motivacional' | 'tecnico' | 'descontraido' | 'educacional' | 'inspirador'>('descontraido');
+  const [objective, setObjective] = useState<'sale' | 'authority' | 'growth'>('growth');
+  const [hookType, setHookType] = useState<'pergunta' | 'estatistica' | 'historia' | 'promessa' | 'provocacao' | ''>('');
+  const [copyFormula, setCopyFormula] = useState<'PAS' | 'AIDA' | 'BAB' | 'FAB' | '4Ps' | ''>('');
+  
   // Estados da aba Assuntos
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -261,6 +269,14 @@ export default function InfluencerContentCreate() {
     if (influencerContentType) {
       payload.type = influencerContentType; // carousel, image, video
     }
+
+    // Adicionar controles avançados de copywriting
+    payload.clickbait = clickbait;
+    payload.person = person;
+    payload.voiceTone = voiceTone;
+    payload.objective = objective;
+    if (hookType) payload.hookType = hookType;
+    if (copyFormula) payload.copyFormula = copyFormula;
 
     setIsGenerating(true);
     generateContentWithProductMutation.mutate(payload);
@@ -448,6 +464,117 @@ export default function InfluencerContentCreate() {
                     </Button>
                   ))}                </div>
               </div>
+            )}
+
+            {/* Controles Avançados de Copywriting */}
+            {influencerCopyTemplate && (
+              <Card className="border-dashed">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Settings className="w-4 h-4 text-muted-foreground" />
+                    <Label className="text-sm font-medium">Controles Avançados (Opcional)</Label>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Pessoa */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Pessoa</Label>
+                      <Select value={person} onValueChange={(v: any) => setPerson(v)}>
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="first">1ª Pessoa (EU)</SelectItem>
+                          <SelectItem value="second">2ª Pessoa (VOCÊ)</SelectItem>
+                          <SelectItem value="third">3ª Pessoa (ELE/ELA)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Tom de Voz */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Tom de Voz</Label>
+                      <Select value={voiceTone} onValueChange={(v: any) => setVoiceTone(v)}>
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="descontraido">Descontraído</SelectItem>
+                          <SelectItem value="motivacional">Motivacional</SelectItem>
+                          <SelectItem value="tecnico">Técnico</SelectItem>
+                          <SelectItem value="educacional">Educacional</SelectItem>
+                          <SelectItem value="inspirador">Inspirador</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Objetivo */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Objetivo</Label>
+                      <Select value={objective} onValueChange={(v: any) => setObjective(v)}>
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="growth">Crescimento</SelectItem>
+                          <SelectItem value="authority">Autoridade</SelectItem>
+                          <SelectItem value="sale">Venda</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Clickbait */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Clickbait</Label>
+                      <Select value={clickbait ? 'sim' : 'nao'} onValueChange={(v) => setClickbait(v === 'sim')}>
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="nao">Não</SelectItem>
+                          <SelectItem value="sim">Sim</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Hook Type (Opcional) */}
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Tipo de Hook (Opcional)</Label>
+                    <Select value={hookType} onValueChange={(v: any) => setHookType(v)}>
+                      <SelectTrigger className="h-9 text-xs">
+                        <SelectValue placeholder="Nenhum (automático)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Nenhum (automático)</SelectItem>
+                        <SelectItem value="pergunta">Pergunta</SelectItem>
+                        <SelectItem value="estatistica">Estatística</SelectItem>
+                        <SelectItem value="historia">História</SelectItem>
+                        <SelectItem value="promessa">Promessa</SelectItem>
+                        <SelectItem value="provocacao">Provocação</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Copy Formula (Opcional) */}
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Fórmula de Copy (Opcional)</Label>
+                    <Select value={copyFormula} onValueChange={(v: any) => setCopyFormula(v)}>
+                      <SelectTrigger className="h-9 text-xs">
+                        <SelectValue placeholder="Nenhuma (automático)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Nenhuma (automático)</SelectItem>
+                        <SelectItem value="PAS">PAS (Problema-Agravar-Solução)</SelectItem>
+                        <SelectItem value="AIDA">AIDA (Atenção-Interesse-Desejo-Ação)</SelectItem>
+                        <SelectItem value="BAB">BAB (Antes-Depois-Ponte)</SelectItem>
+                        <SelectItem value="FAB">FAB (Características-Vantagens-Benefícios)</SelectItem>
+                        <SelectItem value="4Ps">4Ps (Picture-Promise-Prove-Push)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </div>
         )}

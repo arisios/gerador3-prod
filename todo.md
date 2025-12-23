@@ -1456,4 +1456,7 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Reimplementar controles avançados de copywriting que foram removidos - IMPLEMENTADO
 - [x] Adicionar campos no input tRPC: clickbait, pessoa (1ª/2ª/3ª), tom de voz, objetivo, tipo de hook, fórmula - IMPLEMENTADO
 - [x] Integrar controles no prompt do LLM para gerar texto personalizado - IMPLEMENTADO
-- [ ] Garantir que frontend está enviando esses valores para o backend - PENDENTE (frontend precisa ser atualizado)
+- [x] Adicionar UI frontend com controles de copywriting (clickbait, pessoa, tom, objetivo, hook, fórmula) - IMPLEMENTADO
+- [x] Usar componentes shadcn/ui (Select, Switch) para os controles - IMPLEMENTADO
+- [x] Conectar ao backend via tRPC mutation - IMPLEMENTADO
+- [x] Manter padrões otimizados: primeira pessoa, tom descontraído, objetivo crescimento - IMPLEMENTADO
