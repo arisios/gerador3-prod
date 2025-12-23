@@ -2417,7 +2417,8 @@ ${input.type === 'carousel' ? 'Gere entre 5-8 slides com textos curtos e impacta
         carouselCount: z.number().min(0).max(10).default(0),
         videoCount: z.number().min(0).max(10).default(0),
         imageCount: z.number().min(0).max(10).default(0),
-        maxCharsPerSlide: z.number().min(50).max(300).default(150), // Limite de caracteres por slide
+        firstSlideCharLimit: z.number().min(50).max(150).default(80), // Limite do PRIMEIRO slide
+        otherSlidesCharLimit: z.number().min(100).max(300).default(150), // Limite dos DEMAIS slides
       }))
       .mutation(async ({ input, ctx }) => {
         const influencer = await db.getInfluencerById(input.influencerId);
@@ -2520,12 +2521,14 @@ Controles de copywriting (padrões otimizados):
 - Pessoa: PRIMEIRA pessoa (EU, MEU, MINHA)
 - Tom: Descontraído e casual
 - Objetivo: CRESCIMENTO (engajamento, compartilhamento)
-- Sem clickbait - seja direto e transparente
+- 🔥 CLICKBAIT SEMPRE ATIVADO: Use títulos CHAMATIVOS, PROVOCATIVOS, que geram CURIOSIDADE e URGÊNCIA. Exemplos: "Você está fazendo ERRADO...", "Nunca mais faça isso...", "O segredo que ninguém conta...", "Isso mudou minha vida em 7 dias..."
 
-📝 LIMITE DE CARACTERES:
-- MÁXIMO ${input.maxCharsPerSlide} caracteres por slide
-- PRIMEIRO SLIDE: MÁXIMO ${Math.min(input.maxCharsPerSlide, 100)} caracteres (seja CURTO e IMPACTANTE)
-- Textos longos afastam o público - seja CONCISO e DIRETO
+📝 LIMITE DE CARACTERES (OBRIGATÓRIO - SERÁ REJEITADO SE ULTRAPASSAR):
+- SLIDE 1: MÁXIMO ${input.firstSlideCharLimit} caracteres ABSOLUTOS (conte cada letra, espaço e pontuação)
+- SLIDES 2+: MÁXIMO ${input.otherSlidesCharLimit} caracteres ABSOLUTOS por slide
+- ⚠️ CRITICAL: Se qualquer slide ultrapassar o limite, TODO o conteúdo será REJEITADO
+- Seja EXTREMAMENTE CONCISO - corte palavras desnecessárias, use abreviações se necessário
+- Priorize IMPACTO sobre completude - melhor curto e poderoso que longo e chato
 
 🎯 REGRAS CRÍTICAS PARA imagePrompt:
 1. SEMPRE use POV (Point of View) em PRIMEIRA PESSOA

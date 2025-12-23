@@ -23,7 +23,8 @@ export default function InfluencerExpressCreate() {
   const [carouselCount, setCarouselCount] = useState(3);
   const [videoCount, setVideoCount] = useState(0);
   const [imageCount, setImageCount] = useState(0);
-  const [maxCharsPerSlide, setMaxCharsPerSlide] = useState(150); // Limite de caracteres por slide
+  const [firstSlideCharLimit, setFirstSlideCharLimit] = useState(80); // Limite do PRIMEIRO slide
+  const [otherSlidesCharLimit, setOtherSlidesCharLimit] = useState(150); // Limite dos DEMAIS slides
 
   // Mutation
   const generateMutation = trpc.influencers.products.generateBulkContentExpress.useMutation({
@@ -62,7 +63,8 @@ export default function InfluencerExpressCreate() {
       carouselCount,
       videoCount,
       imageCount,
-      maxCharsPerSlide,
+      firstSlideCharLimit,
+      otherSlidesCharLimit,
     });
   };
 
@@ -140,25 +142,51 @@ export default function InfluencerExpressCreate() {
             </p>
           </div>
 
-          {/* Limite de Caracteres */}
-          <div className="space-y-2">
-            <Label htmlFor="maxCharsPerSlide" className="text-base font-semibold">
-              Limite de Caracteres por Slide: {maxCharsPerSlide}
-            </Label>
-            <input
-              id="maxCharsPerSlide"
-              type="range"
-              min="50"
-              max="300"
-              step="10"
-              value={maxCharsPerSlide}
-              onChange={(e) => setMaxCharsPerSlide(parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-              disabled={generateMutation.isPending}
-            />
-            <p className="text-xs text-muted-foreground">
-              Textos mais curtos (50-100) são ideais para o primeiro slide. Textos longos (200-300) podem afastar o público.
-            </p>
+          {/* Limite de Caracteres - DOIS SLIDERS SEPARADOS */}
+          <div className="space-y-4">
+            <Label className="text-base font-semibold">Controle de Tamanho do Texto</Label>
+            
+            {/* Primeiro Slide */}
+            <div className="space-y-2">
+              <Label htmlFor="firstSlideCharLimit" className="text-sm font-medium">
+                Primeiro Slide: {firstSlideCharLimit} caracteres
+              </Label>
+              <input
+                id="firstSlideCharLimit"
+                type="range"
+                min="50"
+                max="150"
+                step="10"
+                value={firstSlideCharLimit}
+                onChange={(e) => setFirstSlideCharLimit(parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                disabled={generateMutation.isPending}
+              />
+              <p className="text-xs text-muted-foreground">
+                🎯 Primeiro slide deve ser CURTO e IMPACTANTE para não afastar o público
+              </p>
+            </div>
+
+            {/* Demais Slides */}
+            <div className="space-y-2">
+              <Label htmlFor="otherSlidesCharLimit" className="text-sm font-medium">
+                Demais Slides: {otherSlidesCharLimit} caracteres
+              </Label>
+              <input
+                id="otherSlidesCharLimit"
+                type="range"
+                min="100"
+                max="300"
+                step="10"
+                value={otherSlidesCharLimit}
+                onChange={(e) => setOtherSlidesCharLimit(parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                disabled={generateMutation.isPending}
+              />
+              <p className="text-xs text-muted-foreground">
+                📝 Slides seguintes podem ter mais texto para desenvolver o conteúdo
+              </p>
+            </div>
           </div>
 
           {/* Quantidades */}

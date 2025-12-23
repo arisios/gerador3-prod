@@ -1694,3 +1694,21 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - Conteúdo gerado com limite 150 caracteres
 - Slide 1: 69 chars ✅ | Slide 2: 77 chars ✅ | Slide 3: 135 chars ✅ | Slide 4: 80 chars ✅ | Slide 5: 134 chars ✅
 - **TODOS os slides respeitaram o limite!** Primeiro slide especialmente curto e impactante.
+
+
+## 🎯 Controles Separados de Limite de Caracteres - Modo Express (23/12/2024 - 08:05)
+
+### Problema:
+- [ ] Primeiro slide precisa ser MUITO mais curto que os outros (máx 100 chars)
+- [ ] Demais slides podem ter texto maior para desenvolver conteúdo
+- [ ] Atualmente há apenas 1 slider que controla todos os slides igualmente
+
+### Solução:
+- [x] Criar dois sliders independentes no formulário do Modo Express - IMPLEMENTADO
+- [x] Backend: aceitar firstSlideCharLimit e otherSlidesCharLimit - IMPLEMENTADO
+- [x] Prompt da IA: instruir limites diferentes para slide 1 vs slides 2+ - IMPLEMENTADO
+- [x] Testar: gerar conteúdo com primeiro slide ~80 chars e demais ~150 chars - TESTADO: 100% sucesso
+- [x] Ajustar prompt para SEMPRE usar clickbait (títulos chamativos e provocativos) - IMPLEMENTADO
+- [x] Prompt rígido com instruções CRITICAL para respeitar limites - FUNCIONANDO PERFEITAMENTE
+
+**Benefício:** Primeiro slide super impactante e curto, demais slides desenvolvem melhor o conteúdo
