@@ -2161,6 +2161,7 @@ Retorne array JSON de strings (apenas as dores, sem numeração).`;
         template: z.string(), // Template de copywriting
         type: z.enum(['carousel', 'image', 'video']), // Tipo de conteúdo
         // Controles avançados de copywriting
+        platform: z.enum(['instagram', 'tiktok']).optional().default('instagram'),
         clickbait: z.boolean().optional().default(false),
         person: z.enum(['first', 'second', 'third']).optional().default('first'),
         voiceTone: z.enum(['motivacional', 'tecnico', 'descontraido', 'educacional', 'inspirador']).optional().default('descontraido'),
@@ -2234,6 +2235,7 @@ NÃO faça o conteúdo ser apenas sobre o produto. O produto é um COMPLEMENTO d
 ` : ''}
 
 CONTROLES DE COPYWRITING:
+- PLATAFORMA: ${input.platform === 'instagram' ? 'INSTAGRAM - Textos mais longos e profundos, storytelling completo, primeira linha chamativa para preview, hashtags estratégicas' : 'TIKTOK - Textos CURTOS e DIRETOS, máximo impacto em poucas palavras, MUITO chamativo, hook inicial forte'}
 - PESSOA: ${input.person === 'first' ? 'PRIMEIRA pessoa (EU, MEU, MINHA)' : input.person === 'second' ? 'SEGUNDA pessoa (VOCÊ, SEU, SUA)' : 'TERCEIRA pessoa (ELE/ELA, DELE/DELA)'}
 - TOM DE VOZ: ${input.voiceTone === 'motivacional' ? 'Motivacional e inspirador' : input.voiceTone === 'tecnico' ? 'Técnico e detalhado' : input.voiceTone === 'descontraido' ? 'Descontraído e casual' : input.voiceTone === 'educacional' ? 'Educacional e didático' : 'Inspirador e aspiracional'}
 - OBJETIVO: ${input.objective === 'sale' ? 'VENDA (CTA claro, senso de urgência)' : input.objective === 'authority' ? 'AUTORIDADE (educar, demonstrar expertise)' : 'CRESCIMENTO (engajamento, compartilhamento)'}

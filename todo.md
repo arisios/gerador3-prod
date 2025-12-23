@@ -1466,3 +1466,10 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] **CRÍTICO:** Erro ao escolher template: "Select.Item must have a value prop that is not an empty string" - CORRIGIDO
 - [x] Campos opcionais (hookType, copyFormula) estão usando string vazia como valor padrão - CORRIGIDO: agora usam undefined
 - [x] Remover SelectItem com value="" e usar undefined como estado inicial - IMPLEMENTADO
+
+
+## Melhoria (23/12/2024 - 05:50)
+- [x] Adicionar campo "Plataforma" nos controles avançados de copywriting - IMPLEMENTADO
+- [x] Instagram: textos mais longos e profundos, storytelling completo, hashtags estratégicas - IMPLEMENTADO
+- [x] TikTok: textos curtos e diretos, máximo impacto, muito chamativo - IMPLEMENTADO
+- [x] Integrar plataforma no prompt do LLM com instruções específicas - IMPLEMENTADO

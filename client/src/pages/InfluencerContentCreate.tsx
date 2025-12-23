@@ -102,6 +102,7 @@ export default function InfluencerContentCreate() {
   const [influencerCopyTemplate, setInfluencerCopyTemplate] = useState<string | null>(null);
   
   // Controles avançados de copywriting (com padrões otimizados)
+  const [platform, setPlatform] = useState<'instagram' | 'tiktok'>('instagram');
   const [clickbait, setClickbait] = useState(false);
   const [person, setPerson] = useState<'first' | 'second' | 'third'>('first');
   const [voiceTone, setVoiceTone] = useState<'motivacional' | 'tecnico' | 'descontraido' | 'educacional' | 'inspirador'>('descontraido');
@@ -271,6 +272,7 @@ export default function InfluencerContentCreate() {
     }
 
     // Adicionar controles avançados de copywriting
+    payload.platform = platform;
     payload.clickbait = clickbait;
     payload.person = person;
     payload.voiceTone = voiceTone;
@@ -475,7 +477,21 @@ export default function InfluencerContentCreate() {
                     <Label className="text-sm font-medium">Controles Avançados (Opcional)</Label>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Plataforma */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Plataforma</Label>
+                      <Select value={platform} onValueChange={(v: any) => setPlatform(v)}>
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="instagram">Instagram (texto longo)</SelectItem>
+                          <SelectItem value="tiktok">TikTok (texto curto)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     {/* Pessoa */}
                     <div className="space-y-2">
                       <Label className="text-xs text-muted-foreground">Pessoa</Label>
