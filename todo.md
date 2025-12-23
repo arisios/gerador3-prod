@@ -1528,3 +1528,88 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Última imagem mostra João como mecânico - CORRIGIDO: prompt nunca menciona profissão
 - [x] Prompt conflitante confunde modelo de IA - CORRIGIDO: regras explícitas de POV
 - [x] Garantir consistência física em TODAS as imagens - CORRIGIDO: referenceImageUrl já usado pelo sistema
+
+
+## Problemas Críticos no Editor de Slides (23/12/2024) - FOCO MOBILE
+
+### 📱 CONTEXTO CRÍTICO:
+**O editor DEVE funcionar perfeitamente no CELULAR**
+- Usuários vão gerar conteúdo para TikTok/Instagram
+- Não vão usar computador - querem 10 minutinhos no celular
+- Precisa ser prático, rápido e MUITO fácil de editar no mobile
+- **MOBILE-FIRST obrigatório**
+
+### Problemas reportados pelo usuário:
+
+1. **Editor não funciona bem no celular:**
+   - [ ] **CRÍTICO:** Preview desaparece ao rolar controles
+   - [ ] **CRÍTICO:** Preview muito pequeno (200px) - impossível ver detalhes
+   - [ ] **CRÍTICO:** Proporções erradas (imagem pequena, texto gigante)
+   - [ ] Impossível editar com conforto no celular
+
+2. **Salvamento automático:**
+   - [ ] **CRÍTICO:** Toast "Slide atualizado" aparece a CADA toque/mudança
+   - [ ] Salvamento excessivo torna experiência horrível
+   - [ ] Não está comercial/profissional
+
+3. **Texto ultrapassa limites (baixa prioridade):**
+   - [ ] Texto às vezes sai fora da margem quando é muito grande
+   - [ ] Usuário disse que é "de menos"
+
+### 🎯 Ação necessária:
+- [x] **Estudar como Canva funciona no celular** - CONCLUÍDO: assistidos tutoriais YouTube
+- [x] Testar editor atual no celular (Chrome DevTools mobile) - CONCLUÍDO: identificados problemas
+- [x] Criar solução mobile-first inspirada no Canva - CONCLUÍDO: MobileSlideEditor criado
+- [x] Implementar: Preview sempre visível + Controles fáceis no mobile - CONCLUÍDO: funcionando
+- [x] Debounce + salvamento silencioso - CONCLUÍDO: 800ms debounce implementado
+
+
+## 🚀 Redesign Completo: Editor Mobile-First (23/12/2024)
+
+### 📱 REQUISITOS CRÍTICOS:
+**100% FOCO NO MOBILE - Esquecer desktop/mouse completamente**
+- Tudo deve funcionar com DEDOS (touch)
+- Gestos: arrastar, pinch to zoom, rotacionar com dois dedos
+- Redimensionar pelos cantos (touch-friendly, não mouse hover)
+- Inspirado no Canva mobile (copiar funcionalidades)
+
+### Funcionalidades a Implementar:
+
+#### ✅ Obrigatórias:
+- [x] Preview grande (60-70% da tela mobile) - CONCLUÍDO: 90vw, max 400px, 60vh
+- [x] Barra de ferramentas inferior contextual - CONCLUÍDO: ToolbarBottom component
+- [x] Arrastar elementos com o dedo (drag) - CONCLUÍDO: react-moveable draggable
+- [x] Redimensionar pelos cantos (touch handles grandes) - CONCLUÍDO: react-moveable resizable
+- [ ] Pinch to zoom no preview - NÃO IMPLEMENTADO (baixa prioridade)
+- [x] Rotacionar com dois dedos - CONCLUÍDO: react-moveable rotatable
+- [x] Adicionar texto (botão "+") - CONCLUÍDO: botão Texto na toolbar
+- [x] Editar texto inline - CONCLUÍDO: Input no ContextualControls
+- [x] Controles contextuais (toca elemento → controles aparecem embaixo) - CONCLUÍDO: dinâmico
+- [x] Salvamento silencioso com debounce - CONCLUÍDO: 800ms sem toast
+
+#### 🎨 Desejáveis (se não atrapalhar):
+- [x] Adicionar formas simples (círculo, quadrado, triângulo) - CONCLUÍDO: 3 formas SVG
+- [x] Controles de forma (cor, borda, opacidade) - CONCLUÍDO: paletas + sliders
+- [ ] Camadas (reordenar elementos) - NÃO IMPLEMENTADO (baixa prioridade)
+- [x] Duplicar elemento - CONCLUÍDO: botão Duplicar
+- [x] Deletar elemento - CONCLUÍDO: botão Deletar
+- [ ] Desfazer/Refazer (undo/redo) - NÃO IMPLEMENTADO (baixa prioridade)
+
+#### ❌ NÃO implementar:
+- [ ] Hover effects (não existe no touch)
+- [ ] Tooltips com mouse
+- [ ] Drag handles pequenos (ruins para dedos)
+- [ ] Qualquer coisa que dependa de mouse
+
+### 🔧 Tecnologias/Bibliotecas a Pesquisar:
+- [ ] react-draggable ou similar para touch drag
+- [ ] react-rnd para resize + drag touch-friendly
+- [ ] Biblioteca de gestos touch (pinch, rotate)
+- [ ] Canvas manipulation library mobile-friendly
+
+### ⏱️ Estimativa:
+- Pesquisa de bibliotecas: 30 min
+- Implementação core (drag, resize, rotate): 2-3h
+- Formas e extras: 1-2h
+- Testes e ajustes mobile: 1h
+**Total: 4-6 horas**

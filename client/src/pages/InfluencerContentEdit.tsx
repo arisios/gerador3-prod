@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { trpc } from "@/lib/trpc";
 import SlideComposer, { SlideStyle } from "@/components/SlideComposer";
 import { ImageLightbox } from "@/components/ImageLightbox";
+import { MobileSlideEditor } from "@/components/MobileSlideEditor";
 import { VideoGeneratorSelectorWithCredits } from "@/components/VideoGeneratorSelectorWithCredits";
 import { downloadCarouselSlide, downloadSingleImage, downloadAllSlidesWithText, downloadAllSlidesWithoutText } from "@/lib/downloadSlide";
 import { ArrowLeft, Download, Image, Loader2, ChevronLeft, ChevronRight, Edit2, Check, X, Plus, Sparkles, Maximize2, Video, Upload } from "lucide-react";
@@ -51,6 +52,7 @@ export default function InfluencerContentEdit() {
   const [slideText, setSlideText] = useState("");
   const [tempPrompt, setTempPrompt] = useState("");
   const [showComposer, setShowComposer] = useState(false);
+  const [showMobileEditor, setShowMobileEditor] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState<number | null>(null);
   const [generatingImage, setGeneratingImage] = useState(false);
@@ -528,6 +530,10 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
               <Edit2 className="w-4 h-4 mr-2" />
               {showComposer ? "Fechar Editor" : "Editar Visual"}
             </Button>
+            <Button onClick={() => setShowMobileEditor(true)} variant="secondary">
+              <Edit2 className="w-4 h-4 mr-2" />
+              Editor Mobile
+            </Button>
           </div>
         </div>
 
@@ -579,6 +585,24 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
         onRegenerate={hasReferenceImage ? handleRegenerateImage : undefined}
         onDelete={handleDeleteImage}
       />
+
+      {/* Mobile Editor */}
+      {showMobileEditor && currentSlide && (
+        <MobileSlideEditor
+          slideId={currentSlide.id}
+          initialText={currentSlide.text || ""}
+          initialImageUrl={currentSlide.imageUrl}
+          onSave={(text, elements) => {
+            // Salvar no backend
+            updateSlide.mutate({
+              id: currentSlide.id,
+              text,
+              // TODO: salvar elements no banco
+            });
+          }}
+          onClose={() => setShowMobileEditor(false)}
+        />
+      )}
     </div>
   );
 }
