@@ -62,7 +62,7 @@ export function MobileSlideEditor({
           id: 'text-1',
           type: 'text',
           x: 24, // Margem esquerda 24px
-          y: 450, // bottom-0 + p-6 do preview (500 - 24 - altura texto)
+          y: 380, // Ajustado para ficar visível e próximo do preview // bottom-0 + p-6 do preview (500 - 24 - altura texto)
           width: 352, // right-0 left-0 p-6 (400 - 48)
           height: 100, // Altura para text-lg
           rotation: 0,
@@ -110,7 +110,7 @@ export function MobileSlideEditor({
             id: 'text-1',
             type: 'text',
             x: 24,
-            y: 450, // bottom-0 + p-6 do preview (500 - 24 - altura texto)
+            y: 380, // Ajustado para ficar visível e próximo do preview // bottom-0 + p-6 do preview (500 - 24 - altura texto)
             width: 352,
             height: 100,
             rotation: 0,
