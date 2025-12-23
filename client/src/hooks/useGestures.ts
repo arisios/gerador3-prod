@@ -4,6 +4,7 @@ interface GestureHandlers {
   onPinch?: (scale: number, center: { x: number; y: number }) => void;
   onRotate?: (angleDelta: number, center: { x: number; y: number }) => void;
   onDoubleTap?: (point: { x: number; y: number }) => void;
+  onDrag?: (delta: { x: number; y: number }) => void;
   onGestureEnd?: () => void;
 }
 

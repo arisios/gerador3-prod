@@ -2018,3 +2018,13 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Causa: deleteElement ainda chamava debouncedSave não comentado
 - [x] Correção final: Removida última chamada em deleteElement linha 207
 - [x] RESOLVIDO: Desktop e mobile agora funcionam IGUAL (salvamento manual)
+
+
+## 🐛 BUG CRÍTICO - useGestures faltando onDrag
+
+### 11. Interface GestureHandlers incompleta
+- [x] Problema: ReferenceError ao tocar na tela do mobile
+- [x] Causa: useGestures.ts usa `handlers.onDrag` mas interface não declara onDrag
+- [x] Stack trace: rF, oh, Eh, pb, Ub, j5, Xh, zb, nC, Ec (código minificado)
+- [x] Correção: Adicionado `onDrag?: (delta: { x: number; y: number }) => void;` na interface
+- [x] RESOLVIDO: Interface agora declara todos os handlers usados no código
