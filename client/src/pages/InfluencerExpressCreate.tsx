@@ -16,7 +16,7 @@ export default function InfluencerExpressCreate() {
   const influencerId = parseInt(id!);
 
   // Buscar influenciador
-  const { data: influencer, isLoading: loadingInfluencer } = trpc.influencer.getById.useQuery({ id: influencerId });
+  const { data: influencer, isLoading: loadingInfluencer } = trpc.influencers.get.useQuery({ id: influencerId });
 
   // Estados do formulário
   const [mainSubject, setMainSubject] = useState('');

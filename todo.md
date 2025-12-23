@@ -1501,3 +1501,9 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Botão "Modo Express" na página de detalhes do influenciador - IMPLEMENTADO
 - [ ] Geração em paralelo de múltiplos conteúdos - PENDENTE (usando loop sequencial por enquanto)
 - [x] Zero decisões do usuário - IA decide tudo automaticamente - IMPLEMENTADO
+
+
+## Bug Crítico (23/12/2024 - 07:03)
+- [x] **CRÍTICO:** Erro ao acessar Modo Express: "No procedure found on path influencer.getById" - CORRIGIDO
+- [x] Página InfluencerExpressCreate está chamando procedure inexistente - CORRIGIDO
+- [x] Identificar nome correto da procedure e corrigir chamada - CORRIGIDO: trpc.influencers.get
