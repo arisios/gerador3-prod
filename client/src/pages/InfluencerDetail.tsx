@@ -10,13 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { 
-  ArrowLeft, Trash2, Loader2, User, ChevronRight, Zap, 
+  ArrowLeft, Trash2, Loader2, User, ChevronRight, 
   Camera, Image, Download, RefreshCw, Maximize2, Pencil
 } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Package, Sparkles } from "lucide-react";
+import { Plus, Package, Sparkles, Zap } from "lucide-react";
 
 interface InfluencerContent {
   id: number;

@@ -1507,3 +1507,10 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] **CRÍTICO:** Erro ao acessar Modo Express: "No procedure found on path influencer.getById" - CORRIGIDO
 - [x] Página InfluencerExpressCreate está chamando procedure inexistente - CORRIGIDO
 - [x] Identificar nome correto da procedure e corrigir chamada - CORRIGIDO: trpc.influencers.get
+
+
+## Bugs Críticos (23/12/2024 - 07:08)
+- [x] **CRÍTICO:** "No procedure found on path influencerContent.generateBulkContentExpress" - CORRIGIDO
+- [x] Procedure generateBulkContentExpress não está registrada no router - CORRIGIDO: alterado frontend para influencers.products.generateBulkContentExpress
+- [x] **CRÍTICO:** "Objects are not valid as a React child (found: object with keys {title, description, variant})" - CORRIGIDO
+- [x] Tentando renderizar objeto diretamente no React em vez de string - CORRIGIDO: alterado para toast.success() e toast.error()

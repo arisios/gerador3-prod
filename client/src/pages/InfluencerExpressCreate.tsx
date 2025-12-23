@@ -25,39 +25,32 @@ export default function InfluencerExpressCreate() {
   const [imageCount, setImageCount] = useState(0);
 
   // Mutation
-  const generateMutation = trpc.influencerContent.generateBulkContentExpress.useMutation({
+  const generateMutation = trpc.influencers.products.generateBulkContentExpress.useMutation({
     onSuccess: (data) => {
-      toast({
-        title: '🎉 Conteúdos gerados com sucesso!',
+      toast.success('🎉 Conteúdos gerados com sucesso!', {
         description: `${data.total} conteúdos criados automaticamente.`,
       });
       navigate(`/influencer/${influencerId}`);
     },
     onError: (error) => {
-      toast({
-        title: 'Erro ao gerar conteúdos',
+      toast.error('Erro ao gerar conteúdos', {
         description: error.message,
-        variant: 'destructive',
       });
     },
   });
 
   const handleGenerate = () => {
     if (!mainSubject.trim()) {
-      toast({
-        title: 'Assunto obrigatório',
+      toast.error('Assunto obrigatório', {
         description: 'Digite sobre qual assunto você quer criar conteúdo.',
-        variant: 'destructive',
       });
       return;
     }
 
     const total = carouselCount + videoCount + imageCount;
     if (total === 0) {
-      toast({
-        title: 'Quantidade obrigatória',
+      toast.error('Quantidade obrigatória', {
         description: 'Selecione pelo menos 1 conteúdo para gerar.',
-        variant: 'destructive',
       });
       return;
     }
