@@ -1460,3 +1460,9 @@ Próxima etapa: Implementar integração de Trends/Virais/Assuntos com Produtos.
 - [x] Usar componentes shadcn/ui (Select, Switch) para os controles - IMPLEMENTADO
 - [x] Conectar ao backend via tRPC mutation - IMPLEMENTADO
 - [x] Manter padrões otimizados: primeira pessoa, tom descontraído, objetivo crescimento - IMPLEMENTADO
+
+
+## Bug Crítico (23/12/2024 - 05:40)
+- [x] **CRÍTICO:** Erro ao escolher template: "Select.Item must have a value prop that is not an empty string" - CORRIGIDO
+- [x] Campos opcionais (hookType, copyFormula) estão usando string vazia como valor padrão - CORRIGIDO: agora usam undefined
+- [x] Remover SelectItem com value="" e usar undefined como estado inicial - IMPLEMENTADO

@@ -106,8 +106,8 @@ export default function InfluencerContentCreate() {
   const [person, setPerson] = useState<'first' | 'second' | 'third'>('first');
   const [voiceTone, setVoiceTone] = useState<'motivacional' | 'tecnico' | 'descontraido' | 'educacional' | 'inspirador'>('descontraido');
   const [objective, setObjective] = useState<'sale' | 'authority' | 'growth'>('growth');
-  const [hookType, setHookType] = useState<'pergunta' | 'estatistica' | 'historia' | 'promessa' | 'provocacao' | ''>('');
-  const [copyFormula, setCopyFormula] = useState<'PAS' | 'AIDA' | 'BAB' | 'FAB' | '4Ps' | ''>('');
+  const [hookType, setHookType] = useState<'pergunta' | 'estatistica' | 'historia' | 'promessa' | 'provocacao' | undefined>(undefined);
+  const [copyFormula, setCopyFormula] = useState<'PAS' | 'AIDA' | 'BAB' | 'FAB' | '4Ps' | undefined>(undefined);
   
   // Estados da aba Assuntos
   const [searchQuery, setSearchQuery] = useState("");
@@ -546,7 +546,6 @@ export default function InfluencerContentCreate() {
                         <SelectValue placeholder="Nenhum (automático)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nenhum (automático)</SelectItem>
                         <SelectItem value="pergunta">Pergunta</SelectItem>
                         <SelectItem value="estatistica">Estatística</SelectItem>
                         <SelectItem value="historia">História</SelectItem>
@@ -564,7 +563,6 @@ export default function InfluencerContentCreate() {
                         <SelectValue placeholder="Nenhuma (automático)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nenhuma (automático)</SelectItem>
                         <SelectItem value="PAS">PAS (Problema-Agravar-Solução)</SelectItem>
                         <SelectItem value="AIDA">AIDA (Atenção-Interesse-Desejo-Ação)</SelectItem>
                         <SelectItem value="BAB">BAB (Antes-Depois-Ponte)</SelectItem>
