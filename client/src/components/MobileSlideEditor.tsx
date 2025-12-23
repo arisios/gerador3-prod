@@ -62,7 +62,7 @@ export function MobileSlideEditor({
           id: 'text-1',
           type: 'text',
           x: 24, // Margem esquerda 24px
-          y: 360, // Ajustado para ficar mais em cima (igual ao preview)
+          y: 420, // Colado no fundo (500 - 24 padding - ~56 altura texto)
           width: 352, // Largura total menos margens (400 - 48)
           height: 140, // Altura aumentada para texto maior
           rotation: 0,
@@ -88,6 +88,54 @@ export function MobileSlideEditor({
   });
 
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Recarregar editor quando slideId mudar (navegação entre slides)
+  useEffect(() => {
+    // Se tem initialStyle salvo, usar ele
+    if (initialStyle && initialStyle.length > 0) {
+      setEditorState({
+        elements: initialStyle,
+        selectedElementId: null,
+        zoom: 1,
+        history: [],
+        historyIndex: -1,
+        backgroundImageUrl: initialImageUrl,
+        backgroundColor: '#ffffff',
+      });
+    } else {
+      // Senão, criar elemento padrão com initialText
+      setEditorState({
+        elements: [
+          {
+            id: 'text-1',
+            type: 'text',
+            x: 24,
+            y: 420, // Colado no fundo (500 - 24 padding - ~56 altura texto)
+            width: 352,
+            height: 140,
+            rotation: 0,
+            content: initialText || 'Toque para editar',
+            fontSize: 24,
+            fontFamily: 'Inter',
+            fontWeight: 700,
+            fill: '#FFFFFF',
+            textAlign: 'left',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+            zIndex: 1,
+            opacity: 1,
+            lineHeight: 1.2,
+          },
+        ],
+        selectedElementId: null,
+        zoom: 1,
+        history: [],
+        historyIndex: -1,
+        backgroundImageUrl: initialImageUrl,
+        backgroundColor: '#ffffff',
+      });
+    }
+    setHasChanges(false);
+  }, [slideId, initialText, initialImageUrl, initialStyle]);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Debounce para salvamento automático

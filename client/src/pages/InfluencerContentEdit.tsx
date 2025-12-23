@@ -669,8 +669,8 @@ A foto deve manter a MESMA pessoa da imagem de referência (selfie/foto tirada p
               style: elements, // Salvar elements no campo style
             }, {
               onSuccess: () => {
-                // Forçar refetch para sincronizar preview
-                refetch();
+                // Invalidar cache para forçar recarregamento dos dados
+                utils.influencers.getContent.invalidate({ id: cId });
               }
             });
           }}
